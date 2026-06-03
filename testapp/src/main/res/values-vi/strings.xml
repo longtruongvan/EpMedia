@@ -30,4 +30,5 @@
     <string name="select_video_first">Vui lòng chọn video trước</string>
     <string name="select_video_1_first">Vui lòng chọn video 1</string>
     <string name="select_video_2_first">Vui lòng chọn video 2</string>
+    <string name="new_project">Dự án mới</string>
 </resources>

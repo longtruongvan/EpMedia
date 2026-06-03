@@ -17,16 +17,10 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		findViewById(R.id.bt_one).setOnClickListener(new View.OnClickListener() {
+		findViewById(R.id.btn_new_project).setOnClickListener(new View.OnClickListener() {
 			@Override
-			public void onClick(View v) {
-				startActivity(new Intent(MainActivity.this,EditActivity.class));
-			}
-		});
-		findViewById(R.id.bt_more).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				startActivity(new Intent(MainActivity.this,MergeActivity.class));
+			public void onClick(View view) {
+				startActivity(new Intent(MainActivity.this, EditActivity.class));
 			}
 		});
 	}
