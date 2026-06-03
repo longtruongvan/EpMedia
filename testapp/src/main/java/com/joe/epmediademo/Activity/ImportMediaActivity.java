@@ -215,10 +215,15 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 			finish();
 		} else if (id == R.id.btn_seg_recent) {
 			setSegmentActive(btn_seg_recent);
+			queryLocalVideos();
 		} else if (id == R.id.btn_seg_videos) {
 			setSegmentActive(btn_seg_videos);
+			queryLocalVideos();
 		} else if (id == R.id.btn_seg_photos) {
 			setSegmentActive(btn_seg_photos);
+			videoList.clear();
+			adapter.notifyDataSetChanged();
+			updateImportButtonState();
 			Toast.makeText(this, R.string.no_photo_toast, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_import_submit) {
 			if (selectedVideo != null) {

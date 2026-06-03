@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -53,6 +54,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	// Video Player & Overlay Views
 	private FrameLayout video_container;
 	private VideoView video_view;
+	private View video_filter_overlay;
+	private TextView tv_sticker_preview;
 	private TextView tv_subtitle_preview;
 	private TextView tv_timecode;
 	private LinearLayout video_empty_overlay;
@@ -99,7 +102,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private ImageView iv_tab_overlay;
 	private TextView tv_tab_overlay;
 	
-	// Slide-Up Overlay Panels
+	// Slide-Up Panels
 	private LinearLayout panel_clip_settings;
 	private ImageView btn_close_clip_settings;
 	private LinearLayout btn_action_split;
@@ -131,6 +134,28 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private TextView tv_trim_duration;
 	private TextView tv_trim_end;
 
+	// Filters Panel
+	private LinearLayout panel_filters;
+	private ImageView btn_close_filters;
+	private Button btn_filter_none;
+	private Button btn_filter_warm;
+	private Button btn_filter_cool;
+	private Button btn_filter_vintage;
+
+	// Audio Panel
+	private LinearLayout panel_audio;
+	private ImageView btn_close_audio;
+	private Button btn_audio_track1;
+	private Button btn_audio_track2;
+	private Button btn_audio_track3;
+
+	// Stickers Panel
+	private LinearLayout panel_stickers;
+	private ImageView btn_close_stickers;
+	private Button btn_sticker_fire;
+	private Button btn_sticker_sparkles;
+	private Button btn_sticker_heart;
+
 	// State variables
 	private String videoUrl;
 	private ProgressDialog mProgressDialog;
@@ -148,6 +173,55 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private String subtitleText = "";
 	private float subtitleXPercent = 50f;
 	private float subtitleYPercent = 85f;
+
+	// Visual filter & sticker state
+	private int activeFilterId = R.id.btn_filter_none;
+	private String activeStickerText = "";
+	private boolean isEnhanced = false;
+
+	// Undo / Redo Stacks
+	private static class EditorState {
+		float trimStartSec;
+		float trimEndSec;
+		int selectedCropPreset;
+		int currentRotation;
+		boolean isMirror;
+		String subtitleText;
+		float subtitleXPercent;
+		float subtitleYPercent;
+		int activeFilterId;
+		String activeStickerText;
+		boolean isEnhanced;
+
+		EditorState(float trimStartSec, float trimEndSec, int selectedCropPreset, int currentRotation, 
+					boolean isMirror, String subtitleText, float subtitleXPercent, float subtitleYPercent,
+					int activeFilterId, String activeStickerText, boolean isEnhanced) {
+			this.trimStartSec = trimStartSec;
+			this.trimEndSec = trimEndSec;
+			this.selectedCropPreset = selectedCropPreset;
+			this.currentRotation = currentRotation;
+			this.isMirror = isMirror;
+			this.subtitleText = subtitleText;
+			this.subtitleXPercent = subtitleXPercent;
+			this.subtitleYPercent = subtitleYPercent;
+			this.activeFilterId = activeFilterId;
+			this.activeStickerText = activeStickerText;
+			this.isEnhanced = isEnhanced;
+		}
+	}
+
+	private java.util.Stack<EditorState> undoStack = new java.util.Stack<>();
+	private java.util.Stack<EditorState> redoStack = new java.util.Stack<>();
+
+	private TextWatcher subtitleTextWatcher = new TextWatcher() {
+		@Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+		@Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+		@Override
+		public void afterTextChanged(Editable s) {
+			subtitleText = s.toString();
+			updateSubtitlePreview();
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +247,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		// Video Preview bindings
 		video_container = (FrameLayout) findViewById(R.id.video_container);
 		video_view = (VideoView) findViewById(R.id.video_view);
+		video_filter_overlay = (View) findViewById(R.id.video_filter_overlay);
+		tv_sticker_preview = (TextView) findViewById(R.id.tv_sticker_preview);
 		tv_subtitle_preview = (TextView) findViewById(R.id.tv_subtitle_preview);
 		tv_timecode = (TextView) findViewById(R.id.tv_timecode);
 		video_empty_overlay = (LinearLayout) findViewById(R.id.video_empty_overlay);
@@ -251,6 +327,26 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		tv_trim_duration = (TextView) findViewById(R.id.tv_trim_duration);
 		tv_trim_end = (TextView) findViewById(R.id.tv_trim_end);
 
+		// Panels
+		panel_filters = (LinearLayout) findViewById(R.id.panel_filters);
+		btn_close_filters = (ImageView) findViewById(R.id.btn_close_filters);
+		btn_filter_none = (Button) findViewById(R.id.btn_filter_none);
+		btn_filter_warm = (Button) findViewById(R.id.btn_filter_warm);
+		btn_filter_cool = (Button) findViewById(R.id.btn_filter_cool);
+		btn_filter_vintage = (Button) findViewById(R.id.btn_filter_vintage);
+
+		panel_audio = (LinearLayout) findViewById(R.id.panel_audio);
+		btn_close_audio = (ImageView) findViewById(R.id.btn_close_audio);
+		btn_audio_track1 = (Button) findViewById(R.id.btn_audio_track1);
+		btn_audio_track2 = (Button) findViewById(R.id.btn_audio_track2);
+		btn_audio_track3 = (Button) findViewById(R.id.btn_audio_track3);
+
+		panel_stickers = (LinearLayout) findViewById(R.id.panel_stickers);
+		btn_close_stickers = (ImageView) findViewById(R.id.btn_close_stickers);
+		btn_sticker_fire = (Button) findViewById(R.id.btn_sticker_fire);
+		btn_sticker_sparkles = (Button) findViewById(R.id.btn_sticker_sparkles);
+		btn_sticker_heart = (Button) findViewById(R.id.btn_sticker_heart);
+
 		// Set Click Listeners
 		bt_back.setOnClickListener(this);
 		bt_undo.setOnClickListener(this);
@@ -294,14 +390,31 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		btn_close_text_input.setOnClickListener(this);
 		btn_close_trim_editor.setOnClickListener(this);
 
+		if (btn_close_filters != null) btn_close_filters.setOnClickListener(this);
+		if (btn_filter_none != null) btn_filter_none.setOnClickListener(this);
+		if (btn_filter_warm != null) btn_filter_warm.setOnClickListener(this);
+		if (btn_filter_cool != null) btn_filter_cool.setOnClickListener(this);
+		if (btn_filter_vintage != null) btn_filter_vintage.setOnClickListener(this);
+
+		if (btn_close_audio != null) btn_close_audio.setOnClickListener(this);
+		if (btn_audio_track1 != null) btn_audio_track1.setOnClickListener(this);
+		if (btn_audio_track2 != null) btn_audio_track2.setOnClickListener(this);
+		if (btn_audio_track3 != null) btn_audio_track3.setOnClickListener(this);
+
+		if (btn_close_stickers != null) btn_close_stickers.setOnClickListener(this);
+		if (btn_sticker_fire != null) btn_sticker_fire.setOnClickListener(this);
+		if (btn_sticker_sparkles != null) btn_sticker_sparkles.setOnClickListener(this);
+		if (btn_sticker_heart != null) btn_sticker_heart.setOnClickListener(this);
+
 		// Add Text Change textwatcher for Live update
-		et_subtitle_input.addTextChangedListener(new TextWatcher() {
-			@Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-			@Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+		et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
+
+		et_subtitle_input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 			@Override
-			public void afterTextChanged(Editable s) {
-				subtitleText = s.toString();
-				updateSubtitlePreview();
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					pushStateToUndo();
+				}
 			}
 		});
 
@@ -313,6 +426,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				updateSubtitlePreview();
 			}
 		});
+		slider_text_x.addOnSliderTouchListener(new Slider.OnSliderTouchListener() {
+			@Override public void onStartTrackingTouch(Slider slider) { pushStateToUndo(); }
+			@Override public void onStopTrackingTouch(Slider slider) {}
+		});
 
 		slider_text_y.addOnChangeListener(new Slider.OnChangeListener() {
 			@Override
@@ -320,6 +437,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				subtitleYPercent = value;
 				updateSubtitlePreview();
 			}
+		});
+		slider_text_y.addOnSliderTouchListener(new Slider.OnSliderTouchListener() {
+			@Override public void onStartTrackingTouch(Slider slider) { pushStateToUndo(); }
+			@Override public void onStopTrackingTouch(Slider slider) {}
 		});
 
 		// RangeSlider Event Handlers
@@ -351,6 +472,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			@Override
 			public void onStartTrackingTouch(RangeSlider slider) {
 				isUserSeeking = true;
+				pushStateToUndo();
 			}
 
 			@Override
@@ -412,6 +534,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		mProgressDialog.setCancelable(false);
 		mProgressDialog.setCanceledOnTouchOutside(false);
 		mProgressDialog.setTitle("Processing Video");
+
+		// Staged undo/redo initialization styles
+		updateUndoRedoButtonsVisibility();
 	}
 
 	@Override
@@ -420,9 +545,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (id == R.id.bt_back) {
 			finish();
 		} else if (id == R.id.bt_undo) {
-			Toast.makeText(this, R.string.toast_no_undo, Toast.LENGTH_SHORT).show();
+			undo();
 		} else if (id == R.id.bt_redo) {
-			Toast.makeText(this, R.string.toast_no_redo, Toast.LENGTH_SHORT).show();
+			redo();
 		} else if (id == R.id.bt_exec) {
 			execVideo();
 		} else if (id == R.id.bt_file) {
@@ -447,19 +572,19 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			showPanel(panel_clip_settings);
 			setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
 		} else if (id == R.id.tab_audio) {
-			Toast.makeText(this, R.string.toast_audio_selected, Toast.LENGTH_SHORT).show();
+			showPanel(panel_audio);
 			setActiveTab(tab_audio, iv_tab_audio, tv_tab_audio);
 		} else if (id == R.id.tab_text) {
 			showPanel(panel_text_input);
 			setActiveTab(tab_text, iv_tab_text, tv_tab_text);
 		} else if (id == R.id.tab_stickers) {
-			Toast.makeText(this, R.string.toast_stickers_selected, Toast.LENGTH_SHORT).show();
+			showPanel(panel_stickers);
 			setActiveTab(tab_stickers, iv_tab_stickers, tv_tab_stickers);
 		} else if (id == R.id.tab_effects) {
 			Toast.makeText(this, R.string.toast_effects_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_effects, iv_tab_effects, tv_tab_effects);
 		} else if (id == R.id.tab_filters) {
-			Toast.makeText(this, R.string.toast_filters_selected, Toast.LENGTH_SHORT).show();
+			showPanel(panel_filters);
 			setActiveTab(tab_filters, iv_tab_filters, tv_tab_filters);
 		} else if (id == R.id.tab_transition) {
 			Toast.makeText(this, R.string.toast_transitions_selected, Toast.LENGTH_SHORT).show();
@@ -480,31 +605,195 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_action_delete) {
 			resetEditorState();
 		} else if (id == R.id.btn_action_mirror) {
+			pushStateToUndo();
 			isMirror = !isMirror;
 			updateVideoTransformations();
 			Toast.makeText(this, isMirror ? getString(R.string.toast_mirror_on) : getString(R.string.toast_mirror_off), Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_enhance) {
-			Toast.makeText(this, R.string.toast_enhance_on, Toast.LENGTH_SHORT).show();
+			pushStateToUndo();
+			isEnhanced = !isEnhanced;
+			Toast.makeText(this, isEnhanced ? R.string.toast_enhance_on : R.string.toast_mirror_off, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_more) {
 			Toast.makeText(this, R.string.toast_more_options, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_close_canvas_presets) {
 			showPanel(panel_clip_settings);
 		} else if (id == R.id.btn_crop_original) {
+			pushStateToUndo();
 			updateCropPresetButtons(0);
 			Toast.makeText(this, R.string.toast_crop_original, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_crop_16_9) {
+			pushStateToUndo();
 			updateCropPresetButtons(1);
 			Toast.makeText(this, R.string.toast_crop_16_9, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_crop_9_16) {
+			pushStateToUndo();
 			updateCropPresetButtons(2);
 			Toast.makeText(this, R.string.toast_crop_9_16, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_crop_1_1) {
+			pushStateToUndo();
 			updateCropPresetButtons(3);
 			Toast.makeText(this, R.string.toast_crop_1_1, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_close_text_input) {
 			showPanel(null);
 		} else if (id == R.id.btn_close_trim_editor) {
 			showPanel(panel_clip_settings);
+		} else if (id == R.id.btn_close_filters) {
+			showPanel(null);
+		} else if (id == R.id.btn_filter_none) {
+			pushStateToUndo();
+			applyFilterOverlay(R.id.btn_filter_none);
+		} else if (id == R.id.btn_filter_warm) {
+			pushStateToUndo();
+			applyFilterOverlay(R.id.btn_filter_warm);
+		} else if (id == R.id.btn_filter_cool) {
+			pushStateToUndo();
+			applyFilterOverlay(R.id.btn_filter_cool);
+		} else if (id == R.id.btn_filter_vintage) {
+			pushStateToUndo();
+			applyFilterOverlay(R.id.btn_filter_vintage);
+		} else if (id == R.id.btn_close_audio) {
+			showPanel(null);
+		} else if (id == R.id.btn_audio_track1) {
+			Toast.makeText(this, "Chill Lo-Fi Beat Applied", Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.btn_audio_track2) {
+			Toast.makeText(this, "Electronic Uplifting Applied", Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.btn_audio_track3) {
+			Toast.makeText(this, "Acoustic Melody Applied", Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.btn_close_stickers) {
+			showPanel(null);
+		} else if (id == R.id.btn_sticker_fire) {
+			pushStateToUndo();
+			String nextSticker = "🔥".equals(activeStickerText) ? "" : "🔥";
+			applyStickerPreview(nextSticker);
+		} else if (id == R.id.btn_sticker_sparkles) {
+			pushStateToUndo();
+			String nextSticker = "✨".equals(activeStickerText) ? "" : "✨";
+			applyStickerPreview(nextSticker);
+		} else if (id == R.id.btn_sticker_heart) {
+			pushStateToUndo();
+			String nextSticker = "❤️".equals(activeStickerText) ? "" : "❤️";
+			applyStickerPreview(nextSticker);
+		}
+	}
+
+	private void pushStateToUndo() {
+		EditorState state = new EditorState(
+			trimStartSec,
+			trimEndSec,
+			selectedCropPreset,
+			currentRotation,
+			isMirror,
+			subtitleText,
+			subtitleXPercent,
+			subtitleYPercent,
+			activeFilterId,
+			activeStickerText,
+			isEnhanced
+		);
+		undoStack.push(state);
+		redoStack.clear();
+		updateUndoRedoButtonsVisibility();
+	}
+
+	private void updateUndoRedoButtonsVisibility() {
+		if (bt_undo != null) {
+			bt_undo.setEnabled(!undoStack.isEmpty());
+			bt_undo.setAlpha(undoStack.isEmpty() ? 0.4f : 1.0f);
+		}
+		if (bt_redo != null) {
+			bt_redo.setEnabled(!redoStack.isEmpty());
+			bt_redo.setAlpha(redoStack.isEmpty() ? 0.4f : 1.0f);
+		}
+	}
+
+	private void undo() {
+		if (undoStack.isEmpty()) {
+			Toast.makeText(this, R.string.toast_no_undo, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		EditorState currentState = new EditorState(
+			trimStartSec,
+			trimEndSec,
+			selectedCropPreset,
+			currentRotation,
+			isMirror,
+			subtitleText,
+			subtitleXPercent,
+			subtitleYPercent,
+			activeFilterId,
+			activeStickerText,
+			isEnhanced
+		);
+		redoStack.push(currentState);
+		
+		EditorState previousState = undoStack.pop();
+		applyState(previousState);
+		updateUndoRedoButtonsVisibility();
+	}
+
+	private void redo() {
+		if (redoStack.isEmpty()) {
+			Toast.makeText(this, R.string.toast_no_redo, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		EditorState currentState = new EditorState(
+			trimStartSec,
+			trimEndSec,
+			selectedCropPreset,
+			currentRotation,
+			isMirror,
+			subtitleText,
+			subtitleXPercent,
+			subtitleYPercent,
+			activeFilterId,
+			activeStickerText,
+			isEnhanced
+		);
+		undoStack.push(currentState);
+		
+		EditorState nextState = redoStack.pop();
+		applyState(nextState);
+		updateUndoRedoButtonsVisibility();
+	}
+
+	private void applyState(EditorState state) {
+		trimStartSec = state.trimStartSec;
+		trimEndSec = state.trimEndSec;
+		selectedCropPreset = state.selectedCropPreset;
+		currentRotation = state.currentRotation;
+		isMirror = state.isMirror;
+		subtitleText = state.subtitleText;
+		subtitleXPercent = state.subtitleXPercent;
+		subtitleYPercent = state.subtitleYPercent;
+		activeFilterId = state.activeFilterId;
+		activeStickerText = state.activeStickerText;
+		isEnhanced = state.isEnhanced;
+
+		// Apply transformations
+		updateVideoTransformations();
+		applyVideoViewAspectRatio(selectedCropPreset);
+		updateCropPresetButtons(selectedCropPreset);
+
+		// Apply subtitle text and pos
+		et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
+		et_subtitle_input.setText(subtitleText);
+		et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
+		updateSubtitlePreview();
+		
+		slider_text_x.setValue(subtitleXPercent);
+		slider_text_y.setValue(subtitleYPercent);
+
+		// Apply filter tint
+		applyFilterOverlay(activeFilterId);
+
+		// Apply sticker
+		applyStickerPreview(activeStickerText);
+
+		// Apply trim slider values
+		if (video_view != null) {
+			range_slider.setValues(Arrays.asList(trimStartSec, trimEndSec));
+			updateTrimLabels();
+			video_view.seekTo((int) (trimStartSec * 1000));
 		}
 	}
 
@@ -513,6 +802,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		panel_canvas_presets.setVisibility(View.GONE);
 		panel_text_input.setVisibility(View.GONE);
 		panel_trim_editor.setVisibility(View.GONE);
+		if (panel_filters != null) panel_filters.setVisibility(View.GONE);
+		if (panel_audio != null) panel_audio.setVisibility(View.GONE);
+		if (panel_stickers != null) panel_stickers.setVisibility(View.GONE);
 		if (panelToShow != null) {
 			panelToShow.setVisibility(View.VISIBLE);
 		}
@@ -562,6 +854,124 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				}
 			}
 		}
+
+		applyVideoViewAspectRatio(preset);
+	}
+
+	private void applyVideoViewAspectRatio(int preset) {
+		if (video_view == null || video_container == null) return;
+		
+		int containerWidth = video_container.getWidth();
+		int containerHeight = video_container.getHeight();
+		
+		if (containerWidth <= 0 || containerHeight <= 0) {
+			return;
+		}
+
+		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) video_view.getLayoutParams();
+		if (preset == 0) { // Original
+			lp.width = FrameLayout.LayoutParams.MATCH_PARENT;
+			lp.height = FrameLayout.LayoutParams.MATCH_PARENT;
+			lp.gravity = android.view.Gravity.CENTER;
+		} else {
+			float targetRatio = 1f;
+			if (preset == 1) { // 16:9
+				targetRatio = 16f / 9f;
+			} else if (preset == 2) { // 9:16
+				targetRatio = 9f / 16f;
+			} else if (preset == 3) { // 1:1
+				targetRatio = 1f;
+			}
+			
+			float containerRatio = (float) containerWidth / containerHeight;
+			if (containerRatio > targetRatio) {
+				lp.height = containerHeight;
+				lp.width = (int) (containerHeight * targetRatio);
+			} else {
+				lp.width = containerWidth;
+				lp.height = (int) (containerWidth / targetRatio);
+			}
+			lp.gravity = android.view.Gravity.CENTER;
+		}
+		
+		video_view.setLayoutParams(lp);
+
+		// Synchronize filter overlay bounds
+		if (video_filter_overlay != null) {
+			FrameLayout.LayoutParams overlayLp = (FrameLayout.LayoutParams) video_filter_overlay.getLayoutParams();
+			overlayLp.width = lp.width;
+			overlayLp.height = lp.height;
+			overlayLp.gravity = lp.gravity;
+			video_filter_overlay.setLayoutParams(overlayLp);
+		}
+	}
+
+	private void applyFilterOverlay(int filterId) {
+		activeFilterId = filterId;
+		if (video_filter_overlay == null) return;
+		if (filterId == R.id.btn_filter_none) {
+			video_filter_overlay.setVisibility(View.GONE);
+			video_filter_overlay.setBackgroundColor(Color.TRANSPARENT);
+		} else if (filterId == R.id.btn_filter_warm) {
+			video_filter_overlay.setVisibility(View.VISIBLE);
+			video_filter_overlay.setBackgroundColor(Color.parseColor("#33FF9800"));
+		} else if (filterId == R.id.btn_filter_cool) {
+			video_filter_overlay.setVisibility(View.VISIBLE);
+			video_filter_overlay.setBackgroundColor(Color.parseColor("#3300BCD4"));
+		} else if (filterId == R.id.btn_filter_vintage) {
+			video_filter_overlay.setVisibility(View.VISIBLE);
+			video_filter_overlay.setBackgroundColor(Color.parseColor("#44795548"));
+		}
+
+		// Update button styles
+		Button[] buttons = {btn_filter_none, btn_filter_warm, btn_filter_cool, btn_filter_vintage};
+		int activeColor = getResources().getColor(R.color.colorAccent);
+		int activeTextColor = getResources().getColor(R.color.lumina_bg);
+		int normalColor = getResources().getColor(R.color.lumina_surface_container);
+		int normalTextColor = getResources().getColor(R.color.lumina_text_primary);
+
+		for (Button b : buttons) {
+			if (b != null) {
+				if (b.getId() == filterId) {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(activeColor));
+					b.setTextColor(activeTextColor);
+				} else {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(normalColor));
+					b.setTextColor(normalTextColor);
+				}
+			}
+		}
+	}
+
+	private void applyStickerPreview(String stickerText) {
+		activeStickerText = stickerText;
+		if (tv_sticker_preview == null) return;
+		if (stickerText == null || stickerText.isEmpty()) {
+			tv_sticker_preview.setVisibility(View.GONE);
+		} else {
+			tv_sticker_preview.setVisibility(View.VISIBLE);
+			tv_sticker_preview.setText(stickerText);
+		}
+
+		// Update button styles
+		Button[] buttons = {btn_sticker_fire, btn_sticker_sparkles, btn_sticker_heart};
+		int activeColor = getResources().getColor(R.color.colorAccent);
+		int activeTextColor = getResources().getColor(R.color.lumina_bg);
+		int normalColor = getResources().getColor(R.color.lumina_surface_container);
+		int normalTextColor = getResources().getColor(R.color.lumina_text_primary);
+
+		for (Button b : buttons) {
+			if (b != null) {
+				String bText = b.getText().toString();
+				if (bText.contains(stickerText) && !stickerText.isEmpty()) {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(activeColor));
+					b.setTextColor(activeTextColor);
+				} else {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(normalColor));
+					b.setTextColor(normalTextColor);
+				}
+			}
+		}
 	}
 
 	private void showVolumeDialog() {
@@ -607,13 +1017,23 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		builder.setPositiveButton(R.string.alert_reset_btn, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				pushStateToUndo();
 				currentRotation = 0;
 				isMirror = false;
 				selectedCropPreset = 0;
-				updateVideoTransformations();
-				updateCropPresetButtons(0);
+				activeFilterId = R.id.btn_filter_none;
+				activeStickerText = "";
+				isEnhanced = false;
 				
+				updateVideoTransformations();
+				applyVideoViewAspectRatio(0);
+				updateCropPresetButtons(0);
+				applyFilterOverlay(R.id.btn_filter_none);
+				applyStickerPreview("");
+				
+				et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
 				et_subtitle_input.setText("");
+				et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
 				subtitleText = "";
 				updateSubtitlePreview();
 				
@@ -697,10 +1117,26 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				currentRotation = 0;
 				isMirror = false;
 				selectedCropPreset = 0;
-				updateVideoTransformations();
-				updateCropPresetButtons(0);
+				activeFilterId = R.id.btn_filter_none;
+				activeStickerText = "";
+				isEnhanced = false;
 				
+				updateVideoTransformations();
+				
+				video_view.post(new Runnable() {
+					@Override
+					public void run() {
+						applyVideoViewAspectRatio(0);
+					}
+				});
+				
+				updateCropPresetButtons(0);
+				applyFilterOverlay(R.id.btn_filter_none);
+				applyStickerPreview("");
+				
+				et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
 				et_subtitle_input.setText("");
+				et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
 				subtitleText = "";
 				subtitleXPercent = 50f;
 				subtitleYPercent = 85f;
@@ -710,6 +1146,11 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				
 				showPanel(panel_clip_settings);
 				setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
+
+				// Reset undo/redo stacks
+				undoStack.clear();
+				redoStack.clear();
+				updateUndoRedoButtonsVisibility();
 			}
 		});
 		

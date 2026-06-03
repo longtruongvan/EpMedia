@@ -101,6 +101,24 @@
                 android:layout_gravity="center"
                 android:visibility="gone" />
 
+            <!-- Filter tint overlay -->
+            <View
+                android:id="@+id/video_filter_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:visibility="gone" />
+
+            <!-- Sticker preview overlay -->
+            <TextView
+                android:id="@+id/tv_sticker_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="48sp"
+                android:visibility="gone" />
+
             <!-- Subtitle overlay -->
             <TextView
                 android:id="@+id/tv_subtitle_preview"
@@ -1306,6 +1324,263 @@
                     android:textColor="@color/lumina_text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Filters Selection Panel -->
+    <LinearLayout
+        android:id="@+id/panel_filters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#F2131314"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="24dp"
+        android:elevation="7dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+        <View
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:background="#20FFFFFF"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="12dp">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_filters"
+                app:tint="@color/colorAccent" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/tab_filters"
+                android:textColor="@color/lumina_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/btn_close_filters"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_more"
+                app:tint="@color/lumina_text_secondary"
+                android:clickable="true"
+                android:focusable="true"
+                android:rotation="45" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:gravity="center">
+            <Button
+                android:id="@+id/btn_filter_none"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="None"
+                android:textColor="@color/lumina_bg"
+                android:backgroundTint="@color/colorAccent"
+                android:layout_marginEnd="6dp" />
+            <Button
+                android:id="@+id/btn_filter_warm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Warm"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container"
+                android:layout_marginEnd="6dp" />
+            <Button
+                android:id="@+id/btn_filter_cool"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cool"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container"
+                android:layout_marginEnd="6dp" />
+            <Button
+                android:id="@+id/btn_filter_vintage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vintage"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Audio Selection Panel -->
+    <LinearLayout
+        android:id="@+id/panel_audio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#F2131314"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="24dp"
+        android:elevation="7dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+        <View
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:background="#20FFFFFF"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="12dp">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_audio"
+                app:tint="@color/colorAccent" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/tab_audio"
+                android:textColor="@color/lumina_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/btn_close_audio"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_more"
+                app:tint="@color/lumina_text_secondary"
+                android:clickable="true"
+                android:focusable="true"
+                android:rotation="45" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:gravity="center">
+            <Button
+                android:id="@+id/btn_audio_track1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lo-Fi Beat"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container"
+                android:layout_marginEnd="8dp" />
+            <Button
+                android:id="@+id/btn_audio_track2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Electronic"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container"
+                android:layout_marginEnd="8dp" />
+            <Button
+                android:id="@+id/btn_audio_track3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Acoustic"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Stickers Selection Panel -->
+    <LinearLayout
+        android:id="@+id/panel_stickers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#F2131314"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="24dp"
+        android:elevation="7dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+        <View
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:background="#20FFFFFF"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="12dp">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_stickers"
+                app:tint="@color/colorAccent" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/tab_stickers"
+                android:textColor="@color/lumina_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/btn_close_stickers"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_more"
+                app:tint="@color/lumina_text_secondary"
+                android:clickable="true"
+                android:focusable="true"
+                android:rotation="45" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:gravity="center">
+            <Button
+                android:id="@+id/btn_sticker_fire"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔥 Fire"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container"
+                android:layout_marginEnd="8dp" />
+            <Button
+                android:id="@+id/btn_sticker_sparkles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✨ Sparkles"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container"
+                android:layout_marginEnd="8dp" />
+            <Button
+                android:id="@+id/btn_sticker_heart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="❤️ Heart"
+                android:textColor="@color/lumina_text_primary"
+                android:backgroundTint="@color/lumina_surface_container" />
         </LinearLayout>
     </LinearLayout>
 
