@@ -14,7 +14,7 @@ import com.joe.epmediademo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-	private LinearLayout btn_new_project;
+	private androidx.cardview.widget.CardView btn_new_project;
 	private ImageView btn_search;
 	private TextView btn_see_all;
 	private LinearLayout btn_mock_project_1;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void initView() {
 		// Main actions
-		btn_new_project = (LinearLayout) findViewById(R.id.btn_new_project);
+		btn_new_project = (androidx.cardview.widget.CardView) findViewById(R.id.btn_new_project);
 		btn_search = (ImageView) findViewById(R.id.btn_search);
 		btn_see_all = (TextView) findViewById(R.id.btn_see_all);
 		btn_mock_project_1 = (LinearLayout) findViewById(R.id.btn_mock_project_1);
