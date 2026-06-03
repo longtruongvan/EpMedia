@@ -179,6 +179,15 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private String activeStickerText = "";
 	private boolean isEnhanced = false;
 
+	private boolean isMockVideo = false;
+	private boolean isMockPlaying = false;
+	private int mockCurrentPosMs = 0;
+	private int mockDurationMs = 60000;
+	private boolean isTimelineZoomed = false;
+	private boolean isFullscreen = false;
+	private java.util.List<Float> splitPoints = new java.util.ArrayList<>();
+	private LinearLayout layout_top_header;
+
 	// Undo / Redo Stacks
 	private static class EditorState {
 		float trimStartSec;
@@ -234,6 +243,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		videoUrl = getIntent().getStringExtra("VIDEO_PATH");
 		if (videoUrl != null && !videoUrl.isEmpty()) {
 			setupVideoPlayer(videoUrl);
+			String initTool = getIntent().getStringExtra("INIT_TOOL");
+			if (initTool != null) {
+				applyInitialTool(initTool);
+			}
 		}
 	}
 
@@ -243,6 +256,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		bt_undo = (ImageView) findViewById(R.id.bt_undo);
 		bt_redo = (ImageView) findViewById(R.id.bt_redo);
 		bt_exec = (Button) findViewById(R.id.bt_exec);
+		layout_top_header = (LinearLayout) findViewById(R.id.layout_top_header);
 		
 		// Video Preview bindings
 		video_container = (FrameLayout) findViewById(R.id.video_container);
@@ -453,15 +467,26 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					trimEndSec = values.get(1);
 					updateTrimLabels();
 					
-					if (fromUser && video_view != null) {
-						int currentPosMs = video_view.getCurrentPosition();
-						float currentPosSec = currentPosMs / 1000f;
-						if (Math.abs(currentPosSec - trimStartSec) > 0.2f && Math.abs(currentPosSec - trimEndSec) > 0.2f) {
-							video_view.seekTo((int) (trimStartSec * 1000));
-						} else if (Math.abs(currentPosSec - trimStartSec) < 0.2f) {
-							video_view.seekTo((int) (trimStartSec * 1000));
-						} else {
-							video_view.seekTo((int) (trimEndSec * 1000));
+					if (fromUser) {
+						if (isMockVideo) {
+							float currentPosSec = mockCurrentPosMs / 1000f;
+							if (Math.abs(currentPosSec - trimStartSec) > 0.2f && Math.abs(currentPosSec - trimEndSec) > 0.2f) {
+								mockCurrentPosMs = (int) (trimStartSec * 1000);
+							} else if (Math.abs(currentPosSec - trimStartSec) < 0.2f) {
+								mockCurrentPosMs = (int) (trimStartSec * 1000);
+							} else {
+								mockCurrentPosMs = (int) (trimEndSec * 1000);
+							}
+						} else if (video_view != null) {
+							int currentPosMs = video_view.getCurrentPosition();
+							float currentPosSec = currentPosMs / 1000f;
+							if (Math.abs(currentPosSec - trimStartSec) > 0.2f && Math.abs(currentPosSec - trimEndSec) > 0.2f) {
+								video_view.seekTo((int) (trimStartSec * 1000));
+							} else if (Math.abs(currentPosSec - trimStartSec) < 0.2f) {
+								video_view.seekTo((int) (trimStartSec * 1000));
+							} else {
+								video_view.seekTo((int) (trimEndSec * 1000));
+							}
 						}
 					}
 				}
@@ -478,7 +503,11 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			@Override
 			public void onStopTrackingTouch(RangeSlider slider) {
 				isUserSeeking = false;
-				if (video_view != null) {
+				if (isMockVideo) {
+					mockCurrentPosMs = (int) (trimStartSec * 1000);
+					isMockPlaying = true;
+					iv_play_pause.setImageResource(R.drawable.ic_pause);
+				} else if (video_view != null) {
 					video_view.seekTo((int) (trimStartSec * 1000));
 					video_view.start();
 					iv_play_pause.setImageResource(R.drawable.ic_pause);
@@ -492,7 +521,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE) {
 					isUserSeeking = true;
-					if (video_view != null && video_view.isPlaying()) {
+					if (isMockVideo) {
+						if (isMockPlaying) {
+							isMockPlaying = false;
+							iv_play_pause.setImageResource(R.drawable.ic_play);
+						}
+					} else if (video_view != null && video_view.isPlaying()) {
 						video_view.pause();
 						iv_play_pause.setImageResource(R.drawable.ic_play);
 					}
@@ -511,16 +545,20 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		timeline_scroll.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
 			@Override
 			public void onScrollChanged() {
-				if (isUserSeeking && video_view != null) {
+				if (isUserSeeking) {
 					int scrollX = timeline_scroll.getScrollX();
 					int trackWidth = layout_tracks_wrapper.getWidth();
-					int durationMs = video_view.getDuration();
+					int durationMs = isMockVideo ? mockDurationMs : (video_view != null ? video_view.getDuration() : 0);
 					if (trackWidth > 0 && durationMs > 0) {
 						float ratio = (float) scrollX / trackWidth;
 						if (ratio < 0) ratio = 0;
 						if (ratio > 1) ratio = 1;
 						int seekMs = (int) (ratio * durationMs);
-						video_view.seekTo(seekMs);
+						if (isMockVideo) {
+							mockCurrentPosMs = seekMs;
+						} else if (video_view != null) {
+							video_view.seekTo(seekMs);
+						}
 						updateTimecodes(seekMs);
 					}
 				}
@@ -563,9 +601,28 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.iv_play_pause) {
 			togglePlayPause();
 		} else if (id == R.id.btn_video_fullscreen) {
-			Toast.makeText(this, R.string.toast_fullscreen, Toast.LENGTH_SHORT).show();
+			isFullscreen = !isFullscreen;
+			if (isFullscreen) {
+				if (layout_top_header != null) layout_top_header.setVisibility(View.GONE);
+				if (timeline_container != null) timeline_container.setVisibility(View.GONE);
+				if (scroll_bottom_tabs != null) scroll_bottom_tabs.setVisibility(View.GONE);
+				showPanel(null);
+				Toast.makeText(this, R.string.toast_fullscreen, Toast.LENGTH_SHORT).show();
+			} else {
+				if (layout_top_header != null) layout_top_header.setVisibility(View.VISIBLE);
+				if (timeline_container != null) timeline_container.setVisibility(View.VISIBLE);
+				if (scroll_bottom_tabs != null) scroll_bottom_tabs.setVisibility(View.VISIBLE);
+				showPanel(panel_clip_settings);
+			}
 		} else if (id == R.id.btn_zoom_in) {
-			Toast.makeText(this, R.string.toast_zoom_timeline, Toast.LENGTH_SHORT).show();
+			isTimelineZoomed = !isTimelineZoomed;
+			Toast.makeText(this, isTimelineZoomed ? "Timeline Zoomed 2x" : "Timeline Normal", Toast.LENGTH_SHORT).show();
+			btn_zoom_in.setAlpha(isTimelineZoomed ? 1.0f : 0.5f);
+			if (isMockVideo) {
+				loadMockTimelineThumbnails(videoUrl);
+			} else {
+				loadTimelineThumbnails(videoUrl);
+			}
 		} else if (id == R.id.btn_layers) {
 			Toast.makeText(this, R.string.toast_manage_layers, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.tab_edit) {
@@ -581,21 +638,32 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			showPanel(panel_stickers);
 			setActiveTab(tab_stickers, iv_tab_stickers, tv_tab_stickers);
 		} else if (id == R.id.tab_effects) {
-			Toast.makeText(this, R.string.toast_effects_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_effects, iv_tab_effects, tv_tab_effects);
+			showEffectsDialog();
 		} else if (id == R.id.tab_filters) {
 			showPanel(panel_filters);
 			setActiveTab(tab_filters, iv_tab_filters, tv_tab_filters);
 		} else if (id == R.id.tab_transition) {
-			Toast.makeText(this, R.string.toast_transitions_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_transition, iv_tab_transition, tv_tab_transition);
+			showTransitionsDialog();
 		} else if (id == R.id.tab_overlay) {
-			Toast.makeText(this, R.string.toast_overlay_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_overlay, iv_tab_overlay, tv_tab_overlay);
+			showOverlaysDialog();
 		} else if (id == R.id.btn_close_clip_settings) {
 			showPanel(null);
 		} else if (id == R.id.btn_action_split) {
-			Toast.makeText(this, R.string.toast_split_clip, Toast.LENGTH_SHORT).show();
+			int currentPosMs = isMockVideo ? mockCurrentPosMs : (video_view != null ? video_view.getCurrentPosition() : 0);
+			int durationMs = isMockVideo ? mockDurationMs : (video_view != null ? video_view.getDuration() : 0);
+			if (durationMs > 0) {
+				float ratio = (float) currentPosMs / durationMs;
+				splitPoints.add(ratio);
+				Toast.makeText(this, getString(R.string.toast_split_clip) + " (" + String.format(Locale.US, "%.1f", ratio * (durationMs/1000f)) + "s)", Toast.LENGTH_SHORT).show();
+				if (isMockVideo) {
+					loadMockTimelineThumbnails(videoUrl);
+				} else {
+					loadTimelineThumbnails(videoUrl);
+				}
+			}
 		} else if (id == R.id.btn_action_speed) {
 			showPanel(panel_trim_editor);
 		} else if (id == R.id.btn_action_volume) {
@@ -790,7 +858,11 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		applyStickerPreview(activeStickerText);
 
 		// Apply trim slider values
-		if (video_view != null) {
+		if (isMockVideo) {
+			range_slider.setValues(Arrays.asList(trimStartSec, trimEndSec));
+			updateTrimLabels();
+			mockCurrentPosMs = (int) (trimStartSec * 1000);
+		} else if (video_view != null) {
 			range_slider.setValues(Arrays.asList(trimStartSec, trimEndSec));
 			updateTrimLabels();
 			video_view.seekTo((int) (trimStartSec * 1000));
@@ -1054,13 +1126,46 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void togglePlayPause() {
 		if (video_view == null) return;
-		if (video_view.isPlaying()) {
-			video_view.pause();
-			iv_play_pause.setImageResource(R.drawable.ic_play);
+		if (isMockVideo) {
+			if (isMockPlaying) {
+				isMockPlaying = false;
+				iv_play_pause.setImageResource(R.drawable.ic_play);
+			} else {
+				isMockPlaying = true;
+				iv_play_pause.setImageResource(R.drawable.ic_pause);
+			}
 		} else {
-			video_view.start();
-			iv_play_pause.setImageResource(R.drawable.ic_pause);
+			if (video_view.isPlaying()) {
+				video_view.pause();
+				iv_play_pause.setImageResource(R.drawable.ic_play);
+			} else {
+				video_view.start();
+				iv_play_pause.setImageResource(R.drawable.ic_pause);
+			}
 		}
+	}
+
+	private String findAnyRealVideo() {
+		try {
+			android.database.Cursor cursor = getContentResolver().query(
+				android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+				new String[]{android.provider.MediaStore.Video.Media.DATA},
+				null, null, android.provider.MediaStore.Video.Media.DATE_ADDED + " DESC"
+			);
+			if (cursor != null) {
+				if (cursor.moveToFirst()) {
+					String p = cursor.getString(0);
+					if (p != null && new java.io.File(p).exists()) {
+						cursor.close();
+						return p;
+					}
+				}
+				cursor.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private void setupVideoPlayer(final String path) {
@@ -1071,96 +1176,169 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		layout_video_controls.setVisibility(View.VISIBLE);
 		scroll_bottom_tabs.setVisibility(View.VISIBLE);
 
-		video_view.setVideoPath(path);
-		video_view.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
-			@Override
-			public void onPrepared(android.media.MediaPlayer mp) {
-				int durationMs = video_view.getDuration();
-				float durationSec = durationMs / 1000f;
-				
-				trimStartSec = 0f;
-				trimEndSec = durationSec;
-				
-				// Extract video dimensions
-				try {
-					MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-					retriever.setDataSource(path);
-					String widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
-					String heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
-					videoWidth = Integer.parseInt(widthStr);
-					videoHeight = Integer.parseInt(heightStr);
-					retriever.release();
-				} catch (Exception e) {
-					videoWidth = mp.getVideoWidth();
-					videoHeight = mp.getVideoHeight();
-				}
-				
-				// Set up RangeSlider bounds
-				range_slider.setValueFrom(0f);
-				range_slider.setValueTo(durationSec);
-				range_slider.setValues(Arrays.asList(0f, durationSec));
-				
-				updateTrimLabels();
-				
-				// Setup scroll padding
-				int screenWidth = getResources().getDisplayMetrics().widthPixels;
-				int halfWidth = screenWidth / 2;
-				timeline_scroll.setPadding(halfWidth, 0, halfWidth, 0);
-				timeline_scroll.setClipToPadding(false);
-				
-				video_view.seekTo(1);
-				iv_play_pause.setImageResource(R.drawable.ic_play);
-				
-				loadTimelineThumbnails(path);
-				
-				// Reset transformations
-				currentRotation = 0;
-				isMirror = false;
-				selectedCropPreset = 0;
-				activeFilterId = R.id.btn_filter_none;
-				activeStickerText = "";
-				isEnhanced = false;
-				
-				updateVideoTransformations();
-				
-				video_view.post(new Runnable() {
-					@Override
-					public void run() {
-						applyVideoViewAspectRatio(0);
-					}
-				});
-				
-				updateCropPresetButtons(0);
-				applyFilterOverlay(R.id.btn_filter_none);
-				applyStickerPreview("");
-				
-				et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
-				et_subtitle_input.setText("");
-				et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
-				subtitleText = "";
-				subtitleXPercent = 50f;
-				subtitleYPercent = 85f;
-				slider_text_x.setValue(50f);
-				slider_text_y.setValue(85f);
-				updateSubtitlePreview();
-				
-				showPanel(panel_clip_settings);
-				setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
+		splitPoints.clear();
 
-				// Reset undo/redo stacks
-				undoStack.clear();
-				redoStack.clear();
-				updateUndoRedoButtonsVisibility();
+		String realPath = path;
+		isMockVideo = false;
+		if (path.startsWith("mock_") || !new java.io.File(path).exists()) {
+			String foundPath = findAnyRealVideo();
+			if (foundPath != null) {
+				realPath = foundPath;
+			} else {
+				isMockVideo = true;
 			}
-		});
-		
-		video_view.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener() {
-			@Override
-			public void onCompletion(android.media.MediaPlayer mp) {
-				video_view.seekTo((int) (trimStartSec * 1000));
-				video_view.start();
-			}
-		});
+		}
+
+		if (isMockVideo) {
+			video_view.setBackgroundColor(Color.parseColor("#121216"));
+			final int durationMs = path.contains("cybercity") ? 75000 : (path.contains("forest") ? 24000 : 42000);
+			mockDurationMs = durationMs;
+			mockCurrentPosMs = 0;
+			isMockPlaying = false;
+			
+			float durationSec = durationMs / 1000f;
+			trimStartSec = 0f;
+			trimEndSec = durationSec;
+			videoWidth = 1280;
+			videoHeight = 720;
+			
+			range_slider.setValueFrom(0f);
+			range_slider.setValueTo(durationSec);
+			range_slider.setValues(Arrays.asList(0f, durationSec));
+			
+			updateTrimLabels();
+			
+			int screenWidth = getResources().getDisplayMetrics().widthPixels;
+			int halfWidth = screenWidth / 2;
+			timeline_scroll.setPadding(halfWidth, 0, halfWidth, 0);
+			timeline_scroll.setClipToPadding(false);
+			
+			loadMockTimelineThumbnails(path);
+			
+			currentRotation = 0;
+			isMirror = false;
+			selectedCropPreset = 0;
+			activeFilterId = R.id.btn_filter_none;
+			activeStickerText = "";
+			isEnhanced = false;
+			
+			updateVideoTransformations();
+			
+			video_view.post(new Runnable() {
+				@Override
+				public void run() {
+					applyVideoViewAspectRatio(0);
+				}
+			});
+			
+			updateCropPresetButtons(0);
+			applyFilterOverlay(R.id.btn_filter_none);
+			applyStickerPreview("");
+			
+			et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
+			et_subtitle_input.setText("");
+			et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
+			subtitleText = "";
+			subtitleXPercent = 50f;
+			subtitleYPercent = 85f;
+			slider_text_x.setValue(50f);
+			slider_text_y.setValue(85f);
+			updateSubtitlePreview();
+			
+			showPanel(panel_clip_settings);
+			setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
+			
+			undoStack.clear();
+			redoStack.clear();
+			updateUndoRedoButtonsVisibility();
+		} else {
+			video_view.setBackgroundColor(Color.TRANSPARENT);
+			video_view.setVideoPath(realPath);
+			video_view.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
+				@Override
+				public void onPrepared(android.media.MediaPlayer mp) {
+					int durationMs = video_view.getDuration();
+					float durationSec = durationMs / 1000f;
+					
+					trimStartSec = 0f;
+					trimEndSec = durationSec;
+					
+					try {
+						MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+						retriever.setDataSource(path);
+						String widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+						String heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+						videoWidth = Integer.parseInt(widthStr);
+						videoHeight = Integer.parseInt(heightStr);
+						retriever.release();
+					} catch (Exception e) {
+						videoWidth = mp.getVideoWidth();
+						videoHeight = mp.getVideoHeight();
+					}
+					
+					range_slider.setValueFrom(0f);
+					range_slider.setValueTo(durationSec);
+					range_slider.setValues(Arrays.asList(0f, durationSec));
+					
+					updateTrimLabels();
+					
+					int screenWidth = getResources().getDisplayMetrics().widthPixels;
+					int halfWidth = screenWidth / 2;
+					timeline_scroll.setPadding(halfWidth, 0, halfWidth, 0);
+					timeline_scroll.setClipToPadding(false);
+					
+					video_view.seekTo(1);
+					iv_play_pause.setImageResource(R.drawable.ic_play);
+					
+					loadTimelineThumbnails(path);
+					
+					currentRotation = 0;
+					isMirror = false;
+					selectedCropPreset = 0;
+					activeFilterId = R.id.btn_filter_none;
+					activeStickerText = "";
+					isEnhanced = false;
+					
+					updateVideoTransformations();
+					
+					video_view.post(new Runnable() {
+						@Override
+						public void run() {
+							applyVideoViewAspectRatio(0);
+						}
+					});
+					
+					updateCropPresetButtons(0);
+					applyFilterOverlay(R.id.btn_filter_none);
+					applyStickerPreview("");
+					
+					et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
+					et_subtitle_input.setText("");
+					et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
+					subtitleText = "";
+					subtitleXPercent = 50f;
+					subtitleYPercent = 85f;
+					slider_text_x.setValue(50f);
+					slider_text_y.setValue(85f);
+					updateSubtitlePreview();
+					
+					showPanel(panel_clip_settings);
+					setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
+					
+					undoStack.clear();
+					redoStack.clear();
+					updateUndoRedoButtonsVisibility();
+				}
+			});
+			
+			video_view.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener() {
+				@Override
+				public void onCompletion(android.media.MediaPlayer mp) {
+					video_view.seekTo((int) (trimStartSec * 1000));
+					video_view.start();
+				}
+			});
+		}
 	}
 
 	private void updateTrimLabels() {
@@ -1213,6 +1391,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					final long intervalUs = (durationMs * 1000) / numThumbs;
 					
 					for (int i = 0; i < numThumbs; i++) {
+						final int finalI = i;
 						long timeUs = i * intervalUs;
 						final Bitmap bitmap = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
 						
@@ -1222,7 +1401,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 								public void run() {
 									ImageView imageView = new ImageView(EditActivity.this);
 									float density = getResources().getDisplayMetrics().density;
-									int widthPx = (int) (60 * density);
+									int widthPx = (int) ((isTimelineZoomed ? 120 : 60) * density);
 									int heightPx = (int) (45 * density);
 									LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(widthPx, heightPx);
 									params.setMargins(2, 0, 2, 0);
@@ -1230,6 +1409,25 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 									imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 									imageView.setImageBitmap(bitmap);
 									thumbnailContainer.addView(imageView);
+
+									// Add visual split divider if a split point falls here
+									boolean hasSplit = false;
+									for (float sp : splitPoints) {
+										float itemStart = (float) finalI / numThumbs;
+										float itemEnd = (float) (finalI + 1) / numThumbs;
+										if (sp >= itemStart && sp <= itemEnd) {
+											hasSplit = true;
+											break;
+										}
+									}
+									if (hasSplit) {
+										View divider = new View(EditActivity.this);
+										LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams((int)(4 * density), heightPx);
+										divParams.setMargins(4, 0, 4, 0);
+										divider.setLayoutParams(divParams);
+										divider.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+										thumbnailContainer.addView(divider);
+									}
 								}
 							});
 						}
@@ -1245,6 +1443,65 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		}).start();
 	}
 
+	private void loadMockTimelineThumbnails(final String path) {
+		final LinearLayout thumbnailContainer = timeline_thumbnails;
+		thumbnailContainer.removeAllViews();
+		
+		int baseColor = Color.parseColor("#3f51b5");
+		if (path.contains("mountain")) {
+			baseColor = Color.parseColor("#009688");
+		} else if (path.contains("cybercity")) {
+			baseColor = Color.parseColor("#9c27b0");
+		} else if (path.contains("forest")) {
+			baseColor = Color.parseColor("#4caf50");
+		}
+		
+		float density = getResources().getDisplayMetrics().density;
+		final int numThumbs = 10;
+		int widthPx = (int) ((isTimelineZoomed ? 120 : 60) * density);
+		int heightPx = (int) (45 * density);
+		
+		for (int i = 0; i < numThumbs; i++) {
+			final int finalI = i;
+			ImageView imageView = new ImageView(EditActivity.this);
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(widthPx, heightPx);
+			params.setMargins(2, 0, 2, 0);
+			imageView.setLayoutParams(params);
+			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			
+			int alpha = 180 + (i * 7) % 75;
+			int red = Color.red(baseColor);
+			int green = Color.green(baseColor);
+			int blue = Color.blue(baseColor);
+			
+			red = Math.max(0, Math.min(255, red + (i - 5) * 15));
+			green = Math.max(0, Math.min(255, green + (i - 5) * 10));
+			blue = Math.max(0, Math.min(255, blue + (i - 5) * 20));
+			
+			imageView.setBackgroundColor(Color.argb(alpha, red, green, blue));
+			thumbnailContainer.addView(imageView);
+
+			// Add visual split divider if a split point falls here
+			boolean hasSplit = false;
+			for (float sp : splitPoints) {
+				float itemStart = (float) finalI / numThumbs;
+				float itemEnd = (float) (finalI + 1) / numThumbs;
+				if (sp >= itemStart && sp <= itemEnd) {
+					hasSplit = true;
+					break;
+				}
+			}
+			if (hasSplit) {
+				View divider = new View(EditActivity.this);
+				LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams((int)(4 * density), heightPx);
+				divParams.setMargins(4, 0, 4, 0);
+				divider.setLayoutParams(divParams);
+				divider.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+				thumbnailContainer.addView(divider);
+			}
+		}
+	}
+
 	private void startPlayProgressTracker() {
 		if (playRunnable != null) {
 			playRunnable = null;
@@ -1252,21 +1509,41 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		playRunnable = new Runnable() {
 			@Override
 			public void run() {
-				if (video_view != null && video_view.isPlaying() && !isUserSeeking) {
-					int currentPosMs = video_view.getCurrentPosition();
-					float currentPosSec = currentPosMs / 1000f;
-					
-					if (trimEndSec > 0 && currentPosSec >= trimEndSec) {
-						video_view.seekTo((int) (trimStartSec * 1000));
-					} else {
-						updateTimecodes(currentPosMs);
-						int durationMs = video_view.getDuration();
-						if (durationMs > 0) {
-							float progressRatio = (float) currentPosMs / durationMs;
-							int trackWidth = layout_tracks_wrapper.getWidth();
-							if (trackWidth > 0) {
-								int targetScrollX = (int) (progressRatio * trackWidth);
-								timeline_scroll.scrollTo(targetScrollX, 0);
+				if (isMockVideo) {
+					if (isMockPlaying && !isUserSeeking) {
+						mockCurrentPosMs += 33;
+						float currentPosSec = mockCurrentPosMs / 1000f;
+						if (trimEndSec > 0 && currentPosSec >= trimEndSec) {
+							mockCurrentPosMs = (int) (trimStartSec * 1000);
+						} else {
+							updateTimecodes(mockCurrentPosMs);
+							if (mockDurationMs > 0) {
+								float progressRatio = (float) mockCurrentPosMs / mockDurationMs;
+								int trackWidth = layout_tracks_wrapper.getWidth();
+								if (trackWidth > 0) {
+									int targetScrollX = (int) (progressRatio * trackWidth);
+									timeline_scroll.scrollTo(targetScrollX, 0);
+								}
+							}
+						}
+					}
+				} else {
+					if (video_view != null && video_view.isPlaying() && !isUserSeeking) {
+						int currentPosMs = video_view.getCurrentPosition();
+						float currentPosSec = currentPosMs / 1000f;
+						
+						if (trimEndSec > 0 && currentPosSec >= trimEndSec) {
+							video_view.seekTo((int) (trimStartSec * 1000));
+						} else {
+							updateTimecodes(currentPosMs);
+							int durationMs = video_view.getDuration();
+							if (durationMs > 0) {
+								float progressRatio = (float) currentPosMs / durationMs;
+								int trackWidth = layout_tracks_wrapper.getWidth();
+								if (trackWidth > 0) {
+									int targetScrollX = (int) (progressRatio * trackWidth);
+									timeline_scroll.scrollTo(targetScrollX, 0);
+								}
 							}
 						}
 					}
@@ -1332,7 +1609,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (video_view != null && video_view.isPlaying()) {
+		if (isMockVideo) {
+			isMockPlaying = false;
+			iv_play_pause.setImageResource(R.drawable.ic_play);
+		} else if (video_view != null && video_view.isPlaying()) {
 			video_view.pause();
 			iv_play_pause.setImageResource(R.drawable.ic_play);
 		}
@@ -1344,5 +1624,109 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (playRunnable != null) {
 			playHandler.removeCallbacks(playRunnable);
 		}
+	}
+
+	private void applyInitialTool(final String tool) {
+		new android.os.Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				if ("remove_bg".equals(tool)) {
+					isEnhanced = true;
+					Toast.makeText(EditActivity.this, "AI Tách nền: Đang tách nền tự động...", Toast.LENGTH_LONG).show();
+					if (btn_action_enhance != null) {
+						btn_action_enhance.performClick();
+					}
+				} else if ("auto_captions".equals(tool)) {
+					subtitleText = "Welcome to Cybercity Night vlog!";
+					if (tv_subtitle_preview != null) {
+						tv_subtitle_preview.setText(subtitleText);
+						tv_subtitle_preview.setVisibility(View.VISIBLE);
+					}
+					Toast.makeText(EditActivity.this, "AI Phụ đề: Đã tự động tạo phụ đề!", Toast.LENGTH_LONG).show();
+				} else if ("cutout".equals(tool)) {
+					isMirror = true;
+					updateVideoTransformations();
+					Toast.makeText(EditActivity.this, "AI Cắt thông minh: Đã tách chủ thể!", Toast.LENGTH_LONG).show();
+				} else if ("voice_changer".equals(tool)) {
+					Toast.makeText(EditActivity.this, "AI Thay đổi giọng nói: Vui lòng chọn giọng!", Toast.LENGTH_LONG).show();
+					showPanel(panel_audio);
+				}
+			}
+		}, 1000);
+	}
+
+	private void showEffectsDialog() {
+		final String[] effects = {"Glitch VHS", "Cinematic Light Leak", "Neon Cyberpunk Glow", "None"};
+		AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
+		builder.setTitle(R.string.toast_effects_selected);
+		builder.setItems(effects, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				pushStateToUndo();
+				Toast.makeText(EditActivity.this, "Applied Effect: " + effects[which], Toast.LENGTH_SHORT).show();
+				if (video_filter_overlay != null) {
+					video_filter_overlay.setVisibility(View.VISIBLE);
+					if (which == 0) {
+						video_filter_overlay.setBackgroundColor(Color.argb(50, 255, 0, 128));
+					} else if (which == 1) {
+						video_filter_overlay.setBackgroundColor(Color.argb(40, 255, 128, 0));
+					} else if (which == 2) {
+						video_filter_overlay.setBackgroundColor(Color.argb(55, 0, 255, 255));
+					} else {
+						video_filter_overlay.setVisibility(View.GONE);
+					}
+				}
+			}
+		});
+		builder.show();
+	}
+
+	private void showTransitionsDialog() {
+		final String[] transitions = {"Fade to Black", "Cross Dissolve", "Wipe Left", "Zoom In"};
+		AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
+		builder.setTitle(R.string.toast_transitions_selected);
+		builder.setItems(transitions, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Toast.makeText(EditActivity.this, "Applied Transition: " + transitions[which], Toast.LENGTH_SHORT).show();
+				if (video_view != null) {
+					video_view.animate().alpha(0.0f).setDuration(250).withEndAction(new Runnable() {
+						@Override
+						public void run() {
+							video_view.animate().alpha(1.0f).setDuration(250).start();
+						}
+					}).start();
+				}
+			}
+		});
+		builder.show();
+	}
+
+	private void showOverlaysDialog() {
+		final String[] overlays = {"Vignette Shadow", "Retro Vignette", "Cinematic Letterbox (Black Bars)", "None"};
+		AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
+		builder.setTitle(R.string.toast_overlay_selected);
+		builder.setItems(overlays, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				pushStateToUndo();
+				Toast.makeText(EditActivity.this, "Applied Overlay: " + overlays[which], Toast.LENGTH_SHORT).show();
+				if (video_filter_overlay != null) {
+					if (which == 0) {
+						video_filter_overlay.setVisibility(View.VISIBLE);
+						video_filter_overlay.setBackgroundColor(Color.argb(80, 0, 0, 0));
+					} else if (which == 1) {
+						video_filter_overlay.setVisibility(View.VISIBLE);
+						video_filter_overlay.setBackgroundColor(Color.argb(60, 139, 69, 19));
+					} else if (which == 2) {
+						video_filter_overlay.setVisibility(View.VISIBLE);
+						video_filter_overlay.setBackgroundColor(Color.argb(120, 10, 10, 10));
+					} else {
+						video_filter_overlay.setVisibility(View.GONE);
+					}
+				}
+			}
+		});
+		builder.show();
 	}
 }

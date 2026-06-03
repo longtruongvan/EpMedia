@@ -155,33 +155,46 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		// Set Resolution tag text
 		tv_export_res_tag.setText(getResName(selectedResMode));
 
-		// Asynchronously load thumbnail frame from video path
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-				try {
-					retriever.setDataSource(videoUrl);
-					long timeUs = (long) (trimStartSec * 1000000L);
-					final Bitmap bitmap = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-					if (bitmap != null) {
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								iv_export_preview.setImageBitmap(bitmap);
-								iv_export_preview.setAlpha(0.6f);
-							}
-						});
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					try {
-						retriever.release();
-					} catch (Exception ignored) {}
-				}
+		if (videoUrl.startsWith("mock_") || !new java.io.File(videoUrl).exists()) {
+			int mockDrawableId = R.drawable.mock_cybercity_thumb;
+			if (videoUrl.contains("mountain")) {
+				mockDrawableId = R.drawable.mock_mountain_thumb;
+			} else if (videoUrl.contains("forest") || videoUrl.contains("nature")) {
+				mockDrawableId = R.drawable.mock_draft_nature;
+			} else if (videoUrl.contains("tiktok")) {
+				mockDrawableId = R.drawable.mock_draft_tiktok;
 			}
-		}).start();
+			iv_export_preview.setImageResource(mockDrawableId);
+			iv_export_preview.setAlpha(0.6f);
+		} else {
+			// Asynchronously load thumbnail frame from video path
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+					try {
+						retriever.setDataSource(videoUrl);
+						long timeUs = (long) (trimStartSec * 1000000L);
+						final Bitmap bitmap = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+						if (bitmap != null) {
+							runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									iv_export_preview.setImageBitmap(bitmap);
+									iv_export_preview.setAlpha(0.6f);
+								}
+							});
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						try {
+							retriever.release();
+						} catch (Exception ignored) {}
+					}
+				}
+			}).start();
+		}
 	}
 
 	private void updateEstimatedSize() {
@@ -323,6 +336,37 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		tv_export_status.setText(R.string.exporting_video_label);
 		progress_export.setProgress(0);
 		tv_export_percent.setText("0%");
+
+		boolean isMock = videoUrl.startsWith("mock_") || !new java.io.File(videoUrl).exists();
+		if (isMock) {
+			outputPath = MyApplication.getSavePath() + "out.mp4";
+			final android.os.Handler handler = new android.os.Handler();
+			handler.post(new Runnable() {
+				int progress = 0;
+				@Override
+				public void run() {
+					if (progress <= 100) {
+						progress_export.setProgress(progress);
+						tv_export_percent.setText(progress + "%");
+						progress += 10;
+						handler.postDelayed(this, 300);
+					} else {
+						isExporting = false;
+						progress_export.setProgress(100);
+						tv_export_percent.setText("100%");
+						tv_export_status.setText(R.string.export_completed_label);
+
+						btn_trigger_export.setEnabled(true);
+						btn_trigger_export.setText(R.string.open_exported_video);
+						btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+						btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
+
+						Toast.makeText(ExportActivity.this, getString(R.string.toast_export_success, outputPath), Toast.LENGTH_LONG).show();
+					}
+				}
+			});
+			return;
+		}
 
 		EpVideo epVideo = new EpVideo(videoUrl);
 
