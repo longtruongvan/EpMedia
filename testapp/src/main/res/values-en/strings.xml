@@ -66,6 +66,30 @@
     <string name="draft_tiktok_time">Last edited 3 days ago</string>
     <string name="last_edited_week_ago">Last edited 1 week ago</string>
     
+    <!-- Templates Tab -->
+    <string name="templates_title">Trending Templates</string>
+    <string name="template_neon">Neon Beats Vlog</string>
+    <string name="template_retro">Retro Travel Diary</string>
+    <string name="template_soft">Soft Aesthetic Mood</string>
+    <string name="template_cinematic">Cinematic Opener</string>
+    
+    <!-- AI Tools Tab -->
+    <string name="ai_smart_cutout">Smart Cutout</string>
+    <string name="ai_smart_cutout_desc">Isolate subjects instantly</string>
+    <string name="ai_voice_changer">Voice Changer</string>
+    <string name="ai_voice_changer_desc">Apply creative voice filters</string>
+    <string name="ai_tts">Text to Speech</string>
+    <string name="ai_tts_desc">Convert text to natural speech</string>
+    
+    <!-- Profile Tab -->
+    <string name="profile_title">Creator Profile</string>
+    <string name="profile_name">Creator Pro</string>
+    <string name="profile_level">Gold Creator</string>
+    <string name="profile_stats">12 Projects | 4.2 GB Storage</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_language">Language / Ngôn ngữ</string>
+    <string name="profile_help">Help &amp; Feedback</string>
+    
     <!-- Main Activity Toasts -->
     <string name="toast_search">Search projects or effects</string>
     <string name="toast_see_all">Showing all projects</string>

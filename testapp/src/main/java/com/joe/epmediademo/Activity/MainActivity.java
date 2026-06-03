@@ -45,11 +45,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private ImageView iv_nav_profile;
 	private TextView tv_nav_profile;
 
+	// Content layout containers
+	private androidx.core.widget.NestedScrollView layout_home_content;
+	private androidx.core.widget.NestedScrollView layout_templates_content;
+	private androidx.core.widget.NestedScrollView layout_ai_content;
+	private androidx.core.widget.NestedScrollView layout_projects_content;
+	private androidx.core.widget.NestedScrollView layout_profile_content;
+
+	// Profile controls
+	private LinearLayout btn_switch_language;
+	private TextView tv_current_lang;
+	private LinearLayout btn_help_support;
+
+	// AI Tab controls
+	private LinearLayout btn_ai_remove_bg_tab;
+	private LinearLayout btn_ai_captions_tab;
+	private LinearLayout btn_ai_cutout_tab;
+	private LinearLayout btn_ai_voice_tab;
+
+	// Projects Tab controls
+	private LinearLayout btn_proj_1_tab;
+	private LinearLayout btn_proj_2_tab;
+
+	private int activeTabId = R.id.nav_home;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initView();
+		
+		if (savedInstanceState != null) {
+			activeTabId = savedInstanceState.getInt("activeTabId", R.id.nav_home);
+			restoreActiveTab(activeTabId);
+		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt("activeTabId", activeTabId);
 	}
 
 	private void initView() {
@@ -85,6 +120,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		iv_nav_profile = (ImageView) findViewById(R.id.iv_nav_profile);
 		tv_nav_profile = (TextView) findViewById(R.id.tv_nav_profile);
 
+		// Content layout containers
+		layout_home_content = (androidx.core.widget.NestedScrollView) findViewById(R.id.layout_home_content);
+		layout_templates_content = (androidx.core.widget.NestedScrollView) findViewById(R.id.layout_templates_content);
+		layout_ai_content = (androidx.core.widget.NestedScrollView) findViewById(R.id.layout_ai_content);
+		layout_projects_content = (androidx.core.widget.NestedScrollView) findViewById(R.id.layout_projects_content);
+		layout_profile_content = (androidx.core.widget.NestedScrollView) findViewById(R.id.layout_profile_content);
+
+		// Profile controls
+		btn_switch_language = (LinearLayout) findViewById(R.id.btn_switch_language);
+		tv_current_lang = (TextView) findViewById(R.id.tv_current_lang);
+		btn_help_support = (LinearLayout) findViewById(R.id.btn_help_support);
+
+		// AI Tab controls
+		btn_ai_remove_bg_tab = (LinearLayout) findViewById(R.id.btn_ai_remove_bg_tab);
+		btn_ai_captions_tab = (LinearLayout) findViewById(R.id.btn_ai_captions_tab);
+		btn_ai_cutout_tab = (LinearLayout) findViewById(R.id.btn_ai_cutout_tab);
+		btn_ai_voice_tab = (LinearLayout) findViewById(R.id.btn_ai_voice_tab);
+
+		// Projects Tab controls
+		btn_proj_1_tab = (LinearLayout) findViewById(R.id.btn_proj_1_tab);
+		btn_proj_2_tab = (LinearLayout) findViewById(R.id.btn_proj_2_tab);
+
 		// Click listeners
 		btn_new_project.setOnClickListener(this);
 		btn_search.setOnClickListener(this);
@@ -101,6 +158,72 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		nav_ai.setOnClickListener(this);
 		nav_projects.setOnClickListener(this);
 		nav_profile.setOnClickListener(this);
+
+		if (btn_switch_language != null) btn_switch_language.setOnClickListener(this);
+		if (btn_help_support != null) btn_help_support.setOnClickListener(this);
+		if (btn_ai_remove_bg_tab != null) btn_ai_remove_bg_tab.setOnClickListener(this);
+		if (btn_ai_captions_tab != null) btn_ai_captions_tab.setOnClickListener(this);
+		if (btn_ai_cutout_tab != null) btn_ai_cutout_tab.setOnClickListener(this);
+		if (btn_ai_voice_tab != null) btn_ai_voice_tab.setOnClickListener(this);
+		if (btn_proj_1_tab != null) btn_proj_1_tab.setOnClickListener(this);
+		if (btn_proj_2_tab != null) btn_proj_2_tab.setOnClickListener(this);
+
+		updateLanguageText();
+	}
+
+	private void restoreActiveTab(int id) {
+		View tabView = findViewById(id);
+		if (tabView != null) {
+			onClick(tabView);
+		}
+	}
+
+	private void updateLanguageText() {
+		java.util.Locale currentLocale = getResources().getConfiguration().locale;
+		String lang = currentLocale.getLanguage();
+		if (tv_current_lang != null) {
+			if ("vi".equals(lang)) {
+				tv_current_lang.setText("Tiếng Việt (VI)");
+			} else {
+				tv_current_lang.setText("English (EN)");
+			}
+		}
+	}
+
+	private void toggleLanguage() {
+		java.util.Locale currentLocale = getResources().getConfiguration().locale;
+		String newLang = "vi".equals(currentLocale.getLanguage()) ? "en" : "vi";
+		
+		java.util.Locale locale = new java.util.Locale(newLang);
+		java.util.Locale.setDefault(locale);
+		
+		android.content.res.Resources resources = getResources();
+		android.content.res.Configuration config = resources.getConfiguration();
+		android.util.DisplayMetrics dm = resources.getDisplayMetrics();
+		
+		config.setLocale(locale);
+		resources.updateConfiguration(config, dm);
+		
+		if (getApplicationContext() != null) {
+			android.content.res.Resources appRes = getApplicationContext().getResources();
+			android.content.res.Configuration appConfig = appRes.getConfiguration();
+			appConfig.setLocale(locale);
+			appRes.updateConfiguration(appConfig, appRes.getDisplayMetrics());
+		}
+
+		recreate();
+	}
+
+	private void switchContentLayouts(View activeLayout) {
+		if (layout_home_content != null) layout_home_content.setVisibility(View.GONE);
+		if (layout_templates_content != null) layout_templates_content.setVisibility(View.GONE);
+		if (layout_ai_content != null) layout_ai_content.setVisibility(View.GONE);
+		if (layout_projects_content != null) layout_projects_content.setVisibility(View.GONE);
+		if (layout_profile_content != null) layout_profile_content.setVisibility(View.GONE);
+
+		if (activeLayout != null) {
+			activeLayout.setVisibility(View.VISIBLE);
+		}
 	}
 
 	@Override
@@ -114,32 +237,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			Toast.makeText(this, R.string.toast_search, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_see_all) {
 			Toast.makeText(this, R.string.toast_see_all, Toast.LENGTH_SHORT).show();
-		} else if (id == R.id.btn_mock_project_1) {
+		} else if (id == R.id.btn_mock_project_1 || id == R.id.btn_proj_1_tab) {
 			Toast.makeText(this, getString(R.string.toast_loading_project, getString(R.string.project_mountain)), Toast.LENGTH_SHORT).show();
-		} else if (id == R.id.btn_mock_project_2) {
+		} else if (id == R.id.btn_mock_project_2 || id == R.id.btn_proj_2_tab) {
 			Toast.makeText(this, getString(R.string.toast_loading_project, getString(R.string.project_cybercity)), Toast.LENGTH_SHORT).show();
-		} else if (id == R.id.btn_ai_remove_bg) {
+		} else if (id == R.id.btn_ai_remove_bg || id == R.id.btn_ai_remove_bg_tab) {
 			Toast.makeText(this, R.string.toast_ai_remove_bg, Toast.LENGTH_SHORT).show();
-		} else if (id == R.id.btn_ai_captions) {
+		} else if (id == R.id.btn_ai_captions || id == R.id.btn_ai_captions_tab) {
 			Toast.makeText(this, R.string.toast_ai_captions, Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.btn_ai_cutout_tab) {
+			Toast.makeText(this, getString(R.string.ai_smart_cutout), Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.btn_ai_voice_tab) {
+			Toast.makeText(this, getString(R.string.ai_voice_changer), Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_draft_1) {
 			Toast.makeText(this, getString(R.string.toast_loading_draft, getString(R.string.draft_tiktok)), Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_draft_2) {
 			Toast.makeText(this, getString(R.string.toast_loading_draft, getString(R.string.draft_nature)), Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.btn_switch_language) {
+			toggleLanguage();
+		} else if (id == R.id.btn_help_support) {
+			Toast.makeText(this, R.string.profile_help, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_home) {
+			activeTabId = id;
 			setActiveTab(nav_home, iv_nav_home, tv_nav_home);
+			switchContentLayouts(layout_home_content);
 		} else if (id == R.id.nav_templates) {
+			activeTabId = id;
 			setActiveTab(nav_templates, iv_nav_templates, tv_nav_templates);
-			Toast.makeText(this, R.string.toast_templates_loading, Toast.LENGTH_SHORT).show();
+			switchContentLayouts(layout_templates_content);
 		} else if (id == R.id.nav_ai) {
+			activeTabId = id;
 			setActiveTab(nav_ai, iv_nav_ai, tv_nav_ai);
-			Toast.makeText(this, R.string.toast_ai_loading, Toast.LENGTH_SHORT).show();
+			switchContentLayouts(layout_ai_content);
 		} else if (id == R.id.nav_projects) {
+			activeTabId = id;
 			setActiveTab(nav_projects, iv_nav_projects, tv_nav_projects);
-			Toast.makeText(this, R.string.toast_projects_list, Toast.LENGTH_SHORT).show();
+			switchContentLayouts(layout_projects_content);
 		} else if (id == R.id.nav_profile) {
+			activeTabId = id;
 			setActiveTab(nav_profile, iv_nav_profile, tv_nav_profile);
-			Toast.makeText(this, R.string.toast_profile, Toast.LENGTH_SHORT).show();
+			switchContentLayouts(layout_profile_content);
 		}
 	}
 
@@ -147,8 +284,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		int normalColor = getResources().getColor(R.color.lumina_text_secondary);
 		int activeColor = getResources().getColor(R.color.colorAccent);
 
-		ImageView[] icons = {iv_nav_home, iv_nav_templates, iv_nav_ai, iv_nav_projects, iv_nav_profile};
-		TextView[] texts = {tv_nav_home, tv_nav_templates, tv_nav_ai, tv_nav_projects, tv_nav_profile};
+         ImageView[] icons = {iv_nav_home, iv_nav_templates, iv_nav_ai, iv_nav_projects, iv_nav_profile};
+         TextView[] texts = {tv_nav_home, tv_nav_templates, tv_nav_ai, tv_nav_projects, tv_nav_profile};
 
 		for (int i = 0; i < icons.length; i++) {
 			if (icons[i] != null) {

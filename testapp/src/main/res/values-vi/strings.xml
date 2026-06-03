@@ -66,6 +66,30 @@
     <string name="draft_tiktok_time">Sửa lần cuối 3 ngày trước</string>
     <string name="last_edited_week_ago">Sửa lần cuối 1 tuần trước</string>
     
+    <!-- Templates Tab -->
+    <string name="templates_title">Mẫu phổ biến</string>
+    <string name="template_neon">Vlog Neon Beats</string>
+    <string name="template_retro">Nhật ký Du lịch Retro</string>
+    <string name="template_soft">Tâm trạng Nhẹ nhàng</string>
+    <string name="template_cinematic">Mở đầu Điện ảnh</string>
+    
+    <!-- AI Tools Tab -->
+    <string name="ai_smart_cutout">Cắt thông minh</string>
+    <string name="ai_smart_cutout_desc">Tách chủ thể tức thì</string>
+    <string name="ai_voice_changer">Thay đổi giọng nói</string>
+    <string name="ai_voice_changer_desc">Áp dụng bộ lọc giọng nói sáng tạo</string>
+    <string name="ai_tts">Văn bản thành giọng nói</string>
+    <string name="ai_tts_desc">Chuyển văn bản thành giọng nói tự nhiên</string>
+    
+    <!-- Profile Tab -->
+    <string name="profile_title">Hồ sơ Creator</string>
+    <string name="profile_name">Creator Chuyên nghiệp</string>
+    <string name="profile_level">Creator Hạng Vàng</string>
+    <string name="profile_stats">12 Dự án | 4.2 GB Dung lượng</string>
+    <string name="profile_settings">Cài đặt</string>
+    <string name="profile_language">Ngôn ngữ / Language</string>
+    <string name="profile_help">Trợ giúp &amp; Phản hồi</string>
+    
     <!-- Main Activity Toasts -->
     <string name="toast_search">Tìm kiếm dự án hoặc hiệu ứng</string>
     <string name="toast_see_all">Hiển thị toàn bộ dự án</string>
