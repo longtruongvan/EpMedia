@@ -233,14 +233,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#20FFFFFF"
-                                android:src="@android:drawable/ic_menu_gallery"
-                                android:alpha="0.2" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="#2000C2FF" />
+                                android:src="@drawable/mock_mountain_thumb" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -292,14 +285,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#20FFFFFF"
-                                android:src="@android:drawable/ic_menu_gallery"
-                                android:alpha="0.2" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="#207000FF" />
+                                android:src="@drawable/mock_cybercity_thumb" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -443,6 +429,176 @@
                 </LinearLayout>
             </GridLayout>
 
+            <!-- Trending Templates Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/templates_title"
+                    android:textColor="@color/lumina_text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/btn_explore_templates"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/explore"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="12sp"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="24dp">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Template Card 1 (Retro Wave) -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/btn_home_template_1"
+                        android:layout_width="110dp"
+                        android:layout_height="180dp"
+                        android:layout_marginEnd="12dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardBackgroundColor="@color/lumina_surface"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/mock_retro_wave" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="bottom"
+                                android:padding="8dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/template_neon"
+                                    android:textColor="@color/lumina_text_primary"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    android:ellipsize="end"
+                                    android:singleLine="true"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="24k Uses"
+                                    android:textColor="@color/lumina_text_secondary"
+                                    android:textSize="8sp"
+                                    android:layout_marginTop="1dp"/>
+                            </LinearLayout>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Template Card 2 (Architecture) -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/btn_home_template_2"
+                        android:layout_width="110dp"
+                        android:layout_height="180dp"
+                        android:layout_marginEnd="12dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardBackgroundColor="@color/lumina_surface"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/mock_architecture" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="bottom"
+                                android:padding="8dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/template_retro"
+                                    android:textColor="@color/lumina_text_primary"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    android:ellipsize="end"
+                                    android:singleLine="true"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="12k Uses"
+                                    android:textColor="@color/lumina_text_secondary"
+                                    android:textSize="8sp"
+                                    android:layout_marginTop="1dp"/>
+                            </LinearLayout>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Template Card 3 (Star Trails) -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/btn_home_template_3"
+                        android:layout_width="110dp"
+                        android:layout_height="180dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardBackgroundColor="@color/lumina_surface"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/mock_star_trail" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="bottom"
+                                android:padding="8dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/template_soft"
+                                    android:textColor="@color/lumina_text_primary"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    android:ellipsize="end"
+                                    android:singleLine="true"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8k Uses"
+                                    android:textColor="@color/lumina_text_secondary"
+                                    android:textSize="8sp"
+                                    android:layout_marginTop="1dp"/>
+                            </LinearLayout>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
             <!-- Drafts List -->
             <TextView
                 android:layout_width="wrap_content"
@@ -467,10 +623,11 @@
                 android:clickable="true"
                 android:focusable="true">
 
-                <View
+                <ImageView
                     android:layout_width="52dp"
                     android:layout_height="match_parent"
-                    android:background="#20FFFFFF" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/mock_draft_tiktok" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -515,10 +672,11 @@
                 android:clickable="true"
                 android:focusable="true">
 
-                <View
+                <ImageView
                     android:layout_width="52dp"
                     android:layout_height="match_parent"
-                    android:background="#20FFFFFF" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/mock_draft_nature" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -642,11 +800,14 @@
 
             <!-- Template 1 -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/btn_template_1"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                android:clickable="true"
+                android:focusable="true">
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -654,9 +815,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        android:alpha="0.2"
-                        android:background="#2000C2FF"/>
+                        android:src="@drawable/mock_retro_wave" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -683,11 +842,14 @@
 
             <!-- Template 2 -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/btn_template_2"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                android:clickable="true"
+                android:focusable="true">
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -695,9 +857,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_gallery"
-                        android:alpha="0.2"
-                        android:background="#207000FF"/>
+                        android:src="@drawable/mock_architecture" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -715,6 +875,48 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="98k Uses • 9:16"
+                            android:textColor="@color/lumina_text_secondary"
+                            android:textSize="10sp"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Template 3 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btn_template_3"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                android:clickable="true"
+                android:focusable="true">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/mock_star_trail" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="bottom"
+                        android:padding="16dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/template_soft"
+                            android:textColor="@color/lumina_text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="8k Uses • 9:16"
                             android:textColor="@color/lumina_text_secondary"
                             android:textSize="10sp"
                             android:layout_marginTop="2dp"/>
@@ -973,15 +1175,11 @@
                 android:layout_marginBottom="10dp"
                 android:clickable="true"
                 android:focusable="true">
-                <FrameLayout
+                <ImageView
                     android:layout_width="80dp"
                     android:layout_height="match_parent"
-                    android:background="#20FFFFFF">
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="#2000C2FF" />
-                </FrameLayout>
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/mock_mountain_thumb" />
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -1018,15 +1216,11 @@
                 android:layout_marginBottom="10dp"
                 android:clickable="true"
                 android:focusable="true">
-                <FrameLayout
+                <ImageView
                     android:layout_width="80dp"
                     android:layout_height="match_parent"
-                    android:background="#20FFFFFF">
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="#207000FF" />
-                </FrameLayout>
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/mock_cybercity_thumb" />
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -1099,7 +1293,7 @@
                     <ImageView
                         android:layout_width="28dp"
                         android:layout_height="28dp"
-                        android:src="@drawable/ic_more"
+                        android:src="@drawable/ic_profile"
                         app:tint="@color/lumina_bg"
                         android:layout_gravity="center" />
                 </FrameLayout>
@@ -1234,7 +1428,7 @@
                 android:id="@+id/iv_nav_home"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_history"
+                android:src="@drawable/ic_home"
                 app:tint="@color/colorAccent" />
             <TextView
                 android:id="@+id/tv_nav_home"
@@ -1261,7 +1455,7 @@
                 android:id="@+id/iv_nav_templates"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_effects"
+                android:src="@drawable/ic_templates"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:id="@+id/tv_nav_templates"
@@ -1288,7 +1482,7 @@
                 android:id="@+id/iv_nav_ai"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_enhance"
+                android:src="@drawable/ic_ai"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:id="@+id/tv_nav_ai"
@@ -1342,7 +1536,7 @@
                 android:id="@+id/iv_nav_profile"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_more"
+                android:src="@drawable/ic_profile"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:id="@+id/tv_nav_profile"

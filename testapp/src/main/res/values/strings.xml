@@ -206,4 +206,6 @@
     <string name="frame_rate">Frame Rate (FPS)</string>
     <string name="share_to">Share to</string>
     <string name="ready_to_export">Ready to export</string>
+    <string name="explore">Explore</string>
+    <string name="toast_applying_template">Applying template %s...</string>
 </resources>

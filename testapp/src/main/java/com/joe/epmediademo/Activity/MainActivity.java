@@ -67,6 +67,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private LinearLayout btn_proj_1_tab;
 	private LinearLayout btn_proj_2_tab;
 
+	// Home screen templates
+	private androidx.cardview.widget.CardView btn_home_template_1;
+	private androidx.cardview.widget.CardView btn_home_template_2;
+	private androidx.cardview.widget.CardView btn_home_template_3;
+	private TextView btn_explore_templates;
+
+	// Templates tab templates
+	private androidx.cardview.widget.CardView btn_template_1;
+	private androidx.cardview.widget.CardView btn_template_2;
+	private androidx.cardview.widget.CardView btn_template_3;
+
 	private int activeTabId = R.id.nav_home;
 
 	@Override
@@ -78,6 +89,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		if (savedInstanceState != null) {
 			activeTabId = savedInstanceState.getInt("activeTabId", R.id.nav_home);
 			restoreActiveTab(activeTabId);
+		} else {
+			if (getIntent() != null && getIntent().hasExtra("TARGET_TAB")) {
+				handleIntent(getIntent());
+			} else {
+				restoreActiveTab(R.id.nav_home);
+			}
+		}
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		setIntent(intent);
+		handleIntent(intent);
+	}
+
+	private void handleIntent(Intent intent) {
+		if (intent != null && intent.hasExtra("TARGET_TAB")) {
+			int targetTabId = intent.getIntExtra("TARGET_TAB", R.id.nav_home);
+			restoreActiveTab(targetTabId);
 		}
 	}
 
@@ -142,6 +173,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		btn_proj_1_tab = (LinearLayout) findViewById(R.id.btn_proj_1_tab);
 		btn_proj_2_tab = (LinearLayout) findViewById(R.id.btn_proj_2_tab);
 
+		// Home screen templates
+		btn_home_template_1 = (androidx.cardview.widget.CardView) findViewById(R.id.btn_home_template_1);
+		btn_home_template_2 = (androidx.cardview.widget.CardView) findViewById(R.id.btn_home_template_2);
+		btn_home_template_3 = (androidx.cardview.widget.CardView) findViewById(R.id.btn_home_template_3);
+		btn_explore_templates = (TextView) findViewById(R.id.btn_explore_templates);
+
+		// Templates tab templates
+		btn_template_1 = (androidx.cardview.widget.CardView) findViewById(R.id.btn_template_1);
+		btn_template_2 = (androidx.cardview.widget.CardView) findViewById(R.id.btn_template_2);
+		btn_template_3 = (androidx.cardview.widget.CardView) findViewById(R.id.btn_template_3);
+
 		// Click listeners
 		btn_new_project.setOnClickListener(this);
 		btn_search.setOnClickListener(this);
@@ -167,6 +209,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		if (btn_ai_voice_tab != null) btn_ai_voice_tab.setOnClickListener(this);
 		if (btn_proj_1_tab != null) btn_proj_1_tab.setOnClickListener(this);
 		if (btn_proj_2_tab != null) btn_proj_2_tab.setOnClickListener(this);
+
+		if (btn_home_template_1 != null) btn_home_template_1.setOnClickListener(this);
+		if (btn_home_template_2 != null) btn_home_template_2.setOnClickListener(this);
+		if (btn_home_template_3 != null) btn_home_template_3.setOnClickListener(this);
+		if (btn_explore_templates != null) btn_explore_templates.setOnClickListener(this);
+
+		if (btn_template_1 != null) btn_template_1.setOnClickListener(this);
+		if (btn_template_2 != null) btn_template_2.setOnClickListener(this);
+		if (btn_template_3 != null) btn_template_3.setOnClickListener(this);
 
 		updateLanguageText();
 	}
@@ -257,6 +308,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			toggleLanguage();
 		} else if (id == R.id.btn_help_support) {
 			Toast.makeText(this, R.string.profile_help, Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.btn_home_template_1 || id == R.id.btn_template_1) {
+			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_neon)), Toast.LENGTH_SHORT).show();
+			Intent intent = new Intent(this, ImportMediaActivity.class);
+			startActivity(intent);
+		} else if (id == R.id.btn_home_template_2 || id == R.id.btn_template_2) {
+			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_retro)), Toast.LENGTH_SHORT).show();
+			Intent intent = new Intent(this, ImportMediaActivity.class);
+			startActivity(intent);
+		} else if (id == R.id.btn_home_template_3 || id == R.id.btn_template_3) {
+			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_soft)), Toast.LENGTH_SHORT).show();
+			Intent intent = new Intent(this, ImportMediaActivity.class);
+			startActivity(intent);
+		} else if (id == R.id.btn_explore_templates) {
+			activeTabId = R.id.nav_templates;
+			setActiveTab(nav_templates, iv_nav_templates, tv_nav_templates);
+			switchContentLayouts(layout_templates_content);
 		} else if (id == R.id.nav_home) {
 			activeTabId = id;
 			setActiveTab(nav_home, iv_nav_home, tv_nav_home);

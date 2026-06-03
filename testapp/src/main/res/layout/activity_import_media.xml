@@ -202,7 +202,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_history"
+                android:src="@drawable/ic_home"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:layout_width="wrap_content"
@@ -226,7 +226,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_effects"
+                android:src="@drawable/ic_templates"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:layout_width="wrap_content"
@@ -274,7 +274,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_enhance"
+                android:src="@drawable/ic_ai"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:layout_width="wrap_content"
@@ -298,7 +298,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_more"
+                android:src="@drawable/ic_profile"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:layout_width="wrap_content"

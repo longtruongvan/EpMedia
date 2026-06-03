@@ -103,6 +103,13 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 		btn_seg_photos.setOnClickListener(this);
 		btn_import_submit.setOnClickListener(this);
 
+		// Bottom navigation
+		findViewById(R.id.nav_home).setOnClickListener(this);
+		findViewById(R.id.nav_templates).setOnClickListener(this);
+		findViewById(R.id.nav_projects).setOnClickListener(this);
+		findViewById(R.id.nav_ai).setOnClickListener(this);
+		findViewById(R.id.nav_profile).setOnClickListener(this);
+
 		// Layout Manager
 		recycler_media_grid.setLayoutManager(new GridLayoutManager(this, 3));
 		adapter = new VideoAdapter();
@@ -238,6 +245,12 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 					finish();
 				}
 			}
+		} else if (id == R.id.nav_home || id == R.id.nav_templates || id == R.id.nav_projects || id == R.id.nav_ai || id == R.id.nav_profile) {
+			Intent intent = new Intent(this, MainActivity.class);
+			intent.putExtra("TARGET_TAB", id);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			startActivity(intent);
+			finish();
 		}
 	}
 

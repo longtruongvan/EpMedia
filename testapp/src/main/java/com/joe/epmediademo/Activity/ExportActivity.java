@@ -133,6 +133,12 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		btn_share_youtube.setOnClickListener(this);
 		btn_trigger_export.setOnClickListener(this);
 
+		findViewById(R.id.nav_home).setOnClickListener(this);
+		findViewById(R.id.nav_templates).setOnClickListener(this);
+		findViewById(R.id.nav_projects).setOnClickListener(this);
+		findViewById(R.id.nav_ai).setOnClickListener(this);
+		findViewById(R.id.nav_profile).setOnClickListener(this);
+
 		// Initial selectors highlighted states
 		updateResolutionButtons(1);
 		updateFpsButtons(1);
@@ -242,6 +248,16 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			shareVideo("com.zhiliaoapp.musically");
 		} else if (id == R.id.btn_share_youtube) {
 			shareVideo("com.google.android.youtube");
+		} else if (id == R.id.nav_home || id == R.id.nav_templates || id == R.id.nav_projects || id == R.id.nav_ai || id == R.id.nav_profile) {
+			if (isExporting) {
+				Toast.makeText(this, R.string.toast_export_back_warning, Toast.LENGTH_SHORT).show();
+			} else {
+				Intent intent = new Intent(this, MainActivity.class);
+				intent.putExtra("TARGET_TAB", id);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				startActivity(intent);
+				finish();
+			}
 		}
 	}
 

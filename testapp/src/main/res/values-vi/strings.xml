@@ -206,4 +206,6 @@
     <string name="frame_rate">Khung hình (FPS)</string>
     <string name="share_to">Chia sẻ đến</string>
     <string name="ready_to_export">Sẵn sàng xuất</string>
+    <string name="explore">Khám phá</string>
+    <string name="toast_applying_template">Đang áp dụng mẫu %s...</string>
 </resources>
