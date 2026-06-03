@@ -76,7 +76,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center"
-            android:src="@android:drawable/ic_media_play"
+            android:src="@drawable/ic_play"
             app:tint="#80FFFFFF"
             android:visibility="gone" />
 
@@ -460,11 +460,12 @@
             android:clickable="true"
             android:focusable="true">
             
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✂️"
-                android:textSize="20sp" />
+            <ImageView
+                android:id="@+id/iv_tab_trim"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_trim"
+                app:tint="@color/colorAccent" />
                 
             <TextView
                 android:id="@+id/tv_tab_trim"
@@ -487,11 +488,12 @@
             android:clickable="true"
             android:focusable="true">
             
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📐"
-                android:textSize="20sp" />
+            <ImageView
+                android:id="@+id/iv_tab_canvas"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_canvas"
+                app:tint="@color/capcut_text_secondary" />
                 
             <TextView
                 android:id="@+id/tv_tab_canvas"
@@ -514,11 +516,12 @@
             android:clickable="true"
             android:focusable="true">
             
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💬"
-                android:textSize="20sp" />
+            <ImageView
+                android:id="@+id/iv_tab_text"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_text"
+                app:tint="@color/capcut_text_secondary" />
                 
             <TextView
                 android:id="@+id/tv_tab_text"

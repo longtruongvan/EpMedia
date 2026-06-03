@@ -60,6 +60,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private TextView tv_tab_trim;
 	private TextView tv_tab_canvas;
 	private TextView tv_tab_text;
+	private ImageView iv_tab_trim;
+	private ImageView iv_tab_canvas;
+	private ImageView iv_tab_text;
 	
 	// Trim Panel Views
 	private LinearLayout timeline_thumbnails;
@@ -103,6 +106,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		setContentView(R.layout.activity_edit);
 		initView();
 		startPlayProgressTracker();
+
+		// Load video from intent if passed from MainActivity
+		videoUrl = getIntent().getStringExtra("VIDEO_PATH");
+		if (videoUrl != null && !videoUrl.isEmpty()) {
+			tv_file.setText(videoUrl);
+			setupVideoPlayer(videoUrl);
+		}
 	}
 
 	private void initView() {
@@ -130,6 +140,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		tv_tab_trim = (TextView) findViewById(R.id.tv_tab_trim);
 		tv_tab_canvas = (TextView) findViewById(R.id.tv_tab_canvas);
 		tv_tab_text = (TextView) findViewById(R.id.tv_tab_text);
+		iv_tab_trim = (ImageView) findViewById(R.id.iv_tab_trim);
+		iv_tab_canvas = (ImageView) findViewById(R.id.iv_tab_canvas);
+		iv_tab_text = (ImageView) findViewById(R.id.iv_tab_text);
 
 		// Find trim controls
 		timeline_thumbnails = (LinearLayout) findViewById(R.id.timeline_thumbnails);
@@ -294,6 +307,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		tv_tab_trim.setTextColor(tabIndex == 0 ? getColorAccent() : getCapcutTextSecondaryColor());
 		tv_tab_canvas.setTextColor(tabIndex == 1 ? getColorAccent() : getCapcutTextSecondaryColor());
 		tv_tab_text.setTextColor(tabIndex == 2 ? getColorAccent() : getCapcutTextSecondaryColor());
+		
+		iv_tab_trim.setImageTintList(android.content.res.ColorStateList.valueOf(tabIndex == 0 ? getColorAccent() : getCapcutTextSecondaryColor()));
+		iv_tab_canvas.setImageTintList(android.content.res.ColorStateList.valueOf(tabIndex == 1 ? getColorAccent() : getCapcutTextSecondaryColor()));
+		iv_tab_text.setImageTintList(android.content.res.ColorStateList.valueOf(tabIndex == 2 ? getColorAccent() : getCapcutTextSecondaryColor()));
 	}
 
 	private void togglePlayPause() {
