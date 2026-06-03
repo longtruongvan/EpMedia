@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EpMedia Test</string>
+    <string name="clip_video">Clip Video</string>
+    <string name="from_text">From </string>
+    <string name="sec_to"> sec to </string>
+    <string name="sec_text"> sec</string>
+    <string name="crop_width">Crop Width:</string>
+    <string name="crop_height"> Height:</string>
+    <string name="crop_video">Crop Video</string>
+    <string name="start_x">Start X: </string>
+    <string name="start_y"> Y: </string>
+    <string name="rotation_angle">Angle: </string>
+    <string name="rotate_video">Rotate</string>
+    <string name="mirror_video">Mirror</string>
+    <string name="subtitle_content">Subtitle Text:</string>
+    <string name="subtitle_x">Subtitle X: </string>
+    <string name="default_subtitle">I am subtitle</string>
+    <string name="add_subtitle">Subtitle</string>
+    <string name="please_select_files">Select files:\n</string>
+    <string name="please_select_file">Select file:</string>
+    <string name="btn_select_file">Select File</string>
+    <string name="btn_start_process">Start</string>
+    <string name="btn_single_video">Single Video</string>
+    <string name="btn_multi_video">Multiple Videos</string>
+    <string name="btn_add_video">Add Video</string>
+    <string name="btn_start_merge">Merge</string>
+    <string name="process_complete">Processing complete</string>
+    <string name="process_failed">Processing failed</string>
+    <string name="select_video_first">Please select a video first</string>
+    <string name="select_video_1_first">Please select video 1</string>
+    <string name="select_video_2_first">Please select video 2</string>
+</resources>

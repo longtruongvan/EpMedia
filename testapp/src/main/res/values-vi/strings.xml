@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EpMedia Test</string>
+    <string name="clip_video">Cắt Video</string>
+    <string name="from_text">Từ </string>
+    <string name="sec_to"> giây đến </string>
+    <string name="sec_text"> giây</string>
+    <string name="crop_width">Chiều rộng:</string>
+    <string name="crop_height"> Chiều cao:</string>
+    <string name="crop_video">Xén Video</string>
+    <string name="start_x">Tọa độ X: </string>
+    <string name="start_y"> Tọa độ Y: </string>
+    <string name="rotation_angle">Góc xoay: </string>
+    <string name="rotate_video">Xoay</string>
+    <string name="mirror_video">Lật</string>
+    <string name="subtitle_content">Nội dung:</string>
+    <string name="subtitle_x">Tọa độ X: </string>
+    <string name="default_subtitle">Tôi là phụ đề</string>
+    <string name="add_subtitle">Phụ đề</string>
+    <string name="please_select_files">Chọn files:\n</string>
+    <string name="please_select_file">Chọn file:</string>
+    <string name="btn_select_file">Chọn File</string>
+    <string name="btn_start_process">Bắt đầu</string>
+    <string name="btn_single_video">Một Video</string>
+    <string name="btn_multi_video">Nhiều Video</string>
+    <string name="btn_add_video">Thêm Video</string>
+    <string name="btn_start_merge">Ghép Video</string>
+    <string name="process_complete">Đã xử lý xong</string>
+    <string name="process_failed">Xử lý thất bại</string>
+    <string name="select_video_first">Vui lòng chọn video trước</string>
+    <string name="select_video_1_first">Vui lòng chọn video 1</string>
+    <string name="select_video_2_first">Vui lòng chọn video 2</string>
+</resources>
