@@ -31,4 +31,155 @@
     <string name="select_video_1_first">Vui lòng chọn video 1</string>
     <string name="select_video_2_first">Vui lòng chọn video 2</string>
     <string name="new_project">Dự án mới</string>
+
+    <!-- General -->
+    <string name="app_header_title">Lumina Edit</string>
+    <string name="export">Xuất</string>
+    <string name="editor">Biên tập</string>
+    <string name="media">Phương tiện</string>
+    <string name="home">Trang chủ</string>
+    <string name="templates">Mẫu</string>
+    <string name="ai">AI</string>
+    <string name="projects">Dự án</string>
+    <string name="profile">Cá nhân</string>
+    
+    <!-- Home Screen -->
+    <string name="welcome_back">CHÀO MỪNG QUAY LẠI</string>
+    <string name="creator_greeting">Chào buổi sáng, Nhà sáng tạo</string>
+    <string name="start_fresh">Bắt đầu mới</string>
+    <string name="import_media_desc">Nhập phương tiện và bắt đầu chỉnh sửa</string>
+    <string name="create_new_project">Tạo dự án mới</string>
+    <string name="recent_projects">Dự án gần đây</string>
+    <string name="see_all">Xem tất cả</string>
+    <string name="ai_magic_tools">Công cụ ma thuật AI</string>
+    <string name="remove_background">Tách nền</string>
+    <string name="one_tap_isolation">Tách nền bằng một chạm</string>
+    <string name="auto_captions">Phụ đề tự động</string>
+    <string name="generate_subtitles">Tự động tạo phụ đề</string>
+    <string name="drafts">Bản nháp</string>
+    <string name="project_mountain">Mountain Vlog</string>
+    <string name="project_cybercity">Cybercity Night</string>
+    <string name="draft_tiktok">TikTok Remix v2</string>
+    <string name="draft_nature">Nature Montage</string>
+    <string name="edited_2h_ago">Đã chỉnh sửa 2 giờ trước</string>
+    <string name="edited_yesterday">Đã sửa hôm qua</string>
+    <string name="draft_tiktok_time">Sửa lần cuối 3 ngày trước</string>
+    <string name="last_edited_week_ago">Sửa lần cuối 1 tuần trước</string>
+    
+    <!-- Main Activity Toasts -->
+    <string name="toast_search">Tìm kiếm dự án hoặc hiệu ứng</string>
+    <string name="toast_see_all">Hiển thị toàn bộ dự án</string>
+    <string name="toast_loading_project">Đang tải %s...</string>
+    <string name="toast_ai_remove_bg">Bật công cụ AI tách nền</string>
+    <string name="toast_ai_captions">Bật công cụ AI tạo phụ đề tự động</string>
+    <string name="toast_loading_draft">Đang tải bản nháp %s...</string>
+    <string name="toast_templates_loading">Màn hình Mẫu (Templates) đang tải</string>
+    <string name="toast_ai_loading">Màn hình Công cụ AI đang tải</string>
+    <string name="toast_projects_list">Hiển thị danh sách dự án của bạn</string>
+    <string name="toast_profile">Thông tin cá nhân (Profile)</string>
+
+    <!-- Import Media Screen -->
+    <string name="search_media_hint">Tìm kiếm phương tiện...</string>
+    <string name="seg_recent">Gần đây</string>
+    <string name="seg_videos">Video</string>
+    <string name="seg_photos">Ảnh</string>
+    <string name="import_count_format">Nhập (%d)</string>
+    <string name="no_permission_toast">Không có quyền truy cập bộ nhớ. Sử dụng bộ chọn file hệ thống làm dự phòng.</string>
+    <string name="no_video_toast">Không tìm thấy video nào trên máy. Hiển thị video mẫu.</string>
+    <string name="no_photo_toast">Không tìm thấy ảnh nào</string>
+    <string name="mock_import_toast">Mô phỏng: Đang mở bộ chọn file thực tế để tải...</string>
+
+    <!-- Editor Screen -->
+    <string name="speed_format">Tốc độ: %.1fx</string>
+    <string name="toast_no_undo">Không có hành động để Undo</string>
+    <string name="toast_no_redo">Không có hành động để Redo</string>
+    <string name="toast_fullscreen">Chế độ xem toàn màn hình</string>
+    <string name="toast_zoom_timeline">Thu phóng timeline</string>
+    <string name="toast_manage_layers">Quản lý các Layer</string>
+    <string name="toast_audio_selected">Đã chọn âm thanh</string>
+    <string name="toast_stickers_selected">Đã chọn nhãn dán</string>
+    <string name="toast_effects_selected">Đã chọn hiệu ứng</string>
+    <string name="toast_filters_selected">Đã chọn bộ lọc</string>
+    <string name="toast_transitions_selected">Đã chọn chuyển cảnh</string>
+    <string name="toast_overlay_selected">Đã chọn lớp phủ</string>
+    <string name="toast_split_clip">Đã tách clip tại điểm hiện tại</string>
+    <string name="toast_mirror_on">Đã lật ngược video (Mirror)</string>
+    <string name="toast_mirror_off">Chế độ bình thường</string>
+    <string name="toast_enhance_on">Đã bật bộ lọc làm nét (Enhance)</string>
+    <string name="toast_more_options">Nhiều tùy chọn hơn sắp ra mắt</string>
+    <string name="toast_crop_original">Tỉ lệ: Gốc</string>
+    <string name="toast_crop_16_9">Tỉ lệ: 16:9</string>
+    <string name="toast_crop_9_16">Tỉ lệ: 9:16</string>
+    <string name="toast_crop_1_1">Tỉ lệ: 1:1</string>
+    <string name="toast_volume_success">Đã thiết lập âm lượng thành công</string>
+    <string name="toast_delete_success">Đã xóa toàn bộ chỉnh sửa</string>
+    <string name="toast_select_video_first">Vui lòng chọn video trước</string>
+    
+    <string name="canvas_presets">Tỉ lệ khung hình</string>
+    <string name="crop_ratio_original">Gốc</string>
+    <string name="crop_ratio_16_9">16:9</string>
+    <string name="crop_ratio_9_16">9:16</string>
+    <string name="crop_ratio_1_1">1:1</string>
+    
+    <string name="text_input">Thêm chữ</string>
+    <string name="text_hint">Nhập nội dung phụ đề...</string>
+    <string name="text_position">Vị trí</string>
+    
+    <string name="trim_range">Cắt clip</string>
+    <string name="trim_start_label">Bắt đầu: %.1fs</string>
+    <string name="trim_duration_label">Thời lượng: %.1fs</string>
+    <string name="trim_end_label">Kết thúc: %.1fs</string>
+    
+    <string name="speed_presets">Tốc độ</string>
+    <string name="volume_settings">Âm lượng</string>
+    <string name="volume_label">Điều chỉnh âm lượng</string>
+    <string name="trim_editor">Cắt video</string>
+    
+    <string name="tab_edit">Chỉnh sửa</string>
+    <string name="tab_audio">Âm thanh</string>
+    <string name="tab_text">Văn bản</string>
+    <string name="tab_stickers">Nhãn dán</string>
+    <string name="tab_effects">Hiệu ứng</string>
+    <string name="tab_filters">Bộ lọc</string>
+    <string name="tab_transition">Chuyển cảnh</string>
+    <string name="tab_overlay">Lớp phủ</string>
+    
+    <string name="clip_settings">Cài đặt Clip</string>
+    <string name="action_split">Tách</string>
+    <string name="action_speed">Tốc độ</string>
+    <string name="action_volume">Âm lượng</string>
+    <string name="action_crop">Xén</string>
+    <string name="action_delete">Xóa</string>
+    <string name="action_mirror">Lật</string>
+    <string name="action_enhance">Làm nét</string>
+    <string name="action_more">Thêm</string>
+    <string name="pos_x">Vị trí Ngang (X %)</string>
+    <string name="pos_y">Vị trí Dọc (Y %)</string>
+    
+    <string name="alert_reset_title">Đặt lại dự án</string>
+    <string name="alert_reset_message">Bạn có chắc chắn muốn xóa hết tất cả hiệu ứng và chỉnh sửa của video này không?</string>
+    <string name="alert_reset_btn">Đặt lại</string>
+    <string name="alert_cancel_btn">Hủy</string>
+
+    <!-- Export Screen -->
+    <string name="toast_export_back_warning">Đang xuất video, vui lòng không quay lại</string>
+    <string name="toast_export_no_source">Không có file nguồn để xuất</string>
+    <string name="toast_export_success">Xuất video thành công: %s</string>
+    <string name="toast_export_failed">Xuất video thất bại</string>
+    <string name="toast_export_share_first">Vui lòng xuất video thành công trước khi chia sẻ!</string>
+    <string name="toast_export_share_no_app">Không tìm thấy ứng dụng chia sẻ này trên máy</string>
+    
+    <string name="share_title">Chia sẻ Video</string>
+    <string name="exporting_label">Đang xuất...</string>
+    <string name="exporting_video_label">Đang xuất video...</string>
+    <string name="export_completed_label">Đã xuất xong!</string>
+    <string name="export_failed_label">Xuất thất bại!</string>
+    <string name="open_exported_video">Mở video đã xuất</string>
+    <string name="retry_exporting">Thử xuất lại</string>
+    <string name="estimated_size_format">Kích thước ước tính: %.1f MB</string>
+    <string name="export_settings">Cài đặt Xuất</string>
+    <string name="resolution">Độ phân giải</string>
+    <string name="frame_rate">Khung hình (FPS)</string>
+    <string name="share_to">Chia sẻ đến</string>
+    <string name="ready_to_export">Sẵn sàng xuất</string>
 </resources>

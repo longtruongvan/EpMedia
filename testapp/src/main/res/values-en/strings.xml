@@ -31,4 +31,155 @@
     <string name="select_video_1_first">Please select video 1</string>
     <string name="select_video_2_first">Please select video 2</string>
     <string name="new_project">New Project</string>
+
+    <!-- General -->
+    <string name="app_header_title">Lumina Edit</string>
+    <string name="export">Export</string>
+    <string name="editor">Editor</string>
+    <string name="media">Media</string>
+    <string name="home">Home</string>
+    <string name="templates">Templates</string>
+    <string name="ai">AI</string>
+    <string name="projects">Projects</string>
+    <string name="profile">Profile</string>
+    
+    <!-- Home Screen -->
+    <string name="welcome_back">WELCOME BACK</string>
+    <string name="creator_greeting">Good morning, Creator</string>
+    <string name="start_fresh">Start Fresh</string>
+    <string name="import_media_desc">Import media and start editing</string>
+    <string name="create_new_project">Create New Project</string>
+    <string name="recent_projects">Recent Projects</string>
+    <string name="see_all">See All</string>
+    <string name="ai_magic_tools">AI Magic Tools</string>
+    <string name="remove_background">Remove Background</string>
+    <string name="one_tap_isolation">One-tap isolation</string>
+    <string name="auto_captions">Auto-Captions</string>
+    <string name="generate_subtitles">Generate subtitles</string>
+    <string name="drafts">Drafts</string>
+    <string name="project_mountain">Mountain Vlog</string>
+    <string name="project_cybercity">Cybercity Night</string>
+    <string name="draft_tiktok">TikTok Remix v2</string>
+    <string name="draft_nature">Nature Montage</string>
+    <string name="edited_2h_ago">Edited 2h ago</string>
+    <string name="edited_yesterday">Edited yesterday</string>
+    <string name="draft_tiktok_time">Last edited 3 days ago</string>
+    <string name="last_edited_week_ago">Last edited 1 week ago</string>
+    
+    <!-- Main Activity Toasts -->
+    <string name="toast_search">Search projects or effects</string>
+    <string name="toast_see_all">Showing all projects</string>
+    <string name="toast_loading_project">Loading %s...</string>
+    <string name="toast_ai_remove_bg">Enabling AI background remover</string>
+    <string name="toast_ai_captions">Enabling AI auto-captions</string>
+    <string name="toast_loading_draft">Loading draft %s...</string>
+    <string name="toast_templates_loading">Templates screen is loading</string>
+    <string name="toast_ai_loading">AI tools screen is loading</string>
+    <string name="toast_projects_list">Showing your projects list</string>
+    <string name="toast_profile">Profile info</string>
+
+    <!-- Import Media Screen -->
+    <string name="search_media_hint">Search media...</string>
+    <string name="seg_recent">Recent</string>
+    <string name="seg_videos">Videos</string>
+    <string name="seg_photos">Photos</string>
+    <string name="import_count_format">Import (%d)</string>
+    <string name="no_permission_toast">No storage permission. Using system picker fallback.</string>
+    <string name="no_video_toast">No videos found on device. Displaying mockup videos.</string>
+    <string name="no_photo_toast">No photos found</string>
+    <string name="mock_import_toast">Simulation: Opening system file picker to load...</string>
+
+    <!-- Editor Screen -->
+    <string name="speed_format">Speed: %.1fx</string>
+    <string name="toast_no_undo">No actions to Undo</string>
+    <string name="toast_no_redo">No actions to Redo</string>
+    <string name="toast_fullscreen">Fullscreen preview mode</string>
+    <string name="toast_zoom_timeline">Zoom timeline</string>
+    <string name="toast_manage_layers">Manage layers</string>
+    <string name="toast_audio_selected">Audio track selected</string>
+    <string name="toast_stickers_selected">Stickers selected</string>
+    <string name="toast_effects_selected">Effects selected</string>
+    <string name="toast_filters_selected">Filters selected</string>
+    <string name="toast_transitions_selected">Transitions selected</string>
+    <string name="toast_overlay_selected">Overlay selected</string>
+    <string name="toast_split_clip">Split clip at current position</string>
+    <string name="toast_mirror_on">Mirror effect enabled</string>
+    <string name="toast_mirror_off">Normal view</string>
+    <string name="toast_enhance_on">Enhance filter enabled</string>
+    <string name="toast_more_options">More options coming soon</string>
+    <string name="toast_crop_original">Ratio: Original</string>
+    <string name="toast_crop_16_9">Ratio: 16:9</string>
+    <string name="toast_crop_9_16">Ratio: 9:16</string>
+    <string name="toast_crop_1_1">Ratio: 1:1</string>
+    <string name="toast_volume_success">Volume set successfully</string>
+    <string name="toast_delete_success">Cleared all edits</string>
+    <string name="toast_select_video_first">Please select a video first</string>
+    
+    <string name="canvas_presets">Canvas Presets</string>
+    <string name="crop_ratio_original">Original</string>
+    <string name="crop_ratio_16_9">16:9</string>
+    <string name="crop_ratio_9_16">9:16</string>
+    <string name="crop_ratio_1_1">1:1</string>
+    
+    <string name="text_input">Text Overlay</string>
+    <string name="text_hint">Enter subtitle text here...</string>
+    <string name="text_position">Position</string>
+    
+    <string name="trim_range">Trim Range</string>
+    <string name="trim_start_label">Start: %.1fs</string>
+    <string name="trim_duration_label">Duration: %.1fs</string>
+    <string name="trim_end_label">End: %.1fs</string>
+    
+    <string name="speed_presets">Speed</string>
+    <string name="volume_settings">Volume</string>
+    <string name="volume_label">Adjust Volume</string>
+    <string name="trim_editor">Trim Editor</string>
+    
+    <string name="tab_edit">Edit</string>
+    <string name="tab_audio">Audio</string>
+    <string name="tab_text">Text</string>
+    <string name="tab_stickers">Stickers</string>
+    <string name="tab_effects">Effects</string>
+    <string name="tab_filters">Filters</string>
+    <string name="tab_transition">Transition</string>
+    <string name="tab_overlay">Overlay</string>
+    
+    <string name="clip_settings">Clip Settings</string>
+    <string name="action_split">Split</string>
+    <string name="action_speed">Speed</string>
+    <string name="action_volume">Volume</string>
+    <string name="action_crop">Crop</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_mirror">Mirror</string>
+    <string name="action_enhance">Enhance</string>
+    <string name="action_more">More</string>
+    <string name="pos_x">Horizontal Position (X %)</string>
+    <string name="pos_y">Vertical Position (Y %)</string>
+    
+    <string name="alert_reset_title">Reset Projects</string>
+    <string name="alert_reset_message">Are you sure you want to clear all edits and effects on this video?</string>
+    <string name="alert_reset_btn">Reset</string>
+    <string name="alert_cancel_btn">Cancel</string>
+
+    <!-- Export Screen -->
+    <string name="toast_export_back_warning">Exporting video, please do not go back</string>
+    <string name="toast_export_no_source">No source file to export</string>
+    <string name="toast_export_success">Export completed: %s</string>
+    <string name="toast_export_failed">Export failed</string>
+    <string name="toast_export_share_first">Please export the video successfully before sharing!</string>
+    <string name="toast_export_share_no_app">Could not find this sharing app on device</string>
+    
+    <string name="share_title">Share Video</string>
+    <string name="exporting_label">Exporting...</string>
+    <string name="exporting_video_label">Exporting video...</string>
+    <string name="export_completed_label">Export completed!</string>
+    <string name="export_failed_label">Export failed!</string>
+    <string name="open_exported_video">Open Exported Video</string>
+    <string name="retry_exporting">Retry Exporting</string>
+    <string name="estimated_size_format">Estimated file size: %.1f MB</string>
+    <string name="export_settings">Export Settings</string>
+    <string name="resolution">Resolution</string>
+    <string name="frame_rate">Frame Rate (FPS)</string>
+    <string name="share_to">Share to</string>
+    <string name="ready_to_export">Ready to export</string>
 </resources>

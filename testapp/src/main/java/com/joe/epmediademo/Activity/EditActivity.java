@@ -420,9 +420,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (id == R.id.bt_back) {
 			finish();
 		} else if (id == R.id.bt_undo) {
-			Toast.makeText(this, "Không có hành động để Undo", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_no_undo, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.bt_redo) {
-			Toast.makeText(this, "Không có hành động để Redo", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_no_redo, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.bt_exec) {
 			execVideo();
 		} else if (id == R.id.bt_file) {
@@ -438,39 +438,39 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.iv_play_pause) {
 			togglePlayPause();
 		} else if (id == R.id.btn_video_fullscreen) {
-			Toast.makeText(this, "Chế độ xem toàn màn hình", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_fullscreen, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_zoom_in) {
-			Toast.makeText(this, "Thu phóng timeline", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_zoom_timeline, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_layers) {
-			Toast.makeText(this, "Quản lý các Layer", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_manage_layers, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.tab_edit) {
 			showPanel(panel_clip_settings);
 			setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
 		} else if (id == R.id.tab_audio) {
-			Toast.makeText(this, "Đã chọn âm thanh", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_audio_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_audio, iv_tab_audio, tv_tab_audio);
 		} else if (id == R.id.tab_text) {
 			showPanel(panel_text_input);
 			setActiveTab(tab_text, iv_tab_text, tv_tab_text);
 		} else if (id == R.id.tab_stickers) {
-			Toast.makeText(this, "Đã chọn nhãn dán", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_stickers_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_stickers, iv_tab_stickers, tv_tab_stickers);
 		} else if (id == R.id.tab_effects) {
-			Toast.makeText(this, "Đã chọn hiệu ứng", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_effects_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_effects, iv_tab_effects, tv_tab_effects);
 		} else if (id == R.id.tab_filters) {
-			Toast.makeText(this, "Đã chọn bộ lọc", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_filters_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_filters, iv_tab_filters, tv_tab_filters);
 		} else if (id == R.id.tab_transition) {
-			Toast.makeText(this, "Đã chọn chuyển cảnh", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_transitions_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_transition, iv_tab_transition, tv_tab_transition);
 		} else if (id == R.id.tab_overlay) {
-			Toast.makeText(this, "Đã chọn lớp phủ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_overlay_selected, Toast.LENGTH_SHORT).show();
 			setActiveTab(tab_overlay, iv_tab_overlay, tv_tab_overlay);
 		} else if (id == R.id.btn_close_clip_settings) {
 			showPanel(null);
 		} else if (id == R.id.btn_action_split) {
-			Toast.makeText(this, "Đã tách clip tại điểm hiện tại", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_split_clip, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_speed) {
 			showPanel(panel_trim_editor);
 		} else if (id == R.id.btn_action_volume) {
@@ -482,25 +482,25 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_action_mirror) {
 			isMirror = !isMirror;
 			updateVideoTransformations();
-			Toast.makeText(this, isMirror ? "Đã lật ngược video (Mirror)" : "Chế độ bình thường", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, isMirror ? getString(R.string.toast_mirror_on) : getString(R.string.toast_mirror_off), Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_enhance) {
-			Toast.makeText(this, "Đã bật bộ lọc làm nét (Enhance)", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_enhance_on, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_more) {
-			Toast.makeText(this, "Nhiều tùy chọn hơn sắp ra mắt", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_more_options, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_close_canvas_presets) {
 			showPanel(panel_clip_settings);
 		} else if (id == R.id.btn_crop_original) {
 			updateCropPresetButtons(0);
-			Toast.makeText(this, "Tỉ lệ: Gốc", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_crop_original, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_crop_16_9) {
 			updateCropPresetButtons(1);
-			Toast.makeText(this, "Tỉ lệ: 16:9", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_crop_16_9, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_crop_9_16) {
 			updateCropPresetButtons(2);
-			Toast.makeText(this, "Tỉ lệ: 9:16", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_crop_9_16, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_crop_1_1) {
 			updateCropPresetButtons(3);
-			Toast.makeText(this, "Tỉ lệ: 1:1", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_crop_1_1, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_close_text_input) {
 			showPanel(null);
 		} else if (id == R.id.btn_close_trim_editor) {
@@ -566,16 +566,15 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void showVolumeDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
-		builder.setTitle("Adjust Volume");
+		builder.setTitle(R.string.volume_label);
 		
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
-		layout.setPadding(40, 40, 40, 40);
+		layout.setPadding(40, 20, 40, 20);
 		
 		final TextView tvVol = new TextView(this);
-		tvVol.setText("Volume: 100%");
+		tvVol.setText(getString(R.string.volume_settings) + ": 100%");
 		tvVol.setTextColor(getResources().getColor(R.color.lumina_text_primary));
-		tvVol.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
 		layout.addView(tvVol);
 		
 		Slider slider = new Slider(this);
@@ -585,27 +584,27 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		slider.addOnChangeListener(new Slider.OnChangeListener() {
 			@Override
 			public void onValueChange(Slider slider, float value, boolean fromUser) {
-				tvVol.setText("Volume: " + (int) value + "%");
+				tvVol.setText(getString(R.string.volume_settings) + ": " + (int) value + "%");
 			}
 		});
 		layout.addView(slider);
 		
 		builder.setView(layout);
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				Toast.makeText(EditActivity.this, "Đã thiết lập âm lượng thành công", Toast.LENGTH_SHORT).show();
+				Toast.makeText(EditActivity.this, R.string.toast_volume_success, Toast.LENGTH_SHORT).show();
 			}
 		});
-		builder.setNegativeButton("Cancel", null);
+		builder.setNegativeButton(android.R.string.cancel, null);
 		builder.show();
 	}
 
 	private void resetEditorState() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
-		builder.setTitle("Reset Projects");
-		builder.setMessage("Bạn có chắc chắn muốn xóa hết tất cả hiệu ứng và chỉnh sửa của video này không?");
-		builder.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
+		builder.setTitle(R.string.alert_reset_title);
+		builder.setMessage(R.string.alert_reset_message);
+		builder.setPositiveButton(R.string.alert_reset_btn, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				currentRotation = 0;
@@ -626,10 +625,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					updateTrimLabels();
 					video_view.seekTo(1);
 				}
-				Toast.makeText(EditActivity.this, "Đã xóa toàn bộ chỉnh sửa", Toast.LENGTH_SHORT).show();
+				Toast.makeText(EditActivity.this, R.string.toast_delete_success, Toast.LENGTH_SHORT).show();
 			}
 		});
-		builder.setNegativeButton("Hủy", null);
+		builder.setNegativeButton(R.string.alert_cancel_btn, null);
 		builder.show();
 	}
 
@@ -725,9 +724,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void updateTrimLabels() {
 		float duration = trimEndSec - trimStartSec;
-		tv_trim_start.setText(String.format(Locale.US, "Bắt đầu: %.1fs", trimStartSec));
-		tv_trim_end.setText(String.format(Locale.US, "Kết thúc: %.1fs", trimEndSec));
-		tv_trim_duration.setText(String.format(Locale.US, "Thời lượng: %.1fs", duration));
+		tv_trim_start.setText(getString(R.string.trim_start_label, trimStartSec));
+		tv_trim_end.setText(getString(R.string.trim_end_label, trimEndSec));
+		tv_trim_duration.setText(getString(R.string.trim_duration_label, duration));
 	}
 
 	private void updateVideoTransformations() {
@@ -871,83 +870,21 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void execVideo() {
 		if (videoUrl != null && !videoUrl.isEmpty()) {
-			EpVideo epVideo = new EpVideo(videoUrl);
-			
-			// Apply trim
-			epVideo.clip(trimStartSec, trimEndSec - trimStartSec);
-			
-			// Apply crop
-			if (selectedCropPreset != 0 && videoWidth > 0 && videoHeight > 0) {
-				int cw = videoWidth;
-				int ch = videoHeight;
-				int cx = 0;
-				int cy = 0;
-				
-				if (selectedCropPreset == 1) { // 16:9
-					ch = (int) (videoWidth * 9f / 16f);
-					if (ch > videoHeight) {
-						ch = videoHeight;
-						cw = (int) (videoHeight * 16f / 9f);
-					}
-					cx = (videoWidth - cw) / 2;
-					cy = (videoHeight - ch) / 2;
-				} else if (selectedCropPreset == 2) { // 9:16
-					cw = (int) (videoHeight * 9f / 16f);
-					if (cw > videoWidth) {
-						cw = videoWidth;
-						ch = (int) (videoWidth * 16f / 9f);
-					}
-					cx = (videoWidth - cw) / 2;
-					cy = (videoHeight - ch) / 2;
-				} else if (selectedCropPreset == 3) { // 1:1
-					int minDim = Math.min(videoWidth, videoHeight);
-					cw = minDim;
-					ch = minDim;
-					cx = (videoWidth - minDim) / 2;
-					cy = (videoHeight - minDim) / 2;
-				}
-				epVideo.crop(cw, ch, cx, cy);
-			}
-			
-			// Apply rotation and mirror
-			if (currentRotation != 0 || isMirror) {
-				epVideo.rotation(currentRotation, isMirror);
-			}
-			
-			// Apply subtitle
-			if (subtitleText != null && !subtitleText.trim().isEmpty()) {
-				int targetX = (int) (videoWidth * (subtitleXPercent / 100f));
-				int targetY = (int) (videoHeight * (subtitleYPercent / 100f));
-				epVideo.addText(targetX, targetY, 36, "white", MyApplication.getSavePath() + "msyh.ttf", subtitleText);
-			}
-			
-			mProgressDialog.setProgress(0);
-			mProgressDialog.show();
-			final String outPath = MyApplication.getSavePath() + "out.mp4";
-			EpEditor.exec(epVideo, new EpEditor.OutputOption(outPath), new OnEditorListener() {
-				@Override
-				public void onSuccess() {
-					Toast.makeText(EditActivity.this, "Xuất video thành công: " + outPath, Toast.LENGTH_LONG).show();
-					mProgressDialog.dismiss();
-
-					Intent v = new Intent(Intent.ACTION_VIEW);
-					v.setDataAndType(Uri.parse(outPath), "video/mp4");
-					startActivity(v);
-				}
-
-				@Override
-				public void onFailure() {
-					Toast.makeText(EditActivity.this, "Xuất video thất bại", Toast.LENGTH_SHORT).show();
-					mProgressDialog.dismiss();
-				}
-
-				@Override
-				public void onProgress(float v) {
-					mProgressDialog.setProgress((int) (v * 100));
-				}
-			});
+			Intent intent = new Intent(EditActivity.this, ExportActivity.class);
+			intent.putExtra("VIDEO_PATH", videoUrl);
+			intent.putExtra("TRIM_START", trimStartSec);
+			intent.putExtra("TRIM_END", trimEndSec);
+			intent.putExtra("CROP_PRESET", selectedCropPreset);
+			intent.putExtra("ROTATION", currentRotation);
+			intent.putExtra("MIRROR", isMirror);
+			intent.putExtra("SUBTITLE_TEXT", subtitleText);
+			intent.putExtra("SUBTITLE_X", subtitleXPercent);
+			intent.putExtra("SUBTITLE_Y", subtitleYPercent);
+			intent.putExtra("VIDEO_WIDTH", videoWidth);
+			intent.putExtra("VIDEO_HEIGHT", videoHeight);
+			startActivity(intent);
 		} else {
-			Toast.makeText(this, "Vui lòng chọn một video trước", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_select_video_first, Toast.LENGTH_SHORT).show();
 		}
 	}
 

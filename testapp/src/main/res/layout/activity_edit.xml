@@ -65,7 +65,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Editor"
+                android:text="@string/editor"
                 android:gravity="center"
                 android:textColor="@color/lumina_text_primary"
                 android:textSize="18sp"
@@ -77,7 +77,7 @@
                 android:layout_height="36dp"
                 android:backgroundTint="@color/colorAccent"
                 android:textColor="@color/lumina_bg"
-                android:text="Export"
+                android:text="@string/export"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:paddingHorizontal="16dp"
@@ -115,7 +115,7 @@
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
                 android:visibility="gone"
-                android:text="Subtitle Text" />
+                android:text="@string/subtitle_content" />
 
             <!-- Timecode Overlay (Top-Left) -->
             <TextView
@@ -152,7 +152,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Select Video to Edit"
+                    android:text="@string/please_select_file"
                     android:textColor="@color/lumina_text_secondary"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -226,7 +226,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginVertical="8dp"
-            android:text="Import Video"
+            android:text="@string/btn_select_file"
             android:backgroundTint="@color/lumina_surface"
             android:textColor="@color/lumina_text_primary" />
 
@@ -498,7 +498,7 @@
                         android:id="@+id/tv_tab_edit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Edit"
+                        android:text="@string/tab_edit"
                         android:textColor="@color/colorAccent"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -522,7 +522,7 @@
                         android:id="@+id/tv_tab_audio"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Audio"
+                        android:text="@string/tab_audio"
                         android:textColor="@color/lumina_text_secondary"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -546,7 +546,7 @@
                         android:id="@+id/tv_tab_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Text"
+                        android:text="@string/tab_text"
                         android:textColor="@color/lumina_text_secondary"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -570,7 +570,7 @@
                         android:id="@+id/tv_tab_stickers"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Stickers"
+                        android:text="@string/tab_stickers"
                         android:textColor="@color/lumina_text_secondary"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -594,7 +594,7 @@
                         android:id="@+id/tv_tab_effects"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Effects"
+                        android:text="@string/tab_effects"
                         android:textColor="@color/lumina_text_secondary"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -618,7 +618,7 @@
                         android:id="@+id/tv_tab_filters"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Filters"
+                        android:text="@string/tab_filters"
                         android:textColor="@color/lumina_text_secondary"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -642,7 +642,7 @@
                         android:id="@+id/tv_tab_transition"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Transition"
+                        android:text="@string/tab_transition"
                         android:textColor="@color/lumina_text_secondary"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -666,7 +666,7 @@
                         android:id="@+id/tv_tab_overlay"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Overlay"
+                        android:text="@string/tab_overlay"
                         android:textColor="@color/lumina_text_secondary"
                         android:textSize="10sp"
                         android:layout_marginTop="2dp" />
@@ -719,7 +719,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Clip Settings"
+                android:text="@string/clip_settings"
                 android:textColor="@color/lumina_text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -764,7 +764,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Split"
+                    android:text="@string/action_split"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -791,7 +791,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Speed"
+                    android:text="@string/action_speed"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -818,7 +818,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Volume"
+                    android:text="@string/action_volume"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -845,7 +845,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Crop"
+                    android:text="@string/action_crop"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -873,7 +873,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Delete"
+                    android:text="@string/action_delete"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -901,7 +901,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mirror"
+                    android:text="@string/action_mirror"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -929,7 +929,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enhance"
+                    android:text="@string/action_enhance"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -957,7 +957,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="More"
+                    android:text="@string/action_more"
                     android:textColor="@color/lumina_text_primary"
                     android:textSize="11sp"
                     android:layout_marginTop="4dp" />
@@ -1008,7 +1008,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Crop Ratio presets"
+                android:text="@string/canvas_presets"
                 android:textColor="@color/lumina_text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -1035,7 +1035,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Gốc"
+                android:text="@string/crop_ratio_original"
                 android:textSize="12sp"
                 android:layout_marginEnd="4dp"
                 android:backgroundTint="@color/colorAccent"
@@ -1047,7 +1047,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="16:9"
+                android:text="@string/crop_ratio_16_9"
                 android:textSize="12sp"
                 android:layout_marginHorizontal="4dp"
                 android:backgroundTint="@color/lumina_surface_container"
@@ -1059,7 +1059,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="9:16"
+                android:text="@string/crop_ratio_9_16"
                 android:textSize="12sp"
                 android:layout_marginHorizontal="4dp"
                 android:backgroundTint="@color/lumina_surface_container"
@@ -1071,7 +1071,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="1:1"
+                android:text="@string/crop_ratio_1_1"
                 android:textSize="12sp"
                 android:layout_marginStart="4dp"
                 android:backgroundTint="@color/lumina_surface_container"
@@ -1120,7 +1120,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Add Text Overlay"
+                android:text="@string/text_input"
                 android:textColor="@color/lumina_text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -1157,7 +1157,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Vị trí Ngang (X %)"
+                android:text="@string/pos_x"
                 android:textColor="@color/lumina_text_secondary"
                 android:textSize="11sp"
                 android:layout_marginBottom="2dp"/>
@@ -1177,7 +1177,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Vị trí Dọc (Y %)"
+                android:text="@string/pos_y"
                 android:textColor="@color/lumina_text_secondary"
                 android:textSize="11sp"
                 android:layout_marginBottom="2dp"/>
@@ -1235,7 +1235,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Trim Video Clip"
+                android:text="@string/trim_editor"
                 android:textColor="@color/lumina_text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
