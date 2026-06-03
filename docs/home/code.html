@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Creator Studio - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    body {
+      background-color: #0F0F10;
+      -webkit-font-smoothing: antialiased;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .primary-glow {
+      box-shadow: 0 0 20px rgba(0, 194, 255, 0.3);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#006688",
+            "on-secondary-container": "#ddcdff",
+            "primary-fixed-dim": "#75d1ff",
+            "secondary-fixed": "#e9ddff",
+            "surface-dim": "#131314",
+            "surface-tint": "#75d1ff",
+            "surface-variant": "#353436",
+            "surface-container-low": "#1c1b1c",
+            "on-tertiary-container": "#920005",
+            "inverse-surface": "#e5e2e3",
+            "primary-fixed": "#c2e8ff",
+            "outline": "#86929a",
+            "surface-container-lowest": "#0e0e0f",
+            "on-background": "#e5e2e3",
+            "inverse-on-surface": "#313031",
+            "on-secondary-fixed-variant": "#5700c9",
+            "on-surface-variant": "#bcc8d1",
+            "error": "#ffb4ab",
+            "on-primary-container": "#004c66",
+            "secondary": "#d1bcff",
+            "secondary-container": "#7000ff",
+            "surface": "#131314",
+            "surface-container": "#201f20",
+            "primary-container": "#00c2ff",
+            "tertiary": "#ffc1b9",
+            "on-error": "#690005",
+            "on-tertiary-fixed-variant": "#930005",
+            "on-secondary": "#3c0090",
+            "secondary-fixed-dim": "#d1bcff",
+            "background": "#131314",
+            "surface-bright": "#39393a",
+            "tertiary-container": "#ff998c",
+            "on-tertiary": "#690003",
+            "surface-container-highest": "#353436",
+            "surface-container-high": "#2a2a2b",
+            "on-primary-fixed-variant": "#004d67",
+            "on-secondary-fixed": "#23005b",
+            "on-surface": "#e5e2e3",
+            "on-primary-fixed": "#001e2b",
+            "outline-variant": "#3d484f",
+            "on-tertiary-fixed": "#410001",
+            "tertiary-fixed": "#ffdad5",
+            "tertiary-fixed-dim": "#ffb4aa",
+            "on-primary": "#003548",
+            "primary": "#92d9ff",
+            "error-container": "#93000a",
+            "on-error-container": "#ffdad6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "touch-target-min": "44px",
+            "margin-edge": "16px",
+            "stack-sm": "8px",
+            "gutter": "12px",
+            "unit": "4px",
+            "stack-md": "16px",
+            "stack-lg": "24px"
+          },
+          "fontFamily": {
+            "headline-lg": ["Hanken Grotesk"],
+            "body-lg": ["Inter"],
+            "display": ["Hanken Grotesk"],
+            "headline-lg-mobile": ["Hanken Grotesk"],
+            "label-sm": ["JetBrains Mono"],
+            "label-lg": ["JetBrains Mono"],
+            "headline-md": ["Hanken Grotesk"],
+            "body-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "display": ["34px", {"lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+            "label-lg": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+            "headline-md": ["20px", {"lineHeight": "25px", "fontWeight": "600"}],
+            "body-md": ["15px", {"lineHeight": "20px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-24">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-white/10 flex justify-between items-center h-14 px-margin-edge w-full">
+<div class="flex items-center gap-stack-sm">
+<span class="material-symbols-outlined text-primary" data-icon="movie_edit">movie_edit</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">Editor</h1>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="hover:opacity-80 transition-opacity text-on-surface-variant active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="hover:opacity-80 transition-opacity text-primary font-headline-md-mobile text-headline-md-mobile active:scale-95 transition-transform">
+        Export
+      </button>
+</div>
+</header>
+<main class="pt-20 px-margin-edge space-y-stack-lg">
+<!-- Greeting Section -->
+<section>
+<p class="font-label-lg text-label-lg text-primary uppercase tracking-widest mb-unit">Welcome back</p>
+<h2 class="font-display text-display text-on-surface">Good morning, Creator</h2>
+</section>
+<!-- Create New Project CTA -->
+<section class="relative overflow-hidden rounded-xl bg-primary-container p-stack-lg flex flex-col justify-between aspect-[16/7] primary-glow group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="relative z-10">
+<h3 class="font-headline-lg text-headline-lg text-on-primary-fixed mb-unit">Start Fresh</h3>
+<p class="font-body-md text-body-md text-on-primary-fixed/80">Import media and start editing</p>
+</div>
+<div class="flex items-center gap-stack-sm z-10">
+<div class="bg-on-primary-fixed text-primary-container rounded-full w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="add" style="font-variation-settings: 'wght' 700;">add</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-primary-fixed">Create New Project</span>
+</div>
+<!-- Decorative BG Element -->
+<div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/20 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
+</section>
+<!-- Recent Projects Carousel -->
+<section>
+<div class="flex justify-between items-end mb-stack-md">
+<h3 class="font-headline-md text-headline-md">Recent Projects</h3>
+<button class="font-label-lg text-label-lg text-primary">See All</button>
+</div>
+<div class="flex gap-gutter overflow-x-auto hide-scrollbar -mx-margin-edge px-margin-edge">
+<!-- Project Card 1 -->
+<div class="flex-none w-64 space-y-stack-sm">
+<div class="aspect-video rounded-lg overflow-hidden bg-surface-container-high relative border border-white/5">
+<img alt="Cinematic Landscape" class="w-full h-full object-cover" data-alt="A cinematic wide shot of a misty mountain range during blue hour, with deep teal and violet hues. In the foreground, a single glowing orange tent provides a sharp color contrast. The lighting is moody and professional, capturing a sense of tranquil adventure in a high-end digital film style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCgzOOmsxv2IByUAmgn1VnZFUv8PNlQ-zEIyGFKv_a5eHNPRn5eITTKAWlkdflL7nwW4VSZCfzoLfoxkPEOJvGsycZUdb3AGpu7gfKNFknts9X7fbR0XiNNASfjdLjaDKBPYNzvsR_2CO2bM408krTtkQ6TSZ3E0xNma-5OWXWCOzwE1FuJGQppuEd1hsreh-uVYFXF-y2NJ3_6uzLQnNVHi4Nj6pujUHUtXSoFiyNs5Ri6OL-eGpE4jKAkUAQ7SXE5hqcmuy0Wuw"/>
+<div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-label-sm text-white">00:42</div>
+</div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold truncate">Mountain Adventure VLog</h4>
+<p class="font-label-sm text-label-sm text-outline">Edited 2h ago</p>
+</div>
+</div>
+<!-- Project Card 2 -->
+<div class="flex-none w-64 space-y-stack-sm">
+<div class="aspect-video rounded-lg overflow-hidden bg-surface-container-high relative border border-white/5">
+<img alt="Cyberpunk City" class="w-full h-full object-cover" data-alt="A futuristic cyberpunk street scene at night, drenched in neon cyan and electric purple light reflecting off wet asphalt. High-tech signage and glowing holographic interfaces are visible in the background. The atmosphere is dense with urban energy, rendered with sharp details and a high-contrast cinematic color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnH5Y6QscZhtAoMxsM8Vr43SjndonuUIkINKiPyFie8BfGDywDSEKgoFnpXEyM_ClSQnfaDPelg-4uJm3FoHIaaRh8kgx3-3FEIIOtEiowDq20ohegMUMXP4RBDjsG4xMVOA4Ms9j30Md8SKRAHZeUgYb9HQVu0lIK6zbUHo_almWt3S3HckH2Lqwz8qScnBSpyjnqQX5QJvN3iXeLivK6wtNVzp-YQ3hkAmtgperAAazGGTgKVqUt78HlDbEhUXV8FFBfdXm-PgM"/>
+<div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-label-sm text-white">01:15</div>
+</div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold truncate">Cybercity Night B-Roll</h4>
+<p class="font-label-sm text-label-sm text-outline">Edited yesterday</p>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Tools Bento Grid -->
+<section>
+<h3 class="font-headline-md text-headline-md mb-stack-md">AI Magic Tools</h3>
+<div class="grid grid-cols-2 gap-gutter">
+<div class="glass-card p-stack-md rounded-xl space-y-stack-sm active:scale-95 transition-transform cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="auto_videocam">auto_videocam</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold">Remove Background</h4>
+<p class="font-label-sm text-label-sm text-outline leading-tight">One-tap isolation for portraits.</p>
+</div>
+<div class="glass-card p-stack-md rounded-xl space-y-stack-sm active:scale-95 transition-transform cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined" data-icon="closed_caption">closed_caption</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold">Auto-Captions</h4>
+<p class="font-label-sm text-label-sm text-outline leading-tight">Generate subtitles in 20+ languages.</p>
+</div>
+</div>
+</section>
+<!-- Templates Section -->
+<section>
+<div class="flex justify-between items-end mb-stack-md">
+<h3 class="font-headline-md text-headline-md">Trending Templates</h3>
+<button class="font-label-lg text-label-lg text-primary">Explore</button>
+</div>
+<div class="flex gap-gutter overflow-x-auto hide-scrollbar -mx-margin-edge px-margin-edge">
+<div class="flex-none w-36 aspect-[9/16] rounded-xl overflow-hidden relative group cursor-pointer">
+<img alt="Abstract Gradient" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A lush, vibrant abstract background featuring flowing liquid gradients of deep cyan, rich violet, and obsidian black. The textures are smooth and organic, creating a high-end artistic feel. The lighting is soft and internal, giving the colors a luminous, high-resolution digital appearance consistent with premium creative software." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQydxPA5dyX2hpNSQPkls6OPaqRnVIBIEmQNAEQ9X_EvyLjIMdL0FI3CY496Amh-cQvY4pUEuctCSz6sxymP2gsHZASq3HxugeTBdhX0OZbwSz-1rujwZ650mtCDwU7f6IFCMVyc2GZLN5jOcDSKalJ1pCbTwqVeow32XzccYqvADKx-5qvJh6V8ICaH81KD697T82EXnXY0eQAl4pbZ9-8QTcyMk8iqFBYsBzmOCL8TEHEqwTQdmnI-TVjSyWV5UdG89yqxcHK2g"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+<p class="font-label-lg text-label-lg text-white font-bold">Retro Wave</p>
+<p class="font-label-sm text-label-sm text-white/60">24k used</p>
+</div>
+</div>
+<div class="flex-none w-36 aspect-[9/16] rounded-xl overflow-hidden relative group cursor-pointer">
+<img alt="Minimalist Architecture" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Clean, minimalist architectural details of a modern concrete building with sharp shadows and bright sunlight. The palette is dominated by neutral grays and stark whites, creating a professional and sophisticated aesthetic. The composition uses leading lines and geometric precision to evoke a sense of high-end design and structural clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBFHsrPGOWIa9DZnRR07RbyByQ37wTDwXfoLtS_YnUIavoRk8j2V_mwfw0x5yN6tl1E86Br5G2brJ2k55gm-FwtoPT8zy5gVXv1gdwJwh2BJ4xAQF_NQrb7xppJe-fgPm0Y_TWFc4DNKEdY0cUhEAQCrG3kNhFqq-K3leTvfu8hKBqmS5IpL6TLq31wXVd6OwCe-SklEx693Sy1PTYgAZ7JC-d25ydqvgPIFXt_Y_t2HlE72WlGtoeGKvTsr1_unfXUOmHd0T3Hfc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+<p class="font-label-lg text-label-lg text-white font-bold">Architecture</p>
+<p class="font-label-sm text-label-sm text-white/60">12k used</p>
+</div>
+</div>
+<div class="flex-none w-36 aspect-[9/16] rounded-xl overflow-hidden relative group cursor-pointer">
+<img alt="Night Sky Star Trails" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A mesmerizing long-exposure photograph of star trails spinning around the Polaris star in a deep navy night sky. The silhouettes of tall pine trees frame the bottom of the shot. The lighting is purely celestial, with vibrant blue and white light streaks creating a sense of cosmic motion and epic scale." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzhu3Jv_GDCfzMSjO3SdyHa9v-4RPmTseORs0EZJo4fvkrYPLkzPOK_Xu1S1bYMVaS_t9c49z3UxEEULP45-8mX_jZIlKfKhiwsJHQ7SnEf2vMUejCZRQ_lQmkHhC4tt-BbMRwmoLEWvZIRmaL7_mZFA3-9fwNYhc1pO8rocPq7l8FlACl0rmMI3Ff2EcC_-68uL0okf0YMKnwCvuqd1ee_WRWfWpRi2yglTS1n-OiotO_SrMm9Zjjf9kNBM66BU45zCvvDlHzJxk"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+<p class="font-label-lg text-label-lg text-white font-bold">Star Trails</p>
+<p class="font-label-sm text-label-sm text-white/60">8k used</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Drafts List -->
+<section class="pb-8">
+<h3 class="font-headline-md text-headline-md mb-stack-md">Drafts</h3>
+<div class="space-y-gutter">
+<div class="flex items-center gap-stack-md p-unit bg-surface-container-low rounded-xl border border-white/5 group">
+<div class="w-16 h-16 rounded-lg bg-surface-container-high overflow-hidden flex-shrink-0">
+<img alt="Neon Lights" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Close-up of vibrant neon signs in a crowded metropolitan street, with glowing reds and blues blurring into a bokeh background. The style is cinematic and high-contrast, focusing on the texture of light and shadow. The mood is energetic and urban, perfect for a high-quality video editing draft preview." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL4vqLTBesuFkjexDdXfr33AdBzdDIn2BMN3BqmIPJyboaGr68L2mrjMvoBNqf4xPpGzEqJYDRYnR6htfwqSp82JdnU6lpKrWDkWWD_QywN3_lGLj8IEhkAqYSrqI_lbasZQyJrQovHXs76DEJ4PJ78yHYP3a9G6R_zKOESk2DA1nlYr0WOXP3RiCln3Wire7ourQ7GTvOJOMKaG1LlISpOJrgLzVVvpFTM1yQA2ckfkhuhWyhx6SrgQpQ0AIldwOHk4rRGz8uNYk"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-body-md text-body-md font-semibold truncate">TikTok Remix v2</h4>
+<p class="font-label-sm text-label-sm text-outline">Last edited 3 days ago</p>
+</div>
+<button class="p-stack-sm text-outline hover:text-on-surface">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="flex items-center gap-stack-md p-unit bg-surface-container-low rounded-xl border border-white/5 group">
+<div class="w-16 h-16 rounded-lg bg-surface-container-high overflow-hidden flex-shrink-0">
+<img alt="Forest Mist" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="A serene morning in a dense evergreen forest, with thick fog rolling through the trees and sunbeams piercing the canopy. The color palette is rich in forest greens and soft golden yellows. The mood is peaceful and cinematic, rendered with a professional lens-blur effect in the foreground." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1oyhfzHYA-ZsNXDxSzSq2aRN4hmHNJUmo9F8Z0BRdpPMiIMjwfExZULU-cjLTw8_hF8pUubZtzD360HaDXw9S3orIiGnzGLu8gVhTfecG_I5t5EmXetpc7Ly9aoD4SOajZgZMRModyTpQd-IUzhNRa-_MPADAe9-mWyQgFnoMvSFgIwyji7ThqsJdzDu8DWAUWaPcJ_gO65Z0KFzHxMFzZmgt532rfgZdANJTrN19eMCs2Jb3APxEaN_kop_BNhY9qvAGDR15sik"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-body-md text-body-md font-semibold truncate">Nature Montage</h4>
+<p class="font-label-sm text-label-sm text-outline">Last edited 1 week ago</p>
+</div>
+<button class="p-stack-sm text-outline hover:text-on-surface">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface dark:bg-surface border-t border-white/10 flex justify-around items-center h-touch-target-min py-2 px-margin-edge w-full">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-lg text-label-lg">Home</span>
+</a>
+<!-- Templates -->
+<a class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-lg text-label-lg">Templates</span>
+</a>
+<!-- AI -->
+<a class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-label-lg text-label-lg">AI</span>
+</a>
+<!-- Projects -->
+<a class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="movie_edit">movie_edit</span>
+<span class="font-label-lg text-label-lg">Projects</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-lg text-label-lg">Profile</span>
+</a>
+</nav>
+<script>
+    // Add simple click feedback for all interactive elements
+    document.querySelectorAll('button, .glass-card, [role="button"]').forEach(el => {
+      el.addEventListener('touchstart', () => {
+        el.style.transform = 'scale(0.97)';
+      });
+      el.addEventListener('touchend', () => {
+        el.style.transform = 'scale(1)';
+      });
+    });
+
+    // Horizontal scroll snapping simulation or enhancements can be added here
+  </script>
+</body></html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Media Picker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#006688",
+                    "on-secondary-container": "#ddcdff",
+                    "primary-fixed-dim": "#75d1ff",
+                    "secondary-fixed": "#e9ddff",
+                    "surface-dim": "#131314",
+                    "surface-tint": "#75d1ff",
+                    "surface-variant": "#353436",
+                    "surface-container-low": "#1c1b1c",
+                    "on-tertiary-container": "#920005",
+                    "inverse-surface": "#e5e2e3",
+                    "primary-fixed": "#c2e8ff",
+                    "outline": "#86929a",
+                    "surface-container-lowest": "#0e0e0f",
+                    "on-background": "#e5e2e3",
+                    "inverse-on-surface": "#313031",
+                    "on-secondary-fixed-variant": "#5700c9",
+                    "on-surface-variant": "#bcc8d1",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#004c66",
+                    "secondary": "#d1bcff",
+                    "secondary-container": "#7000ff",
+                    "surface": "#131314",
+                    "surface-container": "#201f20",
+                    "primary-container": "#00c2ff",
+                    "tertiary": "#ffc1b9",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed-variant": "#930005",
+                    "on-secondary": "#3c0090",
+                    "secondary-fixed-dim": "#d1bcff",
+                    "background": "#131314",
+                    "surface-bright": "#39393a",
+                    "tertiary-container": "#ff998c",
+                    "on-tertiary": "#690003",
+                    "surface-container-highest": "#353436",
+                    "surface-container-high": "#2a2a2b",
+                    "on-primary-fixed-variant": "#004d67",
+                    "on-secondary-fixed": "#23005b",
+                    "on-surface": "#e5e2e3",
+                    "on-primary-fixed": "#001e2b",
+                    "outline-variant": "#3d484f",
+                    "on-tertiary-fixed": "#410001",
+                    "tertiary-fixed": "#ffdad5",
+                    "tertiary-fixed-dim": "#ffb4aa",
+                    "on-primary": "#003548",
+                    "primary": "#92d9ff",
+                    "error-container": "#93000a",
+                    "on-error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "touch-target-min": "44px",
+                    "margin-edge": "16px",
+                    "stack-sm": "8px",
+                    "gutter": "12px",
+                    "unit": "4px",
+                    "stack-md": "16px",
+                    "stack-lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-lg": ["Inter"],
+                    "display": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-sm": ["JetBrains Mono"],
+                    "label-lg": ["JetBrains Mono"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display": ["34px", {"lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "label-lg": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-md": ["20px", {"lineHeight": "25px", "fontWeight": "600"}],
+                    "body-md": ["15px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0F0F10;
+            color: #e5e2e3;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+        }
+        .glass-panel {
+            background: rgba(32, 31, 32, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .ios-segment-active {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .clip-item.selected {
+            outline: 2px solid #00C2FF;
+            outline-offset: -2px;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md select-none">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-white/10 flex justify-between items-center h-14 px-margin-edge">
+<button class="active:scale-95 transition-transform hover:opacity-80 flex items-center">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-md-mobile text-headline-md-mobile font-bold text-on-surface">Media</h1>
+<button class="active:scale-95 transition-transform hover:opacity-80 text-primary font-body-md">Export</button>
+</header>
+<main class="pt-14 pb-32">
+<!-- Search & Filters -->
+<div class="px-margin-edge py-stack-md sticky top-14 z-40 bg-background">
+<div class="relative w-full mb-stack-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full bg-surface-container border-none rounded-lg py-2 pl-10 pr-4 text-body-md focus:ring-1 focus:ring-primary-container placeholder:text-outline-variant outline-none" placeholder="Search media..." type="text"/>
+</div>
+<!-- iOS Segmented Control -->
+<div class="flex p-1 bg-surface-container-high rounded-lg">
+<button class="flex-1 py-1.5 text-label-lg rounded-md transition-all font-bold bg-surface-bright text-on-surface ios-segment-active" onclick="switchTab(this)">Recent</button>
+<button class="flex-1 py-1.5 text-label-lg rounded-md transition-all text-outline hover:text-on-surface" onclick="switchTab(this)">Videos</button>
+<button class="flex-1 py-1.5 text-label-lg rounded-md transition-all text-outline hover:text-on-surface" onclick="switchTab(this)">Photos</button>
+</div>
+</div>
+<!-- Media Grid -->
+<div class="media-grid px-[1px]">
+<!-- Grid Item 1 (Selected) -->
+<div class="relative aspect-square clip-item selected cursor-pointer overflow-hidden group" onclick="toggleSelection(this)">
+<img class="w-full h-full object-cover" data-alt="Cinematic close-up of a high-end cinema camera lens focusing on a neon-lit urban street at night. The lighting is dominated by deep blues and vibrant cyans, creating a professional studio atmosphere. Reflections of city lights dance on the glass elements of the lens, emphasizing a premium creator aesthetic with high contrast and sharp detail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByZrKIyhTiyKTXoICEFFnBC0brpP1IEzAqGJscT1P8UNMh4oLXcRFAwMqlzpCgy0c7kyJuPX6Rw8su4tnR61ZMqcGbP1KpI6wa8NLceYdhH2UxLDdiSika3dF4UeqEuWYrdxLyQQLRtBbIOiO8ePS7tUmQ0mWCnjJPjP-weN6SFUlvvlFYnY1TBegE5O7d8oTlOEDeujVmcLItRkbhcZ11dJ7M2KnL3Hgl8LsRiCRPmtYToWeG_DkcUKsORdO8vze2IiRAl-tjNeg"/>
+<div class="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<div class="absolute bottom-1 right-1 px-1 bg-black/40 backdrop-blur-md rounded text-[10px] font-label-sm">0:15</div>
+</div>
+<!-- Grid Item 2 -->
+<div class="relative aspect-square clip-item cursor-pointer overflow-hidden" onclick="toggleSelection(this)">
+<img class="w-full h-full object-cover" data-alt="A minimalist architectural shot of a brutalist concrete building against a moody twilight sky. The scene is lit with subtle cyan highlights along the building's geometric edges, maintaining a dark and sophisticated color palette. The composition is balanced and professional, evoking a sense of modern corporate precision and high-end design quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsWh2MitB_VnDpJ-xrZ1QnGbAOZ-qkfn3bYz4cTrdOj9QbgHOB1Wv3e0bC5ga5HZejjzvtSHOKi5_JoBqE4ljrtVL93HFiWi1Jk9UJhFjuwmO8PFiRDeLk5OV_IM-2ZgGh9miF5LNsADuD9v3WUe_fCgj_57mIPv5AXB7M8ZdUzkFW7_z4dLvWHnH-uWxyD2uj3YrxbhPNFooRKDa_feOOPOGNIxOoejWRJCjPNTTxvDpm6NbRAYP1LwerqnxBoLNosH_nNfYtXZU"/>
+<div class="absolute top-2 right-2 w-6 h-6 bg-black/20 border-2 border-white/40 rounded-full"></div>
+<div class="absolute bottom-1 right-1 px-1 bg-black/40 backdrop-blur-md rounded text-[10px] font-label-sm">0:42</div>
+</div>
+<!-- Grid Item 3 (Selected) -->
+<div class="relative aspect-square clip-item selected cursor-pointer overflow-hidden" onclick="toggleSelection(this)">
+<img class="w-full h-full object-cover" data-alt="An atmospheric aerial shot of a dense pine forest shrouded in thick morning mist. The lighting is cool and desaturated, with deep shadows and soft highlights that enhance the mysterious mood. The visual style is cinematic and high-definition, fitting for a premium video editing application's media library, emphasizing nature's textures and professional color grading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXavRo_IF1bV5daic0iD8VHNcVUNZNOR5Se5ZpVLJVozUW9jQSNylpZ37CM7tLVzNUg7LhW5oeAMlnu31nC6kVpwm-3fw73U4-3qJYYiT7YuMlJ4wYFcwFd3GQucs6ifJZN7lU0bonGToIXG-f9Jgqt9fSnQKeJ_Cl9mqCag-0qEz5FjhF8WudmE43W3o4ZdzV-Or4wUDau6LC7LBOkWpEgLzQCRp17tms2QnkWVH1zyKt_kx-4EC1-oFd9trE0Lssztf3iiGcnI4"/>
+<div class="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<!-- Grid Item 4 -->
+<div class="relative aspect-square clip-item cursor-pointer overflow-hidden" onclick="toggleSelection(this)">
+<img class="w-full h-full object-cover" data-alt="A high-contrast street photography shot of a person walking through a shaft of light in a dark city alley. The lighting creates dramatic highlights on the subject, contrasted against deep black backgrounds. The color palette is restricted to monochrome with subtle cyan tinting, reflecting a professional and artistic vision suitable for a creator-centric mobile app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBScgmQc9MMNVARz_dJTsmwoLjrq220LYh43ZnFTOPD2M4IHM7tkDAv_j6NO3Zj7LTLHjTWZnqzKpfd5ZEXAZlMNmTYrA4f0HnqA7F_RvVWH0_WgMYJuf4xfyR0GBdup1CA-CQvCLFpek4n8sgU9Acx5WeUps0Cn6latxu9NkmLYL8_sanoyJHdeyPrkQN7AWeKyKIIgP0GG8LCK0a17woev8J3iFiO2jKGLrQy8kdWeFvaB1OQdpO-pvyFm_je9J8OH5xfGx8Jp9A"/>
+<div class="absolute top-2 right-2 w-6 h-6 bg-black/20 border-2 border-white/40 rounded-full"></div>
+<div class="absolute bottom-1 right-1 px-1 bg-black/40 backdrop-blur-md rounded text-[10px] font-label-sm">1:04</div>
+</div>
+<!-- Grid Item 5 (Selected) -->
+<div class="relative aspect-square clip-item selected cursor-pointer overflow-hidden" onclick="toggleSelection(this)">
+<img class="w-full h-full object-cover" data-alt="A professional studio setup with a digital tablet displaying vibrant color palettes and editing tools. Soft overhead lighting casts gentle glows on the sleek hardware surfaces, while the interface on the screen pops with intense cyan and magenta accents. The mood is creative and focused, representing a high-end digital workspace for professional video editors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcOl_35L76LUVGUk4i5Svrm9sTGWjQYNDrc-C4rcXYW6EN-4fsbWMbt139CudhhLPRyhXMt7C8MRyOy_hg5J9w9jCaeWqrXfd6w1i_SRwz-eTGRSB25NLWbPMRjDhgJ6RJefoIi6FPX3PWQatvXcuX1NkDobT79JFEhVQ5vU7PMu-UCGe5GCojXov0SnqN7mdBzFC_myeZiuvPvCDgQyDMRoLQOhVrKmqj5OWpQqAVjPc3f1waV22tDm5XsJaIPTKfyrtmT2n-ai4"/>
+<div class="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<div class="absolute bottom-1 right-1 px-1 bg-black/40 backdrop-blur-md rounded text-[10px] font-label-sm">0:08</div>
+</div>
+<!-- Grid Item 6 -->
+<div class="relative aspect-square clip-item cursor-pointer overflow-hidden" onclick="toggleSelection(this)">
+<img class="w-full h-full object-cover" data-alt="Macro photography of vintage synth components and wires, glowing with soft internal lights. The color scheme is a mix of deep charcoals and electric blues, creating a high-tech retro aesthetic. The image focus is sharp on the intricate hardware details, while the background falls into a smooth, professional bokeh, ideal for high-end UI content." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgAn1gevrAok4BSjU6b3-wq03PjuyPeN9oOXmBbNSUQ75aDiQ8ftyo7LQbrqrl8zc_TVMbioRDpy6fyktxVjAz3qEVr-J78fsHJb6la0DEd6YU_YGmYvKk70BQOW5CYbJn_1Oi-NgNt-PwEPgEAleNymr7ffjDQ5QIRMfJiOPACzuE9NpyP7paGX-Mb4ndJgW0f6cpP4nroxMkB8ohJ8mW_3Ym28OD4ZNqBQADDXXSfdIoC_SzstFLCX9MDgAcNCvwjs8wXHj6bLo"/>
+<div class="absolute top-2 right-2 w-6 h-6 bg-black/20 border-2 border-white/40 rounded-full"></div>
+</div>
+<!-- Filling out more items for scroll feel -->
+<script>
+                const grid = document.querySelector('.media-grid');
+                const placeholders = [
+                    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=600&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1433086566085-52f43ace4a67?q=80&w=600&auto=format&fit=crop'
+                ];
+                
+                placeholders.forEach((url, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'relative aspect-square clip-item cursor-pointer overflow-hidden';
+                    div.onclick = function() { toggleSelection(this); };
+                    div.innerHTML = `
+                        <img src="${url}" data-alt="A professional high-definition nature landscape capturing ${index % 2 === 0 ? 'majestic mountain peaks' : 'serene river valleys'} during the golden hour. The lighting is warm yet crisp, emphasizing rich textures and professional color grading. The style is consistent with high-end creative stock footage, featuring balanced compositions and a premium, unobtrusive aesthetic." class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 w-6 h-6 bg-black/20 border-2 border-white/40 rounded-full"></div>
+                        ${index % 3 === 0 ? '<div class="absolute bottom-1 right-1 px-1 bg-black/40 backdrop-blur-md rounded text-[10px] font-label-sm">0:24</div>' : ''}
+                    `;
+                    grid.appendChild(div);
+                });
+            </script>
+</div>
+</main>
+<!-- Bottom Actions & Navigation -->
+<div class="fixed bottom-0 w-full z-50">
+<!-- Floating Action Area (Import) -->
+<div class="px-margin-edge pb-24 pointer-events-none">
+<button class="pointer-events-auto w-full h-14 bg-primary-container text-on-primary-container font-headline-md rounded-xl shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                Import (3)
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+</button>
+</div>
+<!-- Bottom NavBar (From Shared Components) -->
+<nav class="bg-surface dark:bg-surface border-t border-white/10 flex justify-around items-center h-touch-target-min py-2 px-margin-edge w-full">
+<div class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-lg text-label-lg">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-label-lg text-label-lg">Templates</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary font-bold active:scale-90 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">movie_edit</span>
+<span class="font-label-lg text-label-lg">Projects</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-lg text-label-lg">AI</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline hover:text-primary-fixed-dim transition-colors active:scale-90 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-lg text-label-lg">Profile</span>
+</div>
+</nav>
+</div>
+<script>
+        function toggleSelection(el) {
+            const isSelected = el.classList.toggle('selected');
+            const indicator = el.querySelector('.absolute.top-2.right-2');
+            
+            if (isSelected) {
+                indicator.className = 'absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-white';
+                indicator.innerHTML = '<span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: \'wght\' 700;">check</span>';
+            } else {
+                indicator.className = 'absolute top-2 right-2 w-6 h-6 bg-black/20 border-2 border-white/40 rounded-full';
+                indicator.innerHTML = '';
+            }
+            
+            // Update the Import Button count
+            const selectedCount = document.querySelectorAll('.clip-item.selected').length;
+            const importBtn = document.querySelector('button.bg-primary-container');
+            if (importBtn) {
+                importBtn.innerHTML = `Import (${selectedCount}) <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>`;
+                importBtn.style.opacity = selectedCount > 0 ? '1' : '0.5';
+                importBtn.parentElement.style.opacity = selectedCount > 0 ? '1' : '0';
+                importBtn.style.pointerEvents = selectedCount > 0 ? 'auto' : 'none';
+            }
+        }
+
+        function switchTab(btn) {
+            const parent = btn.parentElement;
+            const buttons = parent.querySelectorAll('button');
+            buttons.forEach(b => {
+                b.className = 'flex-1 py-1.5 text-label-lg rounded-md transition-all text-outline hover:text-on-surface';
+            });
+            btn.className = 'flex-1 py-1.5 text-label-lg rounded-md transition-all font-bold bg-surface-bright text-on-surface ios-segment-active';
+        }
+    </script>
+</body></html>

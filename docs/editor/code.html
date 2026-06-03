@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #0F0F10;
+            color: #e5e2e3;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(19, 19, 20, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .timeline-clip-active {
+            box-shadow: 0 0 0 2px #00C2FF, 0 0 12px rgba(0, 194, 255, 0.4);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#006688",
+                        "on-secondary-container": "#ddcdff",
+                        "primary-fixed-dim": "#75d1ff",
+                        "secondary-fixed": "#e9ddff",
+                        "surface-dim": "#131314",
+                        "surface-tint": "#75d1ff",
+                        "surface-variant": "#353436",
+                        "surface-container-low": "#1c1b1c",
+                        "on-tertiary-container": "#920005",
+                        "inverse-surface": "#e5e2e3",
+                        "primary-fixed": "#c2e8ff",
+                        "outline": "#86929a",
+                        "surface-container-lowest": "#0e0e0f",
+                        "on-background": "#e5e2e3",
+                        "inverse-on-surface": "#313031",
+                        "on-secondary-fixed-variant": "#5700c9",
+                        "on-surface-variant": "#bcc8d1",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#004c66",
+                        "secondary": "#d1bcff",
+                        "secondary-container": "#7000ff",
+                        "surface": "#131314",
+                        "surface-container": "#201f20",
+                        "primary-container": "#00c2ff",
+                        "tertiary": "#ffc1b9",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#930005",
+                        "on-secondary": "#3c0090",
+                        "secondary-fixed-dim": "#d1bcff",
+                        "background": "#131314",
+                        "surface-bright": "#39393a",
+                        "tertiary-container": "#ff998c",
+                        "on-tertiary": "#690003",
+                        "surface-container-highest": "#353436",
+                        "surface-container-high": "#2a2a2b",
+                        "on-primary-fixed-variant": "#004d67",
+                        "on-secondary-fixed": "#23005b",
+                        "on-surface": "#e5e2e3",
+                        "on-primary-fixed": "#001e2b",
+                        "outline-variant": "#3d484f",
+                        "on-tertiary-fixed": "#410001",
+                        "tertiary-fixed": "#ffdad5",
+                        "tertiary-fixed-dim": "#ffb4aa",
+                        "on-primary": "#003548",
+                        "primary": "#92d9ff",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "touch-target-min": "44px",
+                        "margin-edge": "16px",
+                        "stack-sm": "8px",
+                        "gutter": "12px",
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "display": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-sm": ["JetBrains Mono"],
+                        "label-lg": ["JetBrains Mono"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "display": ["34px", {"lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "label-lg": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-md": ["20px", {"lineHeight": "25px", "fontWeight": "600"}],
+                        "body-md": ["15px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen select-none">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-white/10 flex justify-between items-center h-14 px-margin-edge w-full">
+<div class="flex items-center gap-stack-md">
+<button class="active:scale-95 transition-transform text-on-surface">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex gap-stack-sm items-center border-l border-white/10 pl-stack-md ml-stack-sm">
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">undo</span>
+</button>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">redo</span>
+</button>
+</div>
+</div>
+<h1 class="font-headline-md-mobile text-headline-md-mobile font-bold text-on-surface">Editor</h1>
+<button class="bg-primary-container text-on-primary-container font-label-lg text-label-lg px-4 py-1.5 rounded-lg active:scale-95 transition-transform">
+            Export
+        </button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow pt-14 flex flex-col overflow-hidden">
+<!-- Video Preview Area (45% height) -->
+<section class="h-[45%] w-full bg-black relative flex items-center justify-center overflow-hidden">
+<div class="relative w-full aspect-video flex items-center justify-center bg-surface-container-lowest shadow-2xl">
+<img class="max-h-full max-w-full object-contain" data-alt="A cinematic low-angle shot of a glowing sunset reflecting off a futuristic urban glass building. The lighting is golden and moody, with deep cyan shadows and vibrant orange highlights. The overall aesthetic is professional, high-fidelity video footage with a premium creator-focused color grade." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmJ8z-LYXrnkOLU6ih9oCy-PSvL9PjFJpenhx9iKzFOe89RlbD3qCFYaDsOFJdgoNBZzHiaKHiDnpn6KoyShK9TPggMUlL2v9lWvf-iryt-EpR8QCVmXUnbBu-4tZJ3IWUaram5PXkh2xEGGmrHEuaiSmhMr7O6Bw89H_tltAYaNTu5I2yPmIJ1sz_EoAZWZVtUZzn7bvoxrogtR9jUrzr3AAdJOnPz-Slk4EkcdicZ5DA2fsuSUwF-lovxor7p4dNwH1WaoKrIME"/>
+<!-- On-video Overlay Controls -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-stack-lg glass-panel px-stack-lg py-2 rounded-full border border-white/10">
+<button class="text-on-surface active:scale-90 transition-transform">
+<span class="material-symbols-outlined">speed</span>
+<span class="block text-[10px] font-label-sm">1x</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-on-surface text-background flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<button class="text-on-surface active:scale-90 transition-transform">
+<span class="material-symbols-outlined">fullscreen</span>
+</button>
+</div>
+<!-- Timecode Overlay -->
+<div class="absolute top-4 left-4 font-label-lg text-label-lg bg-black/50 px-2 py-1 rounded text-primary-container backdrop-blur-sm">
+                    00:12:04
+                </div>
+</div>
+</section>
+<!-- Timeline Area (40% height) -->
+<section class="h-[40%] bg-surface flex flex-col border-t border-white/10 relative overflow-hidden">
+<!-- Timeline Headers -->
+<div class="flex items-center justify-between px-margin-edge h-10 border-b border-white/5 bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">history</span>
+<span class="font-label-sm text-label-sm text-outline">00:00:00</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-outline"><span class="material-symbols-outlined text-[20px]">zoom_in</span></button>
+<button class="text-outline"><span class="material-symbols-outlined text-[20px]">layers</span></button>
+</div>
+</div>
+<!-- Playhead Blue Line (Static in middle, timeline scrolls) -->
+<div class="absolute left-1/2 top-10 bottom-0 w-0.5 bg-primary-container z-20 shadow-[0_0_8px_rgba(0,194,255,0.6)]">
+<div class="absolute -top-1 -left-1.5 w-3.5 h-3.5 bg-primary-container rounded-full border-2 border-surface"></div>
+</div>
+<!-- Scrollable Track Area -->
+<div class="flex-grow overflow-x-auto overflow-y-hidden hide-scrollbar">
+<div class="min-w-[2000px] h-full flex flex-col gap-2 p-margin-edge relative">
+<!-- Track 4: Effects -->
+<div class="h-6 flex items-center relative">
+<div class="absolute left-[200px] w-64 h-full bg-tertiary-container/20 border border-tertiary-container rounded px-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">auto_fix_high</span>
+<span class="font-label-sm text-label-sm text-tertiary">Teal &amp; Orange</span>
+</div>
+</div>
+<!-- Track 2: Text -->
+<div class="h-8 flex items-center relative">
+<div class="absolute left-[350px] w-48 h-full bg-secondary-container/20 border border-secondary-container rounded px-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">title</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">Summer Vibes</span>
+</div>
+</div>
+<!-- Track 1: Video (Selected) -->
+<div class="h-16 flex items-center relative">
+<!-- Previous Clip -->
+<div class="absolute left-0 w-[300px] h-full bg-surface-container-highest rounded border border-white/10 overflow-hidden opacity-80">
+<img class="w-full h-full object-cover" data-alt="A blurred fast-motion shot of city lights at night, creating streaks of cyan and magenta against a dark urban backdrop. Professional cinematic b-roll style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUAZT6g9u6NeGYD1DFAus-yiWCbHsuhplhN9huvvV4FS1I6xiq-BkC3c_JReBbE1nwnWKul9TzkoHcIIu_n9bnVlOhzq7jgqk9a7pyGEP23iI0ab2tgD6f0x7Tab3mpo19ggDlgFJafIODEVWGupGxWgSH3qUo0_5F_wn_lYIPAnOJQ2lW6jdZAVEZozVr0cvJ5YOZi_3QNxKZ6NnyqTcN5kNQ7yzHzptROPwoLs-f6xptkucYv0BvMIBZSyO-FOFx9YmggUcI9KI"/>
+</div>
+<!-- ACTIVE CLIP -->
+<div class="absolute left-[300px] w-[450px] h-full rounded border-2 border-[#FFD700] overflow-hidden timeline-clip-active z-10 group bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Close up of a premium camera lens reflecting a sunset. High-end professional equipment with soft bokeh and vibrant lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEM-K9B1BHoBgGBi72a32Qsq4Nnn3T9ur6-E2h3aLtl-GIEfZZd2_iOl4rUxPEZHXV3x6aJuiBj4OJADayL3LRMOUE--prM-KGw4LiSYRg5xkZW76TxEKnGrQklJsgzDjSL1AP6Z47HZf-9498lbclz_OIKFibm42P0PqF0R8kcworsOd5cn6jJy1fWwAqDcgYUt5CA36aw_5MyGHelBTutpCuwnm1Hyklm7WNQG2G6eh9FB1-P4P01SW3FG1xc9EIX4emkP8mOYQ"/>
+<!-- Trim Handles -->
+<div class="absolute left-0 top-0 bottom-0 w-3 bg-[#FFD700] flex flex-col items-center justify-center gap-1">
+<div class="w-0.5 h-4 bg-black/30 rounded-full"></div>
+<div class="w-0.5 h-4 bg-black/30 rounded-full"></div>
+</div>
+<div class="absolute right-0 top-0 bottom-0 w-3 bg-[#FFD700] flex flex-col items-center justify-center gap-1">
+<div class="w-0.5 h-4 bg-black/30 rounded-full"></div>
+<div class="w-0.5 h-4 bg-black/30 rounded-full"></div>
+</div>
+</div>
+<!-- Next Clip -->
+<div class="absolute left-[750px] w-[200px] h-full bg-surface-container-highest rounded border border-white/10 overflow-hidden opacity-80"></div>
+</div>
+<!-- Track 3: Audio -->
+<div class="h-10 flex items-center relative">
+<div class="absolute left-[150px] w-[800px] h-full bg-primary-container/10 border border-primary-container/30 rounded px-3 flex items-center gap-2 overflow-hidden">
+<span class="material-symbols-outlined text-[16px] text-primary">music_note</span>
+<div class="flex-grow flex items-center gap-0.5 h-full opacity-50">
+<!-- Waveform bars -->
+<div class="w-1 h-3 bg-primary rounded-full"></div>
+<div class="w-1 h-6 bg-primary rounded-full"></div>
+<div class="w-1 h-4 bg-primary rounded-full"></div>
+<div class="w-1 h-8 bg-primary rounded-full"></div>
+<div class="w-1 h-5 bg-primary rounded-full"></div>
+<div class="w-1 h-7 bg-primary rounded-full"></div>
+<div class="w-1 h-3 bg-primary rounded-full"></div>
+<div class="w-1 h-6 bg-primary rounded-full"></div>
+<div class="w-1 h-4 bg-primary rounded-full"></div>
+<div class="w-1 h-8 bg-primary rounded-full"></div>
+<div class="w-1 h-2 bg-primary rounded-full"></div>
+<div class="w-1 h-4 bg-primary rounded-full"></div>
+<div class="w-1 h-5 bg-primary rounded-full"></div>
+<div class="w-1 h-7 bg-primary rounded-full"></div>
+<div class="w-1 h-3 bg-primary rounded-full"></div>
+<div class="w-1 h-6 bg-primary rounded-full"></div>
+<div class="w-1 h-4 bg-primary rounded-full"></div>
+<div class="w-1 h-8 bg-primary rounded-full"></div>
+<div class="w-1 h-5 bg-primary rounded-full"></div>
+<div class="w-1 h-7 bg-primary rounded-full"></div>
+</div>
+<span class="font-label-sm text-label-sm text-primary whitespace-nowrap">Chill Lo-fi Beat</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Editing Toolbar (Horizontal scroll) -->
+<nav class="h-touch-target-min bg-surface-container-high flex items-center gap-stack-lg px-margin-edge overflow-x-auto hide-scrollbar shrink-0">
+<button class="flex flex-col items-center min-w-[56px] text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit</span>
+<span class="text-[10px] font-label-sm mt-1">Edit</span>
+</button>
+<button class="flex flex-col items-center min-w-[56px] text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">music_note</span>
+<span class="text-[10px] font-label-sm mt-1">Audio</span>
+</button>
+<button class="flex flex-col items-center min-w-[56px] text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">title</span>
+<span class="text-[10px] font-label-sm mt-1">Text</span>
+</button>
+<button class="flex flex-col items-center min-w-[56px] text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">mood</span>
+<span class="text-[10px] font-label-sm mt-1">Stickers</span>
+</button>
+<button class="flex flex-col items-center min-w-[56px] text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">auto_fix_high</span>
+<span class="text-[10px] font-label-sm mt-1">Effects</span>
+</button>
+<button class="flex flex-col items-center min-w-[56px] text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">filter_frames</span>
+<span class="text-[10px] font-label-sm mt-1">Filters</span>
+</button>
+<button class="flex flex-col items-center min-w-[56px] text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">animation</span>
+<span class="text-[10px] font-label-sm mt-1">Transition</span>
+</button>
+<button class="flex flex-col items-center min-w-[56px] text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">layers</span>
+<span class="text-[10px] font-label-sm mt-1">Overlay</span>
+</button>
+</nav>
+</main>
+<!-- Clip Editing Panel (Slide up) -->
+<aside class="fixed bottom-0 left-0 w-full glass-panel border-t border-white/10 rounded-t-xl z-50 transform transition-transform translate-y-0 pb-safe shadow-2xl">
+<div class="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-4"></div>
+<div class="flex items-center justify-between px-margin-edge pb-2 border-b border-white/5 mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">movie_edit</span>
+<span class="font-headline-md text-headline-md">Clip Settings</span>
+</div>
+<button class="text-outline active:scale-95 transition-transform"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="grid grid-cols-4 gap-y-6 px-margin-edge pb-8 pt-2 max-h-[353px] overflow-y-auto">
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">content_cut</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">Split</span>
+</button>
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">speed</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">Speed</span>
+</button>
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">volume_up</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">Volume</span>
+</button>
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">crop</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">Crop</span>
+</button>
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">delete</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">Delete</span>
+</button>
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">flip</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">Mirror</span>
+</button>
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">auto_fix_normal</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">Enhance</span>
+</button>
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined">more_horiz</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">More</span>
+</button>
+</div>
+</aside>
+<script>
+        // Simple micro-interactions
+        const timeline = document.querySelector('.overflow-x-auto');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        timeline.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - timeline.offsetLeft;
+            scrollLeft = timeline.scrollLeft;
+        });
+        timeline.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+        timeline.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+        timeline.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - timeline.offsetLeft;
+            const walk = (x - startX) * 2;
+            timeline.scrollLeft = scrollLeft - walk;
+        });
+
+        // Initialize active tab indicator logic would go here if multi-page
+    </script>
+</body></html>
