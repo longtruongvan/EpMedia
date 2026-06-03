@@ -21,15 +21,15 @@
         <ImageView
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_edit"
-            app:tint="@color/colorAccent" />
+            android:src="@drawable/ic_movie_edit"
+            app:tint="@color/lumina_text_primary" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="@string/app_header_title"
+            android:text="@string/editor"
             android:textColor="@color/lumina_text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -57,7 +57,7 @@
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:visibility="gone" />
+            android:visibility="visible" />
     </LinearLayout>
 
     <!-- Scrollable Main Content -->
@@ -356,12 +356,12 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:background="@drawable/bg_action_icon"
-                        android:backgroundTint="#1AFF998C">
+                        android:backgroundTint="#1AD1BCFF">
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
-                            android:src="@drawable/ic_enhance"
-                            app:tint="@color/lumina_orange"
+                            android:src="@drawable/ic_video"
+                            app:tint="@color/lumina_violet"
                             android:layout_gravity="center" />
                     </FrameLayout>
 
@@ -401,12 +401,12 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:background="@drawable/bg_action_icon"
-                        android:backgroundTint="#1AD1BCFF">
+                        android:backgroundTint="#1AFF998C">
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
-                            android:src="@drawable/ic_edit"
-                            app:tint="@color/lumina_violet"
+                            android:src="@drawable/ic_closed_caption"
+                            app:tint="@color/lumina_orange"
                             android:layout_gravity="center" />
                     </FrameLayout>
 
@@ -977,12 +977,12 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:background="@drawable/bg_action_icon"
-                        android:backgroundTint="#1AFF998C">
+                        android:backgroundTint="#1AD1BCFF">
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
-                            android:src="@drawable/ic_enhance"
-                            app:tint="@color/lumina_orange"
+                            android:src="@drawable/ic_video"
+                            app:tint="@color/lumina_violet"
                             android:layout_gravity="center" />
                     </FrameLayout>
                     <TextView
@@ -1020,12 +1020,12 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:background="@drawable/bg_action_icon"
-                        android:backgroundTint="#1AD1BCFF">
+                        android:backgroundTint="#1AFF998C">
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
-                            android:src="@drawable/ic_edit"
-                            app:tint="@color/lumina_violet"
+                            android:src="@drawable/ic_closed_caption"
+                            app:tint="@color/lumina_orange"
                             android:layout_gravity="center" />
                     </FrameLayout>
                     <TextView

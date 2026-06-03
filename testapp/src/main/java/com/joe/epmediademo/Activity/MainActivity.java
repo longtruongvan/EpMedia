@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private androidx.cardview.widget.CardView btn_template_2;
 	private androidx.cardview.widget.CardView btn_template_3;
 
+	private TextView tv_header_export;
+
 	private int activeTabId = R.id.nav_home;
 
 	@Override
@@ -124,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		btn_search = (ImageView) findViewById(R.id.btn_search);
 		btn_see_all = (TextView) findViewById(R.id.btn_see_all);
 		btn_mock_project_1 = (LinearLayout) findViewById(R.id.btn_mock_project_1);
+		tv_header_export = (TextView) findViewById(R.id.tv_header_export);
 		btn_mock_project_2 = (LinearLayout) findViewById(R.id.btn_mock_project_2);
 		btn_ai_remove_bg = (LinearLayout) findViewById(R.id.btn_ai_remove_bg);
 		btn_ai_captions = (LinearLayout) findViewById(R.id.btn_ai_captions);
@@ -214,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		if (btn_home_template_2 != null) btn_home_template_2.setOnClickListener(this);
 		if (btn_home_template_3 != null) btn_home_template_3.setOnClickListener(this);
 		if (btn_explore_templates != null) btn_explore_templates.setOnClickListener(this);
+		if (tv_header_export != null) tv_header_export.setOnClickListener(this);
 
 		if (btn_template_1 != null) btn_template_1.setOnClickListener(this);
 		if (btn_template_2 != null) btn_template_2.setOnClickListener(this);
@@ -286,6 +290,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			startActivity(intent);
 		} else if (id == R.id.btn_search) {
 			Toast.makeText(this, R.string.toast_search, Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.tv_header_export) {
+			Toast.makeText(this, getString(R.string.toast_select_video_first), Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_see_all) {
 			Toast.makeText(this, R.string.toast_see_all, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_mock_project_1 || id == R.id.btn_proj_1_tab) {
