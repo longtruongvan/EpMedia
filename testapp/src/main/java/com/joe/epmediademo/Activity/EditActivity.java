@@ -748,7 +748,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_action_enhance) {
 			pushStateToUndo();
 			isEnhanced = !isEnhanced;
-			updateToggleButton(btn_action_enhance, isEnhanced);
+			updateVideoTransformations();
 			Toast.makeText(this, isEnhanced ? R.string.toast_enhance_on : R.string.toast_enhance_off, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_more) {
 			Toast.makeText(this, R.string.toast_more_options, Toast.LENGTH_SHORT).show();
@@ -1445,6 +1445,16 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		playerView.setScaleX(isMirror ? -1f : 1f);
 		
 		updateToggleButton(btn_action_mirror, isMirror);
+		updateToggleButton(btn_action_enhance, isEnhanced);
+		
+		if (exoPlayer != null) {
+			java.util.List<androidx.media3.common.Effect> effects = new java.util.ArrayList<>();
+			if (isEnhanced) {
+				// Sử dụng Contrast tăng cường (0.5f) như một visual preview cho tính năng Làm nét (Unsharp)
+				effects.add(new androidx.media3.effect.Contrast(0.5f));
+			}
+			exoPlayer.setVideoEffects(effects);
+		}
 	}
 
 	private void updateToggleButton(LinearLayout btnLayout, boolean isActive) {
