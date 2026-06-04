@@ -130,6 +130,7 @@
     <string name="toast_mirror_on">Đã lật ngược video (Mirror)</string>
     <string name="toast_mirror_off">Chế độ bình thường</string>
     <string name="toast_enhance_on">Đã bật bộ lọc làm nét (Enhance)</string>
+    <string name="toast_enhance_off">Đã tắt bộ lọc làm nét</string>
     <string name="toast_more_options">Nhiều tùy chọn hơn sắp ra mắt</string>
     <string name="toast_crop_original">Tỉ lệ: Gốc</string>
     <string name="toast_crop_16_9">Tỉ lệ: 16:9</string>

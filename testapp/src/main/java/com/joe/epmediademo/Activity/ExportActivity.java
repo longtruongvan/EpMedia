@@ -63,12 +63,30 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private float subtitleYPercent;
 	private int videoWidth;
 	private int videoHeight;
+	private float speed;
+	private int filterId;
+	private int effectId;
+	private int overlayId;
+	private float videoVolume;
+	private String stickerText;
+	private int transitionId;
+	private boolean isEnhanced;
 
 	// Export settings states
 	private int selectedResMode = 1; // 0 = 720p, 1 = 1080p, 2 = 2K, 3 = 4K
 	private int selectedFpsMode = 1; // 0 = 24, 1 = 30, 2 = 60
 	private boolean isExporting = false;
 	private String outputPath;
+
+	// Pipeline helper states
+	private float p1Start, p1End;
+	private float p2Start, p2End;
+	private float p3Start, p3End;
+	private float p4Start, p4End;
+	private boolean needSpeed;
+	private boolean needVolume;
+	private boolean needMusic;
+	private boolean hasAudio;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +107,14 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		subtitleYPercent = intent.getFloatExtra("SUBTITLE_Y", 85f);
 		videoWidth = intent.getIntExtra("VIDEO_WIDTH", 0);
 		videoHeight = intent.getIntExtra("VIDEO_HEIGHT", 0);
+		speed = intent.getFloatExtra("SPEED", 1.0f);
+		filterId = intent.getIntExtra("FILTER_ID", 0);
+		effectId = intent.getIntExtra("EFFECT_ID", 3);
+		overlayId = intent.getIntExtra("OVERLAY_ID", 3);
+		videoVolume = intent.getFloatExtra("VIDEO_VOLUME", 1.0f);
+		stickerText = intent.getStringExtra("STICKER_TEXT");
+		transitionId = intent.getIntExtra("TRANSITION_ID", -1);
+		isEnhanced = intent.getBooleanExtra("ENHANCE", false);
 
 		initView();
 		loadVideoMetadataAndPreview();
@@ -374,6 +400,60 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			return;
 		}
 
+		// Detect if video has audio stream
+		hasAudio = false;
+		android.media.MediaExtractor extractor = new android.media.MediaExtractor();
+		try {
+			extractor.setDataSource(videoUrl);
+			int numTracks = extractor.getTrackCount();
+			for (int i = 0; i < numTracks; i++) {
+				android.media.MediaFormat format = extractor.getTrackFormat(i);
+				String mime = format.getString(android.media.MediaFormat.KEY_MIME);
+				if (mime.startsWith("audio/")) {
+					hasAudio = true;
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			extractor.release();
+		}
+
+		needSpeed = (speed != 1.0f);
+		needVolume = (hasAudio && videoVolume != 1.0f);
+		needMusic = (audioPath != null && !audioPath.isEmpty());
+
+		// Compute weights and progress ranges
+		float visualWeight = 5.0f;
+		float speedWeight = needSpeed ? 2.0f : 0.0f;
+		float volumeWeight = needVolume ? 1.0f : 0.0f;
+		float musicWeight = needMusic ? 2.0f : 0.0f;
+		float totalWeight = visualWeight + speedWeight + volumeWeight + musicWeight;
+
+		p1Start = 0f;
+		p1End = (visualWeight / totalWeight) * 100f;
+
+		p2Start = p1End;
+		p2End = p2Start + (speedWeight / totalWeight) * 100f;
+
+		p3Start = p2End;
+		p3End = p3Start + (volumeWeight / totalWeight) * 100f;
+
+		p4Start = p3End;
+		p4End = 100f;
+
+		outputPath = MyApplication.getSavePath() + "out.mp4";
+
+		// Determine intermediate paths
+		final String pathVisuals = (needSpeed || needVolume || needMusic) ? (MyApplication.getSavePath() + "temp_visuals.mp4") : outputPath;
+		final String pathSpeed = (needVolume || needMusic) ? (MyApplication.getSavePath() + "temp_speed.mp4") : outputPath;
+		final String pathVolume = needMusic ? (MyApplication.getSavePath() + "temp_volume.mp4") : outputPath;
+
+		// Clean up any lingering files
+		cleanupTempFiles();
+		deleteFileSilently(outputPath);
+
 		EpVideo epVideo = new EpVideo(videoUrl);
 
 		// Apply trim clip
@@ -417,6 +497,61 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			epVideo.rotation(currentRotation, isMirror);
 		}
 
+		// Apply color filters
+		if (filterId == R.id.btn_filter_warm) {
+			epVideo.addFilter("colorbalance=rh=0.1:gh=0.05:bh=-0.1");
+		} else if (filterId == R.id.btn_filter_cool) {
+			epVideo.addFilter("colorbalance=rh=-0.1:gh=0.0:bh=0.15");
+		} else if (filterId == R.id.btn_filter_vintage) {
+			epVideo.addFilter("colorbalance=rh=0.15:gh=0.05:bh=-0.05,eq=saturation=0.8");
+		}
+
+		// Apply visual effects
+		if (effectId == 0) { // Glitch VHS
+			epVideo.addFilter("hue=h=30:s=1.5,noise=alls=15:allf=t+u");
+		} else if (effectId == 1) { // Cinematic Light Leak
+			epVideo.addFilter("colorbalance=rh=0.1:gh=-0.05:bh=-0.05,eq=contrast=1.15:saturation=1.1");
+		} else if (effectId == 2) { // Neon Cyberpunk Glow
+			epVideo.addFilter("colorbalance=rh=0.25:gh=-0.1:bh=0.25,hue=s=1.4");
+		}
+
+		// Apply overlays
+		if (overlayId == 0) { // Vignette Shadow
+			epVideo.addFilter("vignette=PI/4");
+		} else if (overlayId == 1) { // Retro Vignette
+			epVideo.addFilter("vignette='PI/3':eval=frame,eq=saturation=0.7");
+		} else if (overlayId == 2) { // Cinematic Letterbox (Black Bars)
+			epVideo.addFilter("drawbox=y=0:h=ih/8:color=black:t=fill,drawbox=y=ih-ih/8:h=ih/8:color=black:t=fill");
+		}
+
+		// Apply Transitions (Fade / Zoom / Wipe)
+		float duration = trimEndSec - trimStartSec;
+		if (duration <= 0) {
+			duration = 10f; // fallback
+		}
+		if (transitionId == 0) { // Fade to Black
+			float fadeStart = Math.max(0f, duration - 1.0f);
+			epVideo.addFilter("fade=t=in:st=0:d=1,fade=t=out:st=" + fadeStart + ":d=1");
+		} else if (transitionId == 1) { // Cross Dissolve (mock with a soft color transition or fade in/out)
+			epVideo.addFilter("fade=t=in:st=0:d=1.5");
+		} else if (transitionId == 2) { // Wipe Left / Slide
+			epVideo.addFilter("scroll=horizontal=0.0005");
+		} else if (transitionId == 3) { // Zoom In
+			epVideo.addFilter("zoompan=z='min(zoom+0.001,1.3)':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1280x720");
+		}
+
+		// Apply Enhance filter (sharpen)
+		if (isEnhanced) {
+			epVideo.addFilter("unsharp=5:5:1.0:5:5:0.0");
+		}
+
+		// Apply sticker emoji overlay
+		if (stickerText != null && !stickerText.trim().isEmpty()) {
+			int cx = videoWidth > 0 ? (videoWidth / 2 - 24) : 100;
+			int cy = videoHeight > 0 ? (videoHeight / 2 - 24) : 100;
+			epVideo.addText(cx, cy, 48, "white", MyApplication.getSavePath() + "msyh.ttf", stickerText);
+		}
+
 		// Apply subtitle overlay
 		if (subtitleText != null && !subtitleText.trim().isEmpty()) {
 			int targetX = (int) (videoWidth * (subtitleXPercent / 100f));
@@ -424,11 +559,8 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			epVideo.addText(targetX, targetY, 36, "white", MyApplication.getSavePath() + "msyh.ttf", subtitleText);
 		}
 
-		outputPath = MyApplication.getSavePath() + "out.mp4";
-
 		// Custom options can add resolution/bitrate flags based on settings (selectedResMode, selectedFpsMode)
-		EpEditor.OutputOption opt = new EpEditor.OutputOption(outputPath);
-		// Simple custom command mapping if desired
+		EpEditor.OutputOption opt = new EpEditor.OutputOption(pathVisuals);
 		if (selectedResMode == 0) {
 			opt.setWidth(1280);
 			opt.setHeight(720);
@@ -447,55 +579,25 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		else if (selectedFpsMode == 1) opt.frameRate = 30;
 		else if (selectedFpsMode == 2) opt.frameRate = 60;
 
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				tv_export_status.setText("Áp dụng bộ lọc và hiệu ứng...");
+			}
+		});
+
 		EpEditor.exec(epVideo, opt, new OnEditorListener() {
 			@Override
 			public void onSuccess() {
-				if (audioPath != null && !audioPath.isEmpty()) {
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							tv_export_status.setText("Chèn nhạc nền...");
-						}
-					});
-					final String tempAudioFile = copyAssetToTempFile(audioPath);
-					if (tempAudioFile != null) {
-						final String finalOutputPath = MyApplication.getSavePath() + "out_mixed.mp4";
-						EpEditor.music(outputPath, tempAudioFile, finalOutputPath, 0.3f, 0.8f, new OnEditorListener() {
-							@Override
-							public void onSuccess() {
-								try {
-									new File(tempAudioFile).delete();
-									File mixedFile = new File(finalOutputPath);
-									File originalFile = new File(outputPath);
-									if (originalFile.exists()) {
-										originalFile.delete();
-									}
-									mixedFile.renameTo(originalFile);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-								showExportSuccess();
-							}
-
-							@Override
-							public void onFailure() {
-								showExportFailure();
-							}
-
-							@Override
-							public void onProgress(final float v) {
-								runOnUiThread(new Runnable() {
-									@Override
-									public void run() {
-										tv_export_status.setText("Chèn nhạc nền: " + (int)(v * 100) + "%");
-									}
-								});
-							}
-						});
-						return;
-					}
+				if (needSpeed) {
+					runSpeedStage(pathVisuals, pathSpeed, hasAudio, needVolume, needMusic);
+				} else if (needVolume) {
+					runVolumeStage(pathVisuals, pathVolume, needMusic);
+				} else if (needMusic) {
+					runMusicStage(pathVisuals);
+				} else {
+					showExportSuccess();
 				}
-				showExportSuccess();
 			}
 
 			@Override
@@ -508,7 +610,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						int progress = (int) (v * 100);
+						int progress = (int) (p1Start + v * (p1End - p1Start));
 						progress_export.setProgress(progress);
 						tv_export_percent.setText(progress + "%");
 					}
@@ -518,6 +620,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	}
 
 	private void showExportSuccess() {
+		cleanupTempFiles();
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -540,6 +643,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	}
 
 	private void showExportFailure() {
+		cleanupTempFiles();
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -575,6 +679,169 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+
+	private void runSpeedStage(final String inputPath, final String outputPathStage, final boolean hasAudioState, final boolean needVolumeState, final boolean needMusicState) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				tv_export_status.setText("Điều chỉnh tốc độ...");
+			}
+		});
+
+		EpEditor.PTS ptsType = hasAudioState ? EpEditor.PTS.ALL : EpEditor.PTS.VIDEO;
+
+		EpEditor.changePTS(inputPath, outputPathStage, speed, ptsType, new OnEditorListener() {
+			@Override
+			public void onSuccess() {
+				deleteFileSilently(inputPath);
+				if (needVolumeState) {
+					runVolumeStage(outputPathStage, needMusicState ? (MyApplication.getSavePath() + "temp_volume.mp4") : outputPath, needMusicState);
+				} else if (needMusicState) {
+					runMusicStage(outputPathStage);
+				} else {
+					showExportSuccess();
+				}
+			}
+
+			@Override
+			public void onFailure() {
+				showExportFailure();
+			}
+
+			@Override
+			public void onProgress(final float v) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						int progress = (int) (p2Start + v * (p2End - p2Start));
+						progress_export.setProgress(progress);
+						tv_export_percent.setText(progress + "%");
+					}
+				});
+			}
+		});
+	}
+
+	private void runVolumeStage(final String inputPath, final String outputPathStage, final boolean needMusicState) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				tv_export_status.setText("Điều chỉnh âm lượng...");
+			}
+		});
+
+		long durationUs = 0;
+		try {
+			android.media.MediaMetadataRetriever retriever = new android.media.MediaMetadataRetriever();
+			retriever.setDataSource(inputPath);
+			String durStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
+			if (durStr != null) {
+				durationUs = Long.parseLong(durStr) * 1000;
+			}
+			retriever.release();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (durationUs <= 0) {
+			durationUs = 10 * 1000000; // fallback 10s
+		}
+
+		String cmd = "-y -i " + inputPath + " -filter:a volume=" + videoVolume + " -c:v copy " + outputPathStage;
+
+		EpEditor.execCmd(cmd, durationUs, new OnEditorListener() {
+			@Override
+			public void onSuccess() {
+				deleteFileSilently(inputPath);
+				if (needMusicState) {
+					runMusicStage(outputPathStage);
+				} else {
+					showExportSuccess();
+				}
+			}
+
+			@Override
+			public void onFailure() {
+				showExportFailure();
+			}
+
+			@Override
+			public void onProgress(final float v) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						int progress = (int) (p3Start + v * (p3End - p3Start));
+						progress_export.setProgress(progress);
+						tv_export_percent.setText(progress + "%");
+					}
+				});
+			}
+		});
+	}
+
+	private void runMusicStage(final String inputPath) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				tv_export_status.setText("Chèn nhạc nền...");
+			}
+		});
+
+		final String tempAudioFile = copyAssetToTempFile(audioPath);
+		if (tempAudioFile == null) {
+			showExportFailure();
+			return;
+		}
+
+		float mixVideoVolume = needVolume ? 1.0f : videoVolume;
+
+		EpEditor.music(inputPath, tempAudioFile, outputPath, mixVideoVolume, 0.8f, new OnEditorListener() {
+			@Override
+			public void onSuccess() {
+				deleteFileSilently(tempAudioFile);
+				deleteFileSilently(inputPath);
+				showExportSuccess();
+			}
+
+			@Override
+			public void onFailure() {
+				deleteFileSilently(tempAudioFile);
+				showExportFailure();
+			}
+
+			@Override
+			public void onProgress(final float v) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						int progress = (int) (p4Start + v * (p4End - p4Start));
+						progress_export.setProgress(progress);
+						tv_export_percent.setText(progress + "%");
+					}
+				});
+			}
+		});
+	}
+
+	private void cleanupTempFiles() {
+		String savePath = MyApplication.getSavePath();
+		deleteFileSilently(savePath + "temp_visuals.mp4");
+		deleteFileSilently(savePath + "temp_speed.mp4");
+		deleteFileSilently(savePath + "temp_volume.mp4");
+		deleteFileSilently(savePath + "out_mixed.mp4");
+	}
+
+	private void deleteFileSilently(String path) {
+		if (path != null) {
+			try {
+				File file = new File(path);
+				if (file.exists()) {
+					file.delete();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

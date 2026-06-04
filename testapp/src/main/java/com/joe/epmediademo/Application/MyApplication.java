@@ -25,7 +25,7 @@ public class MyApplication extends Application {
 	}
 
 	private void choseSavePath() {
-		savePath = Environment.getExternalStorageDirectory().getPath() + "/EpMedia/";
+		savePath = getFilesDir().getAbsolutePath() + "/EpMedia/";
 		File file = new File(savePath);
 		if (!file.exists()) {
 			file.mkdirs();

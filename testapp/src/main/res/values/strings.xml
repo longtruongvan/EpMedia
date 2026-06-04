@@ -130,6 +130,7 @@
     <string name="toast_mirror_on">Mirror effect enabled</string>
     <string name="toast_mirror_off">Normal view</string>
     <string name="toast_enhance_on">Enhance filter enabled</string>
+    <string name="toast_enhance_off">Enhance filter disabled</string>
     <string name="toast_more_options">More options coming soon</string>
     <string name="toast_crop_original">Ratio: Original</string>
     <string name="toast_crop_16_9">Ratio: 16:9</string>

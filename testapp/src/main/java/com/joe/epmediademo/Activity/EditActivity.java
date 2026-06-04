@@ -183,6 +183,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private boolean isEnhanced = false;
 	private String selectedAudioPath = null;
 	private android.app.Dialog dialog_online_music_instance = null;
+	private float currentSpeed = 1.0f;
+	private android.media.MediaPlayer realVideoPlayer = null;
+	private int selectedEffect = 3; // 0 = Glitch, 1 = Cinematic, 2 = Cyberpunk, 3 = None
+	private int selectedTransition = -1; // -1 = None
+	private int selectedOverlay = 3; // 0 = Vignette, 1 = Retro Vignette, 2 = Letterbox, 3 = None
+	private float videoVolume = 1.0f;
 
 	private boolean isMockVideo = false;
 	private boolean isMockPlaying = false;
@@ -608,7 +614,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				togglePlayPause();
 			}
 		} else if (id == R.id.btn_video_speed) {
-			showPanel(panel_trim_editor);
+			showSpeedDialog();
 		} else if (id == R.id.iv_play_pause) {
 			togglePlayPause();
 		} else if (id == R.id.btn_video_fullscreen) {
@@ -676,13 +682,56 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				}
 			}
 		} else if (id == R.id.btn_action_speed) {
-			showPanel(panel_trim_editor);
+			showSpeedDialog();
 		} else if (id == R.id.btn_action_volume) {
 			showVolumeDialog();
 		} else if (id == R.id.btn_action_crop) {
 			showPanel(panel_canvas_presets);
 		} else if (id == R.id.btn_action_delete) {
-			resetEditorState();
+			if (!splitPoints.isEmpty()) {
+				pushStateToUndo();
+				int currentPosMs = isMockVideo ? mockCurrentPosMs : (video_view != null ? video_view.getCurrentPosition() : 0);
+				int durationMs = isMockVideo ? mockDurationMs : (video_view != null ? video_view.getDuration() : 0);
+				float currentRatio = durationMs > 0 ? (float) currentPosMs / durationMs : 0f;
+				
+				float closestSplit = -1f;
+				float minDiff = Float.MAX_VALUE;
+				for (float sp : splitPoints) {
+					float diff = Math.abs(sp - currentRatio);
+					if (diff < minDiff) {
+						minDiff = diff;
+						closestSplit = sp;
+					}
+				}
+				
+				if (closestSplit >= 0) {
+					float durationSec = durationMs / 1000f;
+					float splitSec = closestSplit * durationSec;
+					
+					if (currentRatio > closestSplit) {
+						trimEndSec = splitSec;
+						Toast.makeText(this, "Deleted latter segment from " + String.format(Locale.US, "%.1f", splitSec) + "s", Toast.LENGTH_SHORT).show();
+					} else {
+						trimStartSec = splitSec;
+						Toast.makeText(this, "Deleted former segment up to " + String.format(Locale.US, "%.1f", splitSec) + "s", Toast.LENGTH_SHORT).show();
+					}
+					splitPoints.remove(closestSplit);
+					
+					if (isMockVideo) {
+						mockCurrentPosMs = (int) (trimStartSec * 1000);
+						loadMockTimelineThumbnails(videoUrl);
+					} else {
+						if (video_view != null) {
+							video_view.seekTo((int) (trimStartSec * 1000));
+						}
+						loadTimelineThumbnails(videoUrl);
+					}
+				} else {
+					resetEditorState();
+				}
+			} else {
+				resetEditorState();
+			}
 		} else if (id == R.id.btn_action_mirror) {
 			pushStateToUndo();
 			isMirror = !isMirror;
@@ -691,7 +740,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_action_enhance) {
 			pushStateToUndo();
 			isEnhanced = !isEnhanced;
-			Toast.makeText(this, isEnhanced ? R.string.toast_enhance_on : R.string.toast_mirror_off, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, isEnhanced ? R.string.toast_enhance_on : R.string.toast_enhance_off, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_more) {
 			Toast.makeText(this, R.string.toast_more_options, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_close_canvas_presets) {
@@ -1071,14 +1120,14 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		layout.setPadding(40, 20, 40, 20);
 		
 		final TextView tvVol = new TextView(this);
-		tvVol.setText(getString(R.string.volume_settings) + ": 100%");
+		tvVol.setText(getString(R.string.volume_settings) + ": " + (int) (videoVolume * 100) + "%");
 		tvVol.setTextColor(getResources().getColor(R.color.lumina_text_primary));
 		layout.addView(tvVol);
 		
-		Slider slider = new Slider(this);
+		final Slider slider = new Slider(this);
 		slider.setValueFrom(0f);
 		slider.setValueTo(100f);
-		slider.setValue(100f);
+		slider.setValue(videoVolume * 100f);
 		slider.addOnChangeListener(new Slider.OnChangeListener() {
 			@Override
 			public void onValueChange(Slider slider, float value, boolean fromUser) {
@@ -1091,6 +1140,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				pushStateToUndo();
+				videoVolume = slider.getValue() / 100f;
 				Toast.makeText(EditActivity.this, R.string.toast_volume_success, Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -1112,6 +1163,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				activeFilterId = R.id.btn_filter_none;
 				activeStickerText = "";
 				isEnhanced = false;
+				
+				currentSpeed = 1.0f;
+				selectedEffect = 3;
+				selectedTransition = -1;
+				selectedOverlay = 3;
+				videoVolume = 1.0f;
+				applyPlaybackSpeed(1.0f);
 				
 				updateVideoTransformations();
 				applyVideoViewAspectRatio(0);
@@ -1139,6 +1197,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		builder.setNegativeButton(R.string.alert_cancel_btn, null);
 		builder.show();
 	}
+
 
 	private void togglePlayPause() {
 		if (video_view == null) return;
@@ -1277,6 +1336,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			video_view.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
 				@Override
 				public void onPrepared(android.media.MediaPlayer mp) {
+					realVideoPlayer = mp;
+					applyPlaybackSpeed(currentSpeed);
 					int durationMs = video_view.getDuration();
 					float durationSec = durationMs / 1000f;
 					
@@ -1531,7 +1592,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			public void run() {
 				if (isMockVideo) {
 					if (isMockPlaying && !isUserSeeking) {
-						mockCurrentPosMs += 33;
+						mockCurrentPosMs += (int) (33 * currentSpeed);
 						float currentPosSec = mockCurrentPosMs / 1000f;
 						if (trimEndSec > 0 && currentPosSec >= trimEndSec) {
 							mockCurrentPosMs = (int) (trimStartSec * 1000);
@@ -1620,12 +1681,63 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			intent.putExtra("SUBTITLE_Y", subtitleYPercent);
 			intent.putExtra("VIDEO_WIDTH", videoWidth);
 			intent.putExtra("VIDEO_HEIGHT", videoHeight);
+			intent.putExtra("SPEED", currentSpeed);
+			intent.putExtra("FILTER_ID", activeFilterId);
+			intent.putExtra("EFFECT_ID", selectedEffect);
+			intent.putExtra("OVERLAY_ID", selectedOverlay);
+			intent.putExtra("VIDEO_VOLUME", videoVolume);
+			intent.putExtra("STICKER_TEXT", activeStickerText);
+			intent.putExtra("TRANSITION_ID", selectedTransition);
+			intent.putExtra("ENHANCE", isEnhanced);
 			if (selectedAudioPath != null) {
 				intent.putExtra("AUDIO_PATH", selectedAudioPath);
 			}
 			startActivity(intent);
 		} else {
 			Toast.makeText(this, R.string.toast_select_video_first, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private void showSpeedDialog() {
+		final String[] speeds = {"0.5x", "1.0x (Mặc định)", "1.5x", "2.0x"};
+		final float[] speedValues = {0.5f, 1.0f, 1.5f, 2.0f};
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
+		builder.setTitle(R.string.speed_presets);
+		
+		int checkedItem = 1;
+		for (int i = 0; i < speedValues.length; i++) {
+			if (speedValues[i] == currentSpeed) {
+				checkedItem = i;
+				break;
+			}
+		}
+		
+		builder.setSingleChoiceItems(speeds, checkedItem, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				pushStateToUndo();
+				applyPlaybackSpeed(speedValues[which]);
+				dialog.dismiss();
+			}
+		});
+		builder.setNegativeButton(R.string.alert_cancel_btn, null);
+		builder.show();
+	}
+
+	private void applyPlaybackSpeed(float speed) {
+		currentSpeed = speed;
+		if (tv_speed_val != null) {
+			tv_speed_val.setText(speed + "x");
+		}
+		if (realVideoPlayer != null) {
+			try {
+				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+					realVideoPlayer.setPlaybackParams(realVideoPlayer.getPlaybackParams().setSpeed(speed));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -1645,6 +1757,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		realVideoPlayer = null;
 		if (playRunnable != null) {
 			playHandler.removeCallbacks(playRunnable);
 		}
@@ -1688,6 +1801,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				pushStateToUndo();
+				selectedEffect = which;
 				Toast.makeText(EditActivity.this, "Applied Effect: " + effects[which], Toast.LENGTH_SHORT).show();
 				if (video_filter_overlay != null) {
 					video_filter_overlay.setVisibility(View.VISIBLE);
@@ -1713,6 +1827,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		builder.setItems(transitions, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				selectedTransition = which;
 				Toast.makeText(EditActivity.this, "Applied Transition: " + transitions[which], Toast.LENGTH_SHORT).show();
 				if (video_view != null) {
 					video_view.animate().alpha(0.0f).setDuration(250).withEndAction(new Runnable() {
@@ -1735,6 +1850,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				pushStateToUndo();
+				selectedOverlay = which;
 				Toast.makeText(EditActivity.this, "Applied Overlay: " + overlays[which], Toast.LENGTH_SHORT).show();
 				if (video_filter_overlay != null) {
 					if (which == 0) {
