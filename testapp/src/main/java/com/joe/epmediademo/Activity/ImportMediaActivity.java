@@ -102,6 +102,10 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 		btn_seg_videos.setOnClickListener(this);
 		btn_seg_photos.setOnClickListener(this);
 		btn_import_submit.setOnClickListener(this);
+		View btn_export_action = findViewById(R.id.btn_export_action);
+		if (btn_export_action != null) {
+			btn_export_action.setOnClickListener(this);
+		}
 
 		// Bottom navigation
 		findViewById(R.id.nav_home).setOnClickListener(this);
@@ -244,6 +248,15 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 					startActivity(intent);
 					finish();
 				}
+			}
+		} else if (id == R.id.btn_export_action) {
+			if (selectedVideo != null) {
+				Intent intent = new Intent(this, ExportActivity.class);
+				intent.putExtra("VIDEO_PATH", selectedVideo.path);
+				startActivity(intent);
+				finish();
+			} else {
+				Toast.makeText(this, R.string.toast_select_video_first, Toast.LENGTH_SHORT).show();
 			}
 		} else if (id == R.id.nav_home || id == R.id.nav_templates || id == R.id.nav_projects || id == R.id.nav_ai || id == R.id.nav_profile) {
 			Intent intent = new Intent(this, MainActivity.class);

@@ -8,57 +8,78 @@
     tools:context=".Activity.MainActivity">
 
     <!-- Top AppBar Header -->
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        android:background="@color/lumina_surface"
-        android:elevation="4dp">
+        android:background="@color/lumina_surface">
 
-        <ImageView
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@drawable/ic_movie_edit"
-            app:tint="@color/lumina_text_primary" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="@string/editor"
-            android:textColor="@color/lumina_text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <ImageView
-            android:id="@+id/btn_search"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_search"
-            android:contentDescription="Search"
-            android:layout_marginEnd="16dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            app:tint="@color/lumina_text_secondary" />
-
-        <TextView
-            android:id="@+id/tv_header_export"
+        <!-- Left Group (Logo & Title) -->
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/export"
-            android:textColor="@color/colorAccent"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:visibility="visible" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_alignParentStart="true">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_movie_edit"
+                app:tint="@color/lumina_text_primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/editor"
+                android:textColor="@color/lumina_text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Right Group (Search & Export) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_alignParentEnd="true">
+
+            <ImageView
+                android:id="@+id/btn_search"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="Search"
+                android:layout_marginEnd="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                app:tint="@color/lumina_text_secondary" />
+
+            <TextView
+                android:id="@+id/tv_header_export"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/export"
+                android:textColor="@color/colorAccent"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <!-- Bottom Border Line (1px) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1AFFFFFF"
+            android:layout_alignParentBottom="true" />
+    </RelativeLayout>
 
     <!-- Scrollable Main Content -->
     <androidx.core.widget.NestedScrollView
@@ -1509,7 +1530,7 @@
                 android:id="@+id/iv_nav_projects"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_layers"
+                android:src="@drawable/ic_movie_edit"
                 app:tint="@color/lumina_text_secondary" />
             <TextView
                 android:id="@+id/tv_nav_projects"

@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -186,7 +187,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private boolean isTimelineZoomed = false;
 	private boolean isFullscreen = false;
 	private java.util.List<Float> splitPoints = new java.util.ArrayList<>();
-	private LinearLayout layout_top_header;
+	private RelativeLayout layout_top_header;
 
 	// Undo / Redo Stacks
 	private static class EditorState {
@@ -256,7 +257,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		bt_undo = (ImageView) findViewById(R.id.bt_undo);
 		bt_redo = (ImageView) findViewById(R.id.bt_redo);
 		bt_exec = (Button) findViewById(R.id.bt_exec);
-		layout_top_header = (LinearLayout) findViewById(R.id.layout_top_header);
+		layout_top_header = (RelativeLayout) findViewById(R.id.layout_top_header);
 		
 		// Video Preview bindings
 		video_container = (FrameLayout) findViewById(R.id.video_container);

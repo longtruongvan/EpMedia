@@ -12,66 +12,75 @@
         android:orientation="vertical">
 
         <!-- Top AppBar Header -->
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/layout_top_header"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
             android:paddingHorizontal="16dp"
             android:background="@color/lumina_surface"
             android:elevation="4dp">
-            
-            <ImageView
-                android:id="@+id/bt_back"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_arrow_back"
-                android:contentDescription="Back"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                app:tint="@color/lumina_text_primary" />
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="24dp"
-                android:background="#1AFFFFFF"
-                android:layout_marginHorizontal="12dp" />
+            <!-- Left Group Container (Arrow Back, Line, Undo, Redo) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_alignParentStart="true">
 
-            <ImageView
-                android:id="@+id/bt_undo"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_undo"
-                android:contentDescription="Undo"
-                android:layout_marginEnd="12dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                app:tint="@color/lumina_text_secondary" />
+                <ImageView
+                    android:id="@+id/bt_back"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_arrow_back"
+                    android:contentDescription="Back"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:tint="@color/lumina_text_primary" />
 
-            <ImageView
-                android:id="@+id/bt_redo"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_redo"
-                android:contentDescription="Redo"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                app:tint="@color/lumina_text_secondary" />
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="24dp"
+                    android:background="#1AFFFFFF"
+                    android:layout_marginHorizontal="12dp" />
 
+                <ImageView
+                    android:id="@+id/bt_undo"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_undo"
+                    android:contentDescription="Undo"
+                    android:layout_marginEnd="12dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:tint="@color/lumina_text_secondary" />
+
+                <ImageView
+                    android:id="@+id/bt_redo"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_redo"
+                    android:contentDescription="Redo"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:tint="@color/lumina_text_secondary" />
+            </LinearLayout>
+
+            <!-- Center Title (Centered on screen) -->
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/header_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="@string/editor"
-                android:gravity="center"
                 android:textColor="@color/lumina_text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_centerInParent="true" />
 
+            <!-- Right Button -->
             <Button
                 android:id="@+id/bt_exec"
                 android:layout_width="wrap_content"
@@ -82,8 +91,11 @@
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:paddingHorizontal="16dp"
-                app:cornerRadius="8dp" />
-        </LinearLayout>
+                app:cornerRadius="8dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true" />
+
+        </RelativeLayout>
 
         <!-- Video Preview Area (45% height) -->
         <FrameLayout
@@ -224,7 +236,8 @@
                     android:scaleType="centerInside"
                     android:layout_marginEnd="16dp"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    app:tint="@color/lumina_bg" />
 
                 <!-- Fullscreen button -->
                 <ImageView
@@ -679,7 +692,7 @@
                         android:id="@+id/iv_tab_overlay"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
-                        android:src="@drawable/ic_overlay"
+                        android:src="@drawable/ic_layers"
                         app:tint="@color/lumina_text_secondary" />
                     <TextView
                         android:id="@+id/tv_tab_overlay"

@@ -132,6 +132,10 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		btn_share_tiktok.setOnClickListener(this);
 		btn_share_youtube.setOnClickListener(this);
 		btn_trigger_export.setOnClickListener(this);
+		View btn_export_action = findViewById(R.id.btn_export_action);
+		if (btn_export_action != null) {
+			btn_export_action.setOnClickListener(this);
+		}
 
 		findViewById(R.id.nav_home).setOnClickListener(this);
 		findViewById(R.id.nav_templates).setOnClickListener(this);
@@ -251,7 +255,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			updateFpsButtons(1);
 		} else if (id == R.id.btn_fps_60) {
 			updateFpsButtons(2);
-		} else if (id == R.id.btn_trigger_export) {
+		} else if (id == R.id.btn_trigger_export || id == R.id.btn_export_action) {
 			if (!isExporting) {
 				startVideoExport();
 			}
