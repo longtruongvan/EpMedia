@@ -556,6 +556,9 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	}
 
 	private String copyAssetToTempFile(String assetPath) {
+		if (assetPath != null && !assetPath.startsWith("audio/")) {
+			return assetPath;
+		}
 		try {
 			java.io.InputStream in = getAssets().open(assetPath);
 			java.io.File tempFile = new java.io.File(getCacheDir(), "temp_bg_music.mp3");

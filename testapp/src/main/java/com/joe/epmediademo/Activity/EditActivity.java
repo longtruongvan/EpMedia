@@ -149,6 +149,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private Button btn_audio_track1;
 	private Button btn_audio_track2;
 	private Button btn_audio_track3;
+	private Button btn_audio_online;
 
 	// Stickers Panel
 	private LinearLayout panel_stickers;
@@ -360,6 +361,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		btn_audio_track1 = (Button) findViewById(R.id.btn_audio_track1);
 		btn_audio_track2 = (Button) findViewById(R.id.btn_audio_track2);
 		btn_audio_track3 = (Button) findViewById(R.id.btn_audio_track3);
+		btn_audio_online = (Button) findViewById(R.id.btn_audio_online);
 
 		panel_stickers = (LinearLayout) findViewById(R.id.panel_stickers);
 		btn_close_stickers = (ImageView) findViewById(R.id.btn_close_stickers);
@@ -420,6 +422,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (btn_audio_track1 != null) btn_audio_track1.setOnClickListener(this);
 		if (btn_audio_track2 != null) btn_audio_track2.setOnClickListener(this);
 		if (btn_audio_track3 != null) btn_audio_track3.setOnClickListener(this);
+		if (btn_audio_online != null) btn_audio_online.setOnClickListener(this);
 
 		if (btn_close_stickers != null) btn_close_stickers.setOnClickListener(this);
 		if (btn_sticker_fire != null) btn_sticker_fire.setOnClickListener(this);
@@ -736,6 +739,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_audio_track3) {
 			Toast.makeText(this, "Acoustic Melody Applied", Toast.LENGTH_SHORT).show();
 			selectAudioTrack("audio/track_acoustic.mp3");
+		} else if (id == R.id.btn_audio_online) {
+			showOnlineMusicDialog();
 		} else if (id == R.id.btn_close_stickers) {
 			showPanel(null);
 		} else if (id == R.id.btn_sticker_fire) {
@@ -1809,6 +1814,17 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			}
 		}
 
+		boolean isOnline = assetPath != null && !assetPath.startsWith("audio/");
+		if (btn_audio_online != null) {
+			if (isOnline) {
+				btn_audio_online.setBackgroundTintList(android.content.res.ColorStateList.valueOf(activeColor));
+				btn_audio_online.setTextColor(activeTextColor);
+			} else {
+				btn_audio_online.setBackgroundTintList(android.content.res.ColorStateList.valueOf(normalColor));
+				btn_audio_online.setTextColor(normalTextColor);
+			}
+		}
+
 		stopPreviewAudio();
 		if (isMockPlaying || (video_view != null && video_view.isPlaying())) {
 			playPreviewAudio();
@@ -1824,9 +1840,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			if (previewAudioPlayer == null) {
 				previewAudioPlayer = new android.media.MediaPlayer();
-				android.content.res.AssetFileDescriptor afd = getAssets().openFd(selectedAudioPath);
-				previewAudioPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-				afd.close();
+				if (selectedAudioPath.startsWith("audio/")) {
+					android.content.res.AssetFileDescriptor afd = getAssets().openFd(selectedAudioPath);
+					previewAudioPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+					afd.close();
+				} else {
+					previewAudioPlayer.setDataSource(selectedAudioPath);
+				}
 				previewAudioPlayer.setLooping(true);
 				previewAudioPlayer.prepare();
 			}
@@ -1860,5 +1880,113 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void showOnlineMusicDialog() {
+		final String[] trackNames = {
+			"Happy Ukulele (Online - Bensound)",
+			"Sunset Lofi Beats (Online - FileSamples)",
+			"Classic Kalimba Loop (Online - LC)",
+			"Upbeat Corporate Pop (Online - SoundHelix)"
+		};
+		final String[] trackUrls = {
+			"https://github.com/prof3ssorSt3v3/media-sample-files/raw/master/creative-common.mp3",
+			"https://filesamples.com/samples/audio/mp3/sample1.mp3",
+			"https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+			"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+		};
+
+		android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
+		builder.setTitle("Thư viện nhạc Online (API 0đ)");
+		builder.setItems(trackNames, new android.content.DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(android.content.DialogInterface dialog, final int which) {
+				downloadAndApplyOnlineTrack(trackNames[which], trackUrls[which]);
+			}
+		});
+		builder.setNegativeButton("Hủy", null);
+		builder.show();
+	}
+
+	private void downloadAndApplyOnlineTrack(final String name, final String urlStr) {
+		final android.app.ProgressDialog progress = new android.app.ProgressDialog(this, android.app.ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+		progress.setTitle("Tải nhạc trực tuyến");
+		progress.setMessage("Đang tải: " + name + "...");
+		progress.setProgressStyle(android.app.ProgressDialog.STYLE_HORIZONTAL);
+		progress.setIndeterminate(false);
+		progress.setMax(100);
+		progress.setCancelable(false);
+		progress.show();
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				java.io.InputStream input = null;
+				java.io.OutputStream output = null;
+				java.net.HttpURLConnection connection = null;
+				try {
+					java.net.URL url = new java.net.URL(urlStr);
+					connection = (java.net.HttpURLConnection) url.openConnection();
+					connection.connect();
+
+					if (connection.getResponseCode() != java.net.HttpURLConnection.HTTP_OK) {
+						throw new Exception("Server HTTP " + connection.getResponseCode());
+					}
+
+					int fileLength = connection.getContentLength();
+					input = connection.getInputStream();
+
+					final String localName = "online_track_" + urlStr.substring(urlStr.lastIndexOf('/') + 1);
+					final java.io.File cachedFile = new java.io.File(getCacheDir(), localName);
+					output = new java.io.FileOutputStream(cachedFile);
+
+					byte[] data = new byte[4096];
+					long total = 0;
+					int count;
+					while ((count = input.read(data)) != -1) {
+						total += count;
+						if (fileLength > 0) {
+							final int percent = (int) (total * 100 / fileLength);
+							runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									progress.setProgress(percent);
+								}
+							});
+						}
+						output.write(data, 0, count);
+					}
+
+					output.flush();
+					output.close();
+					input.close();
+
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							progress.dismiss();
+							Toast.makeText(EditActivity.this, "Đã tải thành công!", Toast.LENGTH_SHORT).show();
+							selectAudioTrack(cachedFile.getAbsolutePath());
+						}
+					});
+
+				} catch (final Exception e) {
+					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							progress.dismiss();
+							Toast.makeText(EditActivity.this, "Lỗi tải nhạc: " + e.getMessage(), Toast.LENGTH_LONG).show();
+						}
+					});
+				} finally {
+					try {
+						if (output != null) output.close();
+						if (input != null) input.close();
+					} catch (Exception ignored) {}
+					if (connection != null) connection.disconnect();
+				}
+			}
+		}).start();
 	}
 }
