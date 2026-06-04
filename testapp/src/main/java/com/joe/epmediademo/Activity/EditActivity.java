@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -181,6 +182,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private String activeStickerText = "";
 	private boolean isEnhanced = false;
 	private String selectedAudioPath = null;
+	private android.app.Dialog dialog_online_music_instance = null;
 
 	private boolean isMockVideo = false;
 	private boolean isMockPlaying = false;
@@ -1882,30 +1884,367 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		}
 	}
 
-	private void showOnlineMusicDialog() {
-		final String[] trackNames = {
-			"Happy Ukulele (Online - Bensound)",
-			"Sunset Lofi Beats (Online - FileSamples)",
-			"Classic Kalimba Loop (Online - LC)",
-			"Upbeat Corporate Pop (Online - SoundHelix)"
-		};
-		final String[] trackUrls = {
-			"https://github.com/prof3ssorSt3v3/media-sample-files/raw/master/creative-common.mp3",
-			"https://filesamples.com/samples/audio/mp3/sample1.mp3",
-			"https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
-			"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-		};
+	private static class OnlineTrack {
+		String id;
+		String title;
+		String artist;
+		String category;
+		String url;
+		boolean isPlaying = false;
+		boolean isLoading = false;
+	}
 
-		android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
-		builder.setTitle("Thư viện nhạc Online (API 0đ)");
-		builder.setItems(trackNames, new android.content.DialogInterface.OnClickListener() {
+	private class OnlineTrackAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<OnlineTrackAdapter.ViewHolder> {
+		private java.util.List<OnlineTrack> list;
+		private android.media.MediaPlayer player;
+		private int currentPlayingPos = -1;
+
+		public OnlineTrackAdapter(java.util.List<OnlineTrack> list) {
+			this.list = list;
+		}
+
+		public void stopPlaying() {
+			if (player != null) {
+				try {
+					if (player.isPlaying()) {
+						player.stop();
+					}
+					player.release();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				player = null;
+			}
+			if (currentPlayingPos != -1 && currentPlayingPos < list.size()) {
+				list.get(currentPlayingPos).isPlaying = false;
+				list.get(currentPlayingPos).isLoading = false;
+				notifyItemChanged(currentPlayingPos);
+				currentPlayingPos = -1;
+			}
+		}
+
+		@Override
+		public ViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
+			android.view.View v = android.view.LayoutInflater.from(parent.getContext()).inflate(R.layout.item_online_track, parent, false);
+			return new ViewHolder(v);
+		}
+
+		@Override
+		public void onBindViewHolder(final ViewHolder holder, final int position) {
+			final OnlineTrack track = list.get(holder.getAdapterPosition());
+			holder.tv_title.setText(track.title);
+			holder.tv_artist.setText(track.artist);
+			holder.tv_category.setText(track.category);
+
+			// Generate premium vibrant gradient cover
+			int hash = track.id.hashCode();
+			int[][] presetColors = {
+				{Color.parseColor("#FF416C"), Color.parseColor("#FF4B2B")}, // Warm Sunset Red-Orange
+				{Color.parseColor("#00B4DB"), Color.parseColor("#0083B0")}, // Ocean Breeze Blue
+				{Color.parseColor("#F1F2B5"), Color.parseColor("#135058")}, // Elegant Forest Teal
+				{Color.parseColor("#7F00FF"), Color.parseColor("#E100FF")}, // Neon Purple-Pink
+				{Color.parseColor("#11998e"), Color.parseColor("#38ef7d")}, // Emerald Mint Green
+				{Color.parseColor("#fc00ff"), Color.parseColor("#00dbde")}, // Cyberpunk Violet-Cyan
+				{Color.parseColor("#3a7bd5"), Color.parseColor("#3a6073")}  // Slate Deep Blue
+			};
+			int index = Math.abs(hash) % presetColors.length;
+			android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable(
+				android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+				presetColors[index]
+			);
+			holder.iv_gradient.setImageDrawable(gd);
+
+			if (track.isLoading) {
+				holder.pb_loading.setVisibility(android.view.View.VISIBLE);
+				holder.iv_play.setVisibility(android.view.View.GONE);
+			} else {
+				holder.pb_loading.setVisibility(android.view.View.GONE);
+				holder.iv_play.setVisibility(android.view.View.VISIBLE);
+				if (track.isPlaying) {
+					holder.iv_play.setImageResource(R.drawable.ic_pause);
+				} else {
+					holder.iv_play.setImageResource(R.drawable.ic_play);
+				}
+			}
+
+			holder.layout_play.setOnClickListener(new android.view.View.OnClickListener() {
+				@Override
+				public void onClick(android.view.View v) {
+					final int pos = holder.getAdapterPosition();
+					if (pos == -1) return;
+					
+					stopPreviewAudio();
+					if (isMockVideo) {
+						isMockPlaying = false;
+						iv_play_pause.setImageResource(R.drawable.ic_play);
+					} else if (video_view != null && video_view.isPlaying()) {
+						video_view.pause();
+						iv_play_pause.setImageResource(R.drawable.ic_play);
+					}
+
+					if (track.isPlaying) {
+						stopPlaying();
+					} else {
+						stopPlaying();
+						track.isLoading = true;
+						currentPlayingPos = pos;
+						notifyItemChanged(pos);
+
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									if (player != null) {
+										player.release();
+										player = null;
+									}
+									player = new android.media.MediaPlayer();
+									final String resolvedUrl = resolveRedirects(track.url);
+									java.util.Map<String, String> headers = new java.util.HashMap<>();
+									headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+									player.setDataSource(EditActivity.this, android.net.Uri.parse(resolvedUrl), headers);
+									player.prepare();
+									player.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener() {
+										@Override
+										public void onCompletion(android.media.MediaPlayer mp) {
+											runOnUiThread(new Runnable() {
+												@Override
+												public void run() {
+													stopPlaying();
+												}
+											});
+										}
+									});
+									
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											track.isLoading = false;
+											track.isPlaying = true;
+											notifyItemChanged(pos);
+											try {
+												player.start();
+											} catch (Exception e) {
+												e.printStackTrace();
+											}
+										}
+									});
+								} catch (final Exception e) {
+									e.printStackTrace();
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											track.isLoading = false;
+											track.isPlaying = false;
+											notifyItemChanged(pos);
+											Toast.makeText(EditActivity.this, "Không thể nghe thử: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+										}
+									});
+								}
+							}
+						}).start();
+					}
+				}
+			});
+
+			holder.btn_use.setOnClickListener(new android.view.View.OnClickListener() {
+				@Override
+				public void onClick(android.view.View v) {
+					stopPlaying();
+					if (dialog_online_music_instance != null) {
+						dialog_online_music_instance.dismiss();
+					}
+					downloadAndApplyOnlineTrack(track.title, track.url);
+				}
+			});
+		}
+
+		@Override
+		public int getItemCount() {
+			return list.size();
+		}
+
+		class ViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+			TextView tv_title, tv_artist, tv_category;
+			ImageView iv_play, btn_use, iv_gradient;
+			ProgressBar pb_loading;
+			android.view.View layout_play;
+
+			public ViewHolder(android.view.View itemView) {
+				super(itemView);
+				tv_title = (TextView) itemView.findViewById(R.id.tv_track_title);
+				tv_artist = (TextView) itemView.findViewById(R.id.tv_track_artist);
+				tv_category = (TextView) itemView.findViewById(R.id.tv_track_category);
+				iv_play = (ImageView) itemView.findViewById(R.id.iv_track_play);
+				btn_use = (ImageView) itemView.findViewById(R.id.btn_use_track);
+				pb_loading = (ProgressBar) itemView.findViewById(R.id.pb_track_loading);
+				layout_play = itemView.findViewById(R.id.layout_play_state);
+				iv_gradient = (ImageView) itemView.findViewById(R.id.iv_album_gradient);
+			}
+		}
+	}
+
+	private String resolveRedirects(String urlStr) {
+		try {
+			int redirects = 0;
+			while (redirects < 5) {
+				java.net.URL url = new java.net.URL(urlStr);
+				java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+				conn.setInstanceFollowRedirects(false);
+				conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+				conn.setConnectTimeout(5000);
+				conn.setReadTimeout(5000);
+				int status = conn.getResponseCode();
+				if (status == java.net.HttpURLConnection.HTTP_MOVED_TEMP
+						|| status == java.net.HttpURLConnection.HTTP_MOVED_PERM
+						|| status == 307
+						|| status == 308) {
+					String newUrl = conn.getHeaderField("Location");
+					if (newUrl != null) {
+						urlStr = newUrl;
+						redirects++;
+						conn.disconnect();
+						continue;
+					}
+				}
+				conn.disconnect();
+				break;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return urlStr;
+	}
+
+	private java.util.List<OnlineTrack> loadOnlineTracksFromAssets() {
+		java.util.List<OnlineTrack> tracks = new java.util.ArrayList<>();
+		try {
+			java.io.InputStream is = getAssets().open("online_music_catalog.json");
+			int size = is.available();
+			byte[] buffer = new byte[size];
+			is.read(buffer);
+			is.close();
+			String json = new String(buffer, "UTF-8");
+			org.json.JSONArray array = new org.json.JSONArray(json);
+			for (int i = 0; i < array.length(); i++) {
+				org.json.JSONObject obj = array.getJSONObject(i);
+				OnlineTrack t = new OnlineTrack();
+				t.id = obj.getString("id");
+				t.title = obj.getString("title");
+				t.artist = obj.getString("artist");
+				t.category = obj.getString("category");
+				t.url = obj.getString("url");
+				tracks.add(t);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return tracks;
+	}
+
+	private void showOnlineMusicDialog() {
+		final java.util.List<OnlineTrack> allTracks = loadOnlineTracksFromAssets();
+		final java.util.List<OnlineTrack> filteredTracks = new java.util.ArrayList<>(allTracks);
+
+		final android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_DeviceDefault_NoActionBar_Fullscreen);
+		dialog.setContentView(R.layout.dialog_online_music);
+		dialog_online_music_instance = dialog;
+
+		final androidx.recyclerview.widget.RecyclerView rv = (androidx.recyclerview.widget.RecyclerView) dialog.findViewById(R.id.recycler_online_music);
+		rv.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+		
+		final OnlineTrackAdapter adapter = new OnlineTrackAdapter(filteredTracks);
+		rv.setAdapter(adapter);
+
+		dialog.findViewById(R.id.btn_close_dialog).setOnClickListener(new android.view.View.OnClickListener() {
 			@Override
-			public void onClick(android.content.DialogInterface dialog, final int which) {
-				downloadAndApplyOnlineTrack(trackNames[which], trackUrls[which]);
+			public void onClick(android.view.View v) {
+				adapter.stopPlaying();
+				dialog.dismiss();
 			}
 		});
-		builder.setNegativeButton("Hủy", null);
-		builder.show();
+
+		dialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(android.content.DialogInterface dialogInterface) {
+				adapter.stopPlaying();
+			}
+		});
+
+		final EditText etSearch = (EditText) dialog.findViewById(R.id.et_music_search);
+		
+		final TextView btnAll = (TextView) dialog.findViewById(R.id.tab_cat_all);
+		final TextView btnVlog = (TextView) dialog.findViewById(R.id.tab_cat_vlog);
+		final TextView btnLofi = (TextView) dialog.findViewById(R.id.tab_cat_lofi);
+		final TextView btnAcoustic = (TextView) dialog.findViewById(R.id.tab_cat_acoustic);
+		final TextView btnCinematic = (TextView) dialog.findViewById(R.id.tab_cat_cinematic);
+		final TextView btnUpbeat = (TextView) dialog.findViewById(R.id.tab_cat_upbeat);
+
+		final String[] activeCategory = {"Tất cả"};
+		final TextView[] categoryButtons = {btnAll, btnVlog, btnLofi, btnAcoustic, btnCinematic, btnUpbeat};
+		final String[] categoryNames = {"Tất cả", "Vlog", "Lofi", "Acoustic", "Cinematic", "Upbeat"};
+
+		final Runnable filterList = new Runnable() {
+			@Override
+			public void run() {
+				String query = etSearch.getText().toString().trim().toLowerCase();
+				String cat = activeCategory[0];
+				
+				filteredTracks.clear();
+				for (OnlineTrack t : allTracks) {
+					boolean matchesQuery = query.isEmpty() || t.title.toLowerCase().contains(query) || t.artist.toLowerCase().contains(query);
+					boolean matchesCat = "Tất cả".equals(cat) || t.category.equalsIgnoreCase(cat);
+					if (matchesQuery && matchesCat) {
+						filteredTracks.add(t);
+					}
+				}
+				adapter.notifyDataSetChanged();
+			}
+		};
+
+		for (int i = 0; i < categoryButtons.length; i++) {
+			final int index = i;
+			categoryButtons[i].setOnClickListener(new android.view.View.OnClickListener() {
+				@Override
+				public void onClick(android.view.View v) {
+					activeCategory[0] = categoryNames[index];
+					
+					int activeColor = getResources().getColor(R.color.colorAccent);
+					int activeTextColor = Color.parseColor("#121216");
+					int normalColor = Color.parseColor("#16FFFFFF");
+					int normalTextColor = Color.parseColor("#E0E0E6");
+
+					for (int k = 0; k < categoryButtons.length; k++) {
+						if (k == index) {
+							categoryButtons[k].setBackgroundTintList(android.content.res.ColorStateList.valueOf(activeColor));
+							categoryButtons[k].setTextColor(activeTextColor);
+							categoryButtons[k].setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+						} else {
+							categoryButtons[k].setBackgroundTintList(android.content.res.ColorStateList.valueOf(normalColor));
+							categoryButtons[k].setTextColor(normalTextColor);
+							categoryButtons[k].setTypeface(android.graphics.Typeface.DEFAULT);
+						}
+					}
+					
+					adapter.stopPlaying();
+					filterList.run();
+				}
+			});
+		}
+
+		etSearch.addTextChangedListener(new android.text.TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				adapter.stopPlaying();
+				filterList.run();
+			}
+			@Override
+			public void afterTextChanged(android.text.Editable s) {}
+		});
+
+		dialog.show();
 	}
 
 	private void downloadAndApplyOnlineTrack(final String name, final String urlStr) {
@@ -1925,8 +2264,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				java.io.OutputStream output = null;
 				java.net.HttpURLConnection connection = null;
 				try {
-					java.net.URL url = new java.net.URL(urlStr);
+					final String resolvedUrl = resolveRedirects(urlStr);
+					java.net.URL url = new java.net.URL(resolvedUrl);
 					connection = (java.net.HttpURLConnection) url.openConnection();
+					connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+					connection.setConnectTimeout(10000);
+					connection.setReadTimeout(10000);
 					connection.connect();
 
 					if (connection.getResponseCode() != java.net.HttpURLConnection.HTTP_OK) {

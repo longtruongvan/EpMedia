@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121216">
+
+    <!-- Header bar -->
+    <RelativeLayout
+        android:id="@+id/layout_dialog_header"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#19191E">
+
+        <ImageView
+            android:id="@+id/btn_close_dialog"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="12dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_more"
+            android:rotation="45"
+            app:tint="#E0E0E6"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Thư viện âm nhạc"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="#1AFFFFFF"/>
+    </RelativeLayout>
+
+    <!-- Search input -->
+    <LinearLayout
+        android:id="@+id/layout_search_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_dialog_header"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_search_capsule"
+        android:backgroundTint="#16FFFFFF"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_search"
+            app:tint="#8E8E93" />
+
+        <EditText
+            android:id="@+id/et_music_search"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@null"
+            android:hint="Tìm kiếm bài hát, tác giả..."
+            android:textColor="#FFFFFF"
+            android:textColorHint="#8E8E93"
+            android:textSize="15sp"
+            android:maxLines="1"
+            android:imeOptions="actionSearch"
+            android:inputType="text"/>
+    </LinearLayout>
+
+    <!-- Categories horizontal tab bar -->
+    <HorizontalScrollView
+        android:id="@+id/scroll_categories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_search_box"
+        android:layout_marginTop="12dp"
+        android:scrollbars="none"
+        android:paddingHorizontal="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/tab_cat_all"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="Tất cả"
+                android:textSize="13sp"
+                android:textColor="#121216"
+                android:background="@drawable/bg_category_pill"
+                android:backgroundTint="@color/colorAccent"
+                android:paddingHorizontal="16dp"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tab_cat_vlog"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="Vlog"
+                android:textSize="13sp"
+                android:textColor="#E0E0E6"
+                android:background="@drawable/bg_category_pill"
+                android:backgroundTint="#16FFFFFF"
+                android:paddingHorizontal="16dp"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <TextView
+                android:id="@+id/tab_cat_lofi"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="Lofi"
+                android:textSize="13sp"
+                android:textColor="#E0E0E6"
+                android:background="@drawable/bg_category_pill"
+                android:backgroundTint="#16FFFFFF"
+                android:paddingHorizontal="16dp"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <TextView
+                android:id="@+id/tab_cat_acoustic"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="Acoustic"
+                android:textSize="13sp"
+                android:textColor="#E0E0E6"
+                android:background="@drawable/bg_category_pill"
+                android:backgroundTint="#16FFFFFF"
+                android:paddingHorizontal="16dp"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <TextView
+                android:id="@+id/tab_cat_cinematic"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="Cinematic"
+                android:textSize="13sp"
+                android:textColor="#E0E0E6"
+                android:background="@drawable/bg_category_pill"
+                android:backgroundTint="#16FFFFFF"
+                android:paddingHorizontal="16dp"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <TextView
+                android:id="@+id/tab_cat_upbeat"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="Sôi động"
+                android:textSize="13sp"
+                android:textColor="#E0E0E6"
+                android:background="@drawable/bg_category_pill"
+                android:backgroundTint="#16FFFFFF"
+                android:paddingHorizontal="16dp"
+                android:clickable="true"
+                android:focusable="true"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Music List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_online_music"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/scroll_categories"
+        android:layout_marginTop="8dp"
+        android:paddingHorizontal="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"/>
+
+</RelativeLayout>
