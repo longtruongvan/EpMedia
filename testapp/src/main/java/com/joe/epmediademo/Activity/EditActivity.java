@@ -179,6 +179,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private int activeFilterId = R.id.btn_filter_none;
 	private String activeStickerText = "";
 	private boolean isEnhanced = false;
+	private String selectedAudioPath = null;
 
 	private boolean isMockVideo = false;
 	private boolean isMockPlaying = false;
@@ -247,6 +248,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			String initTool = getIntent().getStringExtra("INIT_TOOL");
 			if (initTool != null) {
 				applyInitialTool(initTool);
+			}
+			String templateId = getIntent().getStringExtra("TEMPLATE_ID");
+			if (templateId != null) {
+				applyTemplatePreset(templateId);
 			}
 		}
 	}
@@ -724,10 +729,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			showPanel(null);
 		} else if (id == R.id.btn_audio_track1) {
 			Toast.makeText(this, "Chill Lo-Fi Beat Applied", Toast.LENGTH_SHORT).show();
+			selectAudioTrack("audio/track_lofi.mp3");
 		} else if (id == R.id.btn_audio_track2) {
 			Toast.makeText(this, "Electronic Uplifting Applied", Toast.LENGTH_SHORT).show();
+			selectAudioTrack("audio/track_electronic.mp3");
 		} else if (id == R.id.btn_audio_track3) {
 			Toast.makeText(this, "Acoustic Melody Applied", Toast.LENGTH_SHORT).show();
+			selectAudioTrack("audio/track_acoustic.mp3");
 		} else if (id == R.id.btn_close_stickers) {
 			showPanel(null);
 		} else if (id == R.id.btn_sticker_fire) {
@@ -1601,6 +1609,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			intent.putExtra("SUBTITLE_Y", subtitleYPercent);
 			intent.putExtra("VIDEO_WIDTH", videoWidth);
 			intent.putExtra("VIDEO_HEIGHT", videoHeight);
+			if (selectedAudioPath != null) {
+				intent.putExtra("AUDIO_PATH", selectedAudioPath);
+			}
 			startActivity(intent);
 		} else {
 			Toast.makeText(this, R.string.toast_select_video_first, Toast.LENGTH_SHORT).show();
@@ -1729,5 +1740,67 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			}
 		});
 		builder.show();
+	}
+
+	private void applyTemplatePreset(String templateId) {
+		if ("template_neon".equals(templateId)) {
+			Toast.makeText(this, "Applying Vlog Neon Beats Preset...", Toast.LENGTH_SHORT).show();
+			applyFilterOverlay(R.id.btn_filter_cool);
+			selectAudioTrack("audio/track_electronic.mp3");
+			subtitleText = "Vlog Neon Beats #trending";
+			tv_subtitle_preview.post(new Runnable() {
+				@Override
+				public void run() {
+					updateSubtitlePreview();
+				}
+			});
+		} else if ("template_retro".equals(templateId)) {
+			Toast.makeText(this, "Applying Travel Diary Preset...", Toast.LENGTH_SHORT).show();
+			applyFilterOverlay(R.id.btn_filter_warm);
+			selectAudioTrack("audio/track_acoustic.mp3");
+			subtitleText = "Travel Diary: Explore the World";
+			tv_subtitle_preview.post(new Runnable() {
+				@Override
+				public void run() {
+					updateSubtitlePreview();
+				}
+			});
+		} else if ("template_soft".equals(templateId)) {
+			Toast.makeText(this, "Applying Chilling Mood Preset...", Toast.LENGTH_SHORT).show();
+			applyFilterOverlay(R.id.btn_filter_vintage);
+			selectAudioTrack("audio/track_lofi.mp3");
+			subtitleText = "Chilling vibes...";
+			tv_subtitle_preview.post(new Runnable() {
+				@Override
+				public void run() {
+					updateSubtitlePreview();
+				}
+			});
+		}
+	}
+
+	private void selectAudioTrack(String assetPath) {
+		selectedAudioPath = assetPath;
+		
+		int activeColor = getResources().getColor(R.color.colorAccent);
+		int activeTextColor = getResources().getColor(R.color.lumina_bg);
+		int normalColor = getResources().getColor(R.color.lumina_surface_container);
+		int normalTextColor = getResources().getColor(R.color.lumina_text_primary);
+
+		Button[] buttons = {btn_audio_track1, btn_audio_track2, btn_audio_track3};
+		String[] paths = {"audio/track_lofi.mp3", "audio/track_electronic.mp3", "audio/track_acoustic.mp3"};
+
+		for (int i = 0; i < buttons.length; i++) {
+			Button b = buttons[i];
+			if (b != null) {
+				if (paths[i].equals(assetPath)) {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(activeColor));
+					b.setTextColor(activeTextColor);
+				} else {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(normalColor));
+					b.setTextColor(normalTextColor);
+				}
+			}
+		}
 	}
 }

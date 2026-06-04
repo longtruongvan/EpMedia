@@ -54,6 +54,7 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 	private VideoAdapter adapter;
 	private VideoItem selectedVideo = null;
 	private LruCache<String, Bitmap> thumbnailCache;
+	private String templateId = null;
 
 	// Representation of a video asset
 	public static class VideoItem {
@@ -73,6 +74,8 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_import_media);
+
+		templateId = getIntent().getStringExtra("TEMPLATE_ID");
 
 		// 4MB cache for video thumbnails
 		final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
@@ -213,6 +216,9 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 			if (path != null && !path.isEmpty()) {
 				Intent intent = new Intent(this, EditActivity.class);
 				intent.putExtra("VIDEO_PATH", path);
+				if (templateId != null) {
+					intent.putExtra("TEMPLATE_ID", templateId);
+				}
 				startActivity(intent);
 				finish();
 			}
@@ -245,6 +251,9 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				} else {
 					Intent intent = new Intent(this, EditActivity.class);
 					intent.putExtra("VIDEO_PATH", selectedVideo.path);
+					if (templateId != null) {
+						intent.putExtra("TEMPLATE_ID", templateId);
+					}
 					startActivity(intent);
 					finish();
 				}

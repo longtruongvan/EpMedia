@@ -377,19 +377,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_help_support) {
 			Toast.makeText(this, R.string.profile_help, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_home_template_1 || id == R.id.btn_template_1) {
-			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_neon)), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_cybercity.mp4");
+			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_neon)) + "\n" + getString(R.string.toast_select_video_first), Toast.LENGTH_LONG).show();
+			Intent intent = new Intent(this, ImportMediaActivity.class);
+			intent.putExtra("TEMPLATE_ID", "template_neon");
 			startActivity(intent);
 		} else if (id == R.id.btn_home_template_2 || id == R.id.btn_template_2) {
-			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_retro)), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_mountain.mp4");
+			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_retro)) + "\n" + getString(R.string.toast_select_video_first), Toast.LENGTH_LONG).show();
+			Intent intent = new Intent(this, ImportMediaActivity.class);
+			intent.putExtra("TEMPLATE_ID", "template_retro");
 			startActivity(intent);
 		} else if (id == R.id.btn_home_template_3 || id == R.id.btn_template_3) {
-			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_soft)), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_forest.mp4");
+			Toast.makeText(this, getString(R.string.toast_applying_template, getString(R.string.template_soft)) + "\n" + getString(R.string.toast_select_video_first), Toast.LENGTH_LONG).show();
+			Intent intent = new Intent(this, ImportMediaActivity.class);
+			intent.putExtra("TEMPLATE_ID", "template_soft");
 			startActivity(intent);
 		} else if (id == R.id.btn_explore_templates) {
 			activeTabId = R.id.nav_templates;

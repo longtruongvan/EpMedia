@@ -52,6 +52,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 
 	// Intent configuration inputs
 	private String videoUrl;
+	private String audioPath;
 	private float trimStartSec;
 	private float trimEndSec;
 	private int selectedCropPreset;
@@ -77,6 +78,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		// Read configuration extras
 		Intent intent = getIntent();
 		videoUrl = intent.getStringExtra("VIDEO_PATH");
+		audioPath = intent.getStringExtra("AUDIO_PATH");
 		trimStartSec = intent.getFloatExtra("TRIM_START", 0f);
 		trimEndSec = intent.getFloatExtra("TRIM_END", 0f);
 		selectedCropPreset = intent.getIntExtra("CROP_PRESET", 0);
@@ -448,42 +450,57 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		EpEditor.exec(epVideo, opt, new OnEditorListener() {
 			@Override
 			public void onSuccess() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						isExporting = false;
-						progress_export.setProgress(100);
-						tv_export_percent.setText("100%");
-						tv_export_status.setText(R.string.export_completed_label);
+				if (audioPath != null && !audioPath.isEmpty()) {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							tv_export_status.setText("Chèn nhạc nền...");
+						}
+					});
+					final String tempAudioFile = copyAssetToTempFile(audioPath);
+					if (tempAudioFile != null) {
+						final String finalOutputPath = MyApplication.getSavePath() + "out_mixed.mp4";
+						EpEditor.music(outputPath, tempAudioFile, finalOutputPath, 0.3f, 0.8f, new OnEditorListener() {
+							@Override
+							public void onSuccess() {
+								try {
+									new File(tempAudioFile).delete();
+									File mixedFile = new File(finalOutputPath);
+									File originalFile = new File(outputPath);
+									if (originalFile.exists()) {
+										originalFile.delete();
+									}
+									mixedFile.renameTo(originalFile);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								showExportSuccess();
+							}
 
-						btn_trigger_export.setEnabled(true);
-						btn_trigger_export.setText(R.string.open_exported_video);
-						btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-						btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
+							@Override
+							public void onFailure() {
+								showExportFailure();
+							}
 
-						Toast.makeText(ExportActivity.this, getString(R.string.toast_export_success, outputPath), Toast.LENGTH_LONG).show();
-
-						// Play video directly on completion
-						openGeneratedVideo();
+							@Override
+							public void onProgress(final float v) {
+								runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										tv_export_status.setText("Chèn nhạc nền: " + (int)(v * 100) + "%");
+									}
+								});
+							}
+						});
+						return;
 					}
-				});
+				}
+				showExportSuccess();
 			}
 
 			@Override
 			public void onFailure() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						isExporting = false;
-						tv_export_status.setText(R.string.export_failed_label);
-						btn_trigger_export.setEnabled(true);
-						btn_trigger_export.setText(R.string.retry_exporting);
-						btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-						btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
-
-						Toast.makeText(ExportActivity.this, R.string.toast_export_failed, Toast.LENGTH_SHORT).show();
-					}
-				});
+				showExportFailure();
 			}
 
 			@Override
@@ -498,6 +515,64 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				});
 			}
 		});
+	}
+
+	private void showExportSuccess() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				isExporting = false;
+				progress_export.setProgress(100);
+				tv_export_percent.setText("100%");
+				tv_export_status.setText(R.string.export_completed_label);
+
+				btn_trigger_export.setEnabled(true);
+				btn_trigger_export.setText(R.string.open_exported_video);
+				btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+				btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
+
+				Toast.makeText(ExportActivity.this, getString(R.string.toast_export_success, outputPath), Toast.LENGTH_LONG).show();
+
+				// Play video directly on completion
+				openGeneratedVideo();
+			}
+		});
+	}
+
+	private void showExportFailure() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				isExporting = false;
+				tv_export_status.setText(R.string.export_failed_label);
+				btn_trigger_export.setEnabled(true);
+				btn_trigger_export.setText(R.string.retry_exporting);
+				btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+				btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
+
+				Toast.makeText(ExportActivity.this, R.string.toast_export_failed, Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+
+	private String copyAssetToTempFile(String assetPath) {
+		try {
+			java.io.InputStream in = getAssets().open(assetPath);
+			java.io.File tempFile = new java.io.File(getCacheDir(), "temp_bg_music.mp3");
+			java.io.OutputStream out = new java.io.FileOutputStream(tempFile);
+			byte[] buffer = new byte[1024];
+			int read;
+			while ((read = in.read(buffer)) != -1) {
+				out.write(buffer, 0, read);
+			}
+			in.close();
+			out.flush();
+			out.close();
+			return tempFile.getAbsolutePath();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	private void openGeneratedVideo() {
