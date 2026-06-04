@@ -1998,11 +1998,44 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 										player.release();
 										player = null;
 									}
+									
+									String localName = "online_track_preview_" + track.id + ".mp3";
+									final java.io.File cachedFile = new java.io.File(getCacheDir(), localName);
+									
+									if (!cachedFile.exists()) {
+										final String resolvedUrl = resolveRedirects(track.url);
+										java.io.File tmpFile = new java.io.File(getCacheDir(), localName + ".tmp");
+										java.net.URL url = new java.net.URL(resolvedUrl);
+										java.net.HttpURLConnection connection = (java.net.HttpURLConnection) url.openConnection();
+										connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+										connection.setConnectTimeout(10000);
+										connection.setReadTimeout(10000);
+										connection.connect();
+
+										if (connection.getResponseCode() != java.net.HttpURLConnection.HTTP_OK) {
+											throw new Exception("HTTP " + connection.getResponseCode());
+										}
+
+										java.io.InputStream input = connection.getInputStream();
+										java.io.OutputStream output = new java.io.FileOutputStream(tmpFile);
+
+										byte[] data = new byte[4096];
+										int count;
+										while ((count = input.read(data)) != -1) {
+											output.write(data, 0, count);
+										}
+										output.flush();
+										output.close();
+										input.close();
+										connection.disconnect();
+
+										if (!tmpFile.renameTo(cachedFile)) {
+											throw new Exception("Lỗi lưu file cache");
+										}
+									}
+									
 									player = new android.media.MediaPlayer();
-									final String resolvedUrl = resolveRedirects(track.url);
-									java.util.Map<String, String> headers = new java.util.HashMap<>();
-									headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-									player.setDataSource(EditActivity.this, android.net.Uri.parse(resolvedUrl), headers);
+									player.setDataSource(cachedFile.getAbsolutePath());
 									player.prepare();
 									player.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener() {
 										@Override
@@ -2054,7 +2087,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					if (dialog_online_music_instance != null) {
 						dialog_online_music_instance.dismiss();
 					}
-					downloadAndApplyOnlineTrack(track.title, track.url);
+					downloadAndApplyOnlineTrack(track);
 				}
 			});
 		}
@@ -2247,7 +2280,28 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		dialog.show();
 	}
 
-	private void downloadAndApplyOnlineTrack(final String name, final String urlStr) {
+	private void downloadAndApplyOnlineTrack(final OnlineTrack track) {
+		final String name = track.title;
+		final String urlStr = track.url;
+		final String localName = "online_track_" + urlStr.substring(urlStr.lastIndexOf('/') + 1);
+		final java.io.File cachedFile = new java.io.File(getCacheDir(), localName);
+
+		// Check if we already have the preview cache
+		String previewLocalName = "online_track_preview_" + track.id + ".mp3";
+		final java.io.File previewCacheFile = new java.io.File(getCacheDir(), previewLocalName);
+
+		if (previewCacheFile.exists()) {
+			try {
+				copyFile(previewCacheFile, cachedFile);
+				Toast.makeText(EditActivity.this, "Đã chọn nhạc thành công!", Toast.LENGTH_SHORT).show();
+				selectAudioTrack(cachedFile.getAbsolutePath());
+				return;
+			} catch (Exception e) {
+				e.printStackTrace();
+				// Fallback to normal download if copy fails
+			}
+		}
+
 		final android.app.ProgressDialog progress = new android.app.ProgressDialog(this, android.app.ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
 		progress.setTitle("Tải nhạc trực tuyến");
 		progress.setMessage("Đang tải: " + name + "...");
@@ -2278,9 +2332,6 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 					int fileLength = connection.getContentLength();
 					input = connection.getInputStream();
-
-					final String localName = "online_track_" + urlStr.substring(urlStr.lastIndexOf('/') + 1);
-					final java.io.File cachedFile = new java.io.File(getCacheDir(), localName);
 					output = new java.io.FileOutputStream(cachedFile);
 
 					byte[] data = new byte[4096];
@@ -2331,5 +2382,23 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				}
 			}
 		}).start();
+	}
+
+	private void copyFile(java.io.File src, java.io.File dst) throws java.io.IOException {
+		java.io.InputStream in = new java.io.FileInputStream(src);
+		try {
+			java.io.OutputStream out = new java.io.FileOutputStream(dst);
+			try {
+				byte[] buf = new byte[1024];
+				int len;
+				while ((len = in.read(buf)) > 0) {
+					out.write(buf, 0, len);
+				}
+			} finally {
+				out.close();
+			}
+		} finally {
+			in.close();
+		}
 	}
 }
