@@ -1139,17 +1139,21 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			if (isMockPlaying) {
 				isMockPlaying = false;
 				iv_play_pause.setImageResource(R.drawable.ic_play);
+				pausePreviewAudio();
 			} else {
 				isMockPlaying = true;
 				iv_play_pause.setImageResource(R.drawable.ic_pause);
+				playPreviewAudio();
 			}
 		} else {
 			if (video_view.isPlaying()) {
 				video_view.pause();
 				iv_play_pause.setImageResource(R.drawable.ic_play);
+				pausePreviewAudio();
 			} else {
 				video_view.start();
 				iv_play_pause.setImageResource(R.drawable.ic_pause);
+				playPreviewAudio();
 			}
 		}
 	}
@@ -1628,6 +1632,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			video_view.pause();
 			iv_play_pause.setImageResource(R.drawable.ic_play);
 		}
+		pausePreviewAudio();
 	}
 
 	@Override
@@ -1636,6 +1641,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (playRunnable != null) {
 			playHandler.removeCallbacks(playRunnable);
 		}
+		stopPreviewAudio();
 	}
 
 	private void applyInitialTool(final String tool) {
@@ -1801,6 +1807,58 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					b.setTextColor(normalTextColor);
 				}
 			}
+		}
+
+		stopPreviewAudio();
+		if (isMockPlaying || (video_view != null && video_view.isPlaying())) {
+			playPreviewAudio();
+		}
+	}
+
+	private android.media.MediaPlayer previewAudioPlayer = null;
+
+	private void playPreviewAudio() {
+		if (selectedAudioPath == null || selectedAudioPath.isEmpty()) {
+			return;
+		}
+		try {
+			if (previewAudioPlayer == null) {
+				previewAudioPlayer = new android.media.MediaPlayer();
+				android.content.res.AssetFileDescriptor afd = getAssets().openFd(selectedAudioPath);
+				previewAudioPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+				afd.close();
+				previewAudioPlayer.setLooping(true);
+				previewAudioPlayer.prepare();
+			}
+			if (!previewAudioPlayer.isPlaying()) {
+				previewAudioPlayer.start();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void pausePreviewAudio() {
+		try {
+			if (previewAudioPlayer != null && previewAudioPlayer.isPlaying()) {
+				previewAudioPlayer.pause();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void stopPreviewAudio() {
+		try {
+			if (previewAudioPlayer != null) {
+				if (previewAudioPlayer.isPlaying()) {
+					previewAudioPlayer.stop();
+				}
+				previewAudioPlayer.release();
+				previewAudioPlayer = null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }
