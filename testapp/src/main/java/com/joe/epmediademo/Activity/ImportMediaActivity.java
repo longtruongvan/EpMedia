@@ -143,7 +143,7 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				queryLocalVideos();
 			} else {
 				Toast.makeText(this, R.string.no_permission_toast, Toast.LENGTH_LONG).show();
-				openSystemPicker();
+				showMockupAssets();
 			}
 		}
 	}
