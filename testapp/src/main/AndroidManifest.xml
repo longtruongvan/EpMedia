@@ -4,6 +4,7 @@
     <!-- Declare storage permissions for video picker -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".Application.MyApplication"
