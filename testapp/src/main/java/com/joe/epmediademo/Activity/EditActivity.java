@@ -25,7 +25,14 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.PlayerView;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.effect.MatrixTransformation;
+import androidx.media3.effect.GlEffect;
+import androidx.media3.effect.GlShaderProgram;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -55,7 +62,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	
 	// Video Player & Overlay Views
 	private FrameLayout video_container;
-	private VideoView video_view;
+	private PlayerView playerView;
+	private ExoPlayer exoPlayer;
 	private View video_filter_overlay;
 	private TextView tv_sticker_preview;
 	private TextView tv_subtitle_preview;
@@ -275,7 +283,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		
 		// Video Preview bindings
 		video_container = (FrameLayout) findViewById(R.id.video_container);
-		video_view = (VideoView) findViewById(R.id.video_view);
+		playerView = findViewById(R.id.video_view);
 		video_filter_overlay = (View) findViewById(R.id.video_filter_overlay);
 		tv_sticker_preview = (TextView) findViewById(R.id.tv_sticker_preview);
 		tv_subtitle_preview = (TextView) findViewById(R.id.tv_subtitle_preview);
@@ -494,15 +502,15 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 							} else {
 								mockCurrentPosMs = (int) (trimEndSec * 1000);
 							}
-						} else if (video_view != null) {
-							int currentPosMs = video_view.getCurrentPosition();
+						} else if (playerView != null) {
+							int currentPosMs = (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
 							float currentPosSec = currentPosMs / 1000f;
 							if (Math.abs(currentPosSec - trimStartSec) > 0.2f && Math.abs(currentPosSec - trimEndSec) > 0.2f) {
-								video_view.seekTo((int) (trimStartSec * 1000));
+								if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
 							} else if (Math.abs(currentPosSec - trimStartSec) < 0.2f) {
-								video_view.seekTo((int) (trimStartSec * 1000));
+								if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
 							} else {
-								video_view.seekTo((int) (trimEndSec * 1000));
+								if (exoPlayer != null) exoPlayer.seekTo((int) (trimEndSec * 1000));
 							}
 						}
 					}
@@ -524,9 +532,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					mockCurrentPosMs = (int) (trimStartSec * 1000);
 					isMockPlaying = true;
 					iv_play_pause.setImageResource(R.drawable.ic_pause);
-				} else if (video_view != null) {
-					video_view.seekTo((int) (trimStartSec * 1000));
-					video_view.start();
+				} else if (playerView != null) {
+					if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
+					if (exoPlayer != null) exoPlayer.play();
 					iv_play_pause.setImageResource(R.drawable.ic_pause);
 				}
 			}
@@ -543,8 +551,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 							isMockPlaying = false;
 							iv_play_pause.setImageResource(R.drawable.ic_play);
 						}
-					} else if (video_view != null && video_view.isPlaying()) {
-						video_view.pause();
+					} else if ((exoPlayer != null && exoPlayer.isPlaying())) {
+						if (exoPlayer != null) exoPlayer.pause();
 						iv_play_pause.setImageResource(R.drawable.ic_play);
 					}
 				} else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
@@ -565,7 +573,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				if (isUserSeeking) {
 					int scrollX = timeline_scroll.getScrollX();
 					int trackWidth = layout_tracks_wrapper.getWidth();
-					int durationMs = isMockVideo ? mockDurationMs : (video_view != null ? video_view.getDuration() : 0);
+					int durationMs = isMockVideo ? mockDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 					if (trackWidth > 0 && durationMs > 0) {
 						float ratio = (float) scrollX / trackWidth;
 						if (ratio < 0) ratio = 0;
@@ -573,8 +581,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 						int seekMs = (int) (ratio * durationMs);
 						if (isMockVideo) {
 							mockCurrentPosMs = seekMs;
-						} else if (video_view != null) {
-							video_view.seekTo(seekMs);
+						} else if (playerView != null) {
+							if (exoPlayer != null) exoPlayer.seekTo(seekMs);
 						}
 						updateTimecodes(seekMs);
 					}
@@ -669,8 +677,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_close_clip_settings) {
 			showPanel(null);
 		} else if (id == R.id.btn_action_split) {
-			int currentPosMs = isMockVideo ? mockCurrentPosMs : (video_view != null ? video_view.getCurrentPosition() : 0);
-			int durationMs = isMockVideo ? mockDurationMs : (video_view != null ? video_view.getDuration() : 0);
+			int currentPosMs = isMockVideo ? mockCurrentPosMs : (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
+			int durationMs = isMockVideo ? mockDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 			if (durationMs > 0) {
 				float ratio = (float) currentPosMs / durationMs;
 				splitPoints.add(ratio);
@@ -690,8 +698,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_action_delete) {
 			if (!splitPoints.isEmpty()) {
 				pushStateToUndo();
-				int currentPosMs = isMockVideo ? mockCurrentPosMs : (video_view != null ? video_view.getCurrentPosition() : 0);
-				int durationMs = isMockVideo ? mockDurationMs : (video_view != null ? video_view.getDuration() : 0);
+				int currentPosMs = isMockVideo ? mockCurrentPosMs : (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
+				int durationMs = isMockVideo ? mockDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 				float currentRatio = durationMs > 0 ? (float) currentPosMs / durationMs : 0f;
 				
 				float closestSplit = -1f;
@@ -721,8 +729,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 						mockCurrentPosMs = (int) (trimStartSec * 1000);
 						loadMockTimelineThumbnails(videoUrl);
 					} else {
-						if (video_view != null) {
-							video_view.seekTo((int) (trimStartSec * 1000));
+						if (playerView != null) {
+							if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
 						}
 						loadTimelineThumbnails(videoUrl);
 					}
@@ -740,6 +748,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_action_enhance) {
 			pushStateToUndo();
 			isEnhanced = !isEnhanced;
+			updateToggleButton(btn_action_enhance, isEnhanced);
 			Toast.makeText(this, isEnhanced ? R.string.toast_enhance_on : R.string.toast_enhance_off, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_action_more) {
 			Toast.makeText(this, R.string.toast_more_options, Toast.LENGTH_SHORT).show();
@@ -906,6 +915,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		updateVideoTransformations();
 		applyVideoViewAspectRatio(selectedCropPreset);
 		updateCropPresetButtons(selectedCropPreset);
+		updateToggleButton(btn_action_enhance, isEnhanced);
 
 		// Apply subtitle text and pos
 		et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
@@ -927,10 +937,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			range_slider.setValues(Arrays.asList(trimStartSec, trimEndSec));
 			updateTrimLabels();
 			mockCurrentPosMs = (int) (trimStartSec * 1000);
-		} else if (video_view != null) {
+		} else if (playerView != null) {
 			range_slider.setValues(Arrays.asList(trimStartSec, trimEndSec));
 			updateTrimLabels();
-			video_view.seekTo((int) (trimStartSec * 1000));
+			if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
 		}
 	}
 
@@ -996,7 +1006,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void applyVideoViewAspectRatio(int preset) {
-		if (video_view == null || video_container == null) return;
+		if (playerView == null || video_container == null) return;
 		
 		int containerWidth = video_container.getWidth();
 		int containerHeight = video_container.getHeight();
@@ -1005,7 +1015,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			return;
 		}
 
-		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) video_view.getLayoutParams();
+		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) playerView.getLayoutParams();
 		if (preset == 0) { // Original
 			lp.width = FrameLayout.LayoutParams.MATCH_PARENT;
 			lp.height = FrameLayout.LayoutParams.MATCH_PARENT;
@@ -1031,7 +1041,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			lp.gravity = android.view.Gravity.CENTER;
 		}
 		
-		video_view.setLayoutParams(lp);
+		playerView.setLayoutParams(lp);
 
 		// Synchronize filter overlay bounds
 		if (video_filter_overlay != null) {
@@ -1174,6 +1184,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				updateVideoTransformations();
 				applyVideoViewAspectRatio(0);
 				updateCropPresetButtons(0);
+				updateToggleButton(btn_action_enhance, false);
 				applyFilterOverlay(R.id.btn_filter_none);
 				applyStickerPreview("");
 				
@@ -1183,13 +1194,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				subtitleText = "";
 				updateSubtitlePreview();
 				
-				if (video_view != null) {
-					int durationMs = video_view.getDuration();
+				if (playerView != null) {
+					int durationMs = (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 					trimStartSec = 0f;
 					trimEndSec = durationMs / 1000f;
 					range_slider.setValues(Arrays.asList(0f, trimEndSec));
 					updateTrimLabels();
-					video_view.seekTo(1);
+					if (exoPlayer != null) exoPlayer.seekTo(1);
 				}
 				Toast.makeText(EditActivity.this, R.string.toast_delete_success, Toast.LENGTH_SHORT).show();
 			}
@@ -1200,7 +1211,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 
 	private void togglePlayPause() {
-		if (video_view == null) return;
+		if (playerView == null) return;
 		if (isMockVideo) {
 			if (isMockPlaying) {
 				isMockPlaying = false;
@@ -1212,12 +1223,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				playPreviewAudio();
 			}
 		} else {
-			if (video_view.isPlaying()) {
-				video_view.pause();
+			if ((exoPlayer != null && exoPlayer.isPlaying())) {
+				if (exoPlayer != null) exoPlayer.pause();
 				iv_play_pause.setImageResource(R.drawable.ic_play);
 				pausePreviewAudio();
 			} else {
-				video_view.start();
+				if (exoPlayer != null) exoPlayer.play();
 				iv_play_pause.setImageResource(R.drawable.ic_pause);
 				playPreviewAudio();
 			}
@@ -1248,7 +1259,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void setupVideoPlayer(final String path) {
-		video_view.setVisibility(View.VISIBLE);
+		playerView.setVisibility(View.VISIBLE);
 		video_empty_overlay.setVisibility(View.GONE);
 		bt_file.setVisibility(View.GONE);
 		timeline_container.setVisibility(View.VISIBLE);
@@ -1269,7 +1280,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		}
 
 		if (isMockVideo) {
-			video_view.setBackgroundColor(Color.parseColor("#121216"));
+			playerView.setBackgroundColor(Color.parseColor("#121216"));
 			final int durationMs = path.contains("cybercity") ? 75000 : (path.contains("forest") ? 24000 : 42000);
 			mockDurationMs = durationMs;
 			mockCurrentPosMs = 0;
@@ -1302,8 +1313,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			isEnhanced = false;
 			
 			updateVideoTransformations();
+			updateToggleButton(btn_action_enhance, false);
 			
-			video_view.post(new Runnable() {
+			playerView.post(new Runnable() {
 				@Override
 				public void run() {
 					applyVideoViewAspectRatio(0);
@@ -1331,92 +1343,90 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			redoStack.clear();
 			updateUndoRedoButtonsVisibility();
 		} else {
-			video_view.setBackgroundColor(Color.TRANSPARENT);
-			video_view.setVideoPath(realPath);
-			video_view.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
-				@Override
-				public void onPrepared(android.media.MediaPlayer mp) {
-					realVideoPlayer = mp;
-					applyPlaybackSpeed(currentSpeed);
-					int durationMs = video_view.getDuration();
-					float durationSec = durationMs / 1000f;
-					
-					trimStartSec = 0f;
-					trimEndSec = durationSec;
-					
-					try {
-						MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-						retriever.setDataSource(path);
-						String widthStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
-						String heightStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
-						videoWidth = Integer.parseInt(widthStr);
-						videoHeight = Integer.parseInt(heightStr);
-						retriever.release();
-					} catch (Exception e) {
-						videoWidth = mp.getVideoWidth();
-						videoHeight = mp.getVideoHeight();
-					}
-					
-					range_slider.setValueFrom(0f);
-					range_slider.setValueTo(durationSec);
-					range_slider.setValues(Arrays.asList(0f, durationSec));
-					
-					updateTrimLabels();
-					
-					int screenWidth = getResources().getDisplayMetrics().widthPixels;
-					int halfWidth = screenWidth / 2;
-					timeline_scroll.setPadding(halfWidth, 0, halfWidth, 0);
-					timeline_scroll.setClipToPadding(false);
-					
-					video_view.seekTo(1);
-					iv_play_pause.setImageResource(R.drawable.ic_play);
-					
-					loadTimelineThumbnails(path);
-					
-					currentRotation = 0;
-					isMirror = false;
-					selectedCropPreset = 0;
-					activeFilterId = R.id.btn_filter_none;
-					activeStickerText = "";
-					isEnhanced = false;
-					
-					updateVideoTransformations();
-					
-					video_view.post(new Runnable() {
-						@Override
-						public void run() {
-							applyVideoViewAspectRatio(0);
-						}
-					});
-					
-					updateCropPresetButtons(0);
-					applyFilterOverlay(R.id.btn_filter_none);
-					applyStickerPreview("");
-					
-					et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
-					et_subtitle_input.setText("");
-					et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
-					subtitleText = "";
-					subtitleXPercent = 50f;
-					subtitleYPercent = 85f;
-					slider_text_x.setValue(50f);
-					slider_text_y.setValue(85f);
-					updateSubtitlePreview();
-					
-					showPanel(panel_clip_settings);
-					setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
-					
-					undoStack.clear();
-					redoStack.clear();
-					updateUndoRedoButtonsVisibility();
-				}
-			});
+			playerView.setBackgroundColor(Color.TRANSPARENT);
+			if (exoPlayer != null) {
+				exoPlayer.release();
+			}
+			exoPlayer = new ExoPlayer.Builder(this).build();
+			playerView.setPlayer(exoPlayer);
 			
-			video_view.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener() {
+			MediaItem mediaItem = MediaItem.fromUri(realPath);
+			exoPlayer.setMediaItem(mediaItem);
+			exoPlayer.prepare();
+			exoPlayer.addListener(new Player.Listener() {
 				@Override
-				public void onCompletion(android.media.MediaPlayer mp) {
-					video_view.seekTo((int) (trimStartSec * 1000));
-					video_view.start();
+				public void onPlaybackStateChanged(int playbackState) {
+					if (playbackState == Player.STATE_READY) {
+						if (videoWidth == 0) {
+							int durationMs = (int) exoPlayer.getDuration();
+							float durationSec = durationMs / 1000f;
+							
+							trimStartSec = 0f;
+							trimEndSec = durationSec;
+							
+							if (exoPlayer.getVideoFormat() != null) {
+								videoWidth = exoPlayer.getVideoFormat().width;
+								videoHeight = exoPlayer.getVideoFormat().height;
+							}
+							
+							range_slider.setValueFrom(0f);
+							range_slider.setValueTo(durationSec);
+							range_slider.setValues(java.util.Arrays.asList(0f, durationSec));
+							
+							updateTrimLabels();
+							
+							int screenWidth = getResources().getDisplayMetrics().widthPixels;
+							int halfWidth = screenWidth / 2;
+							timeline_scroll.setPadding(halfWidth, 0, halfWidth, 0);
+							timeline_scroll.setClipToPadding(false);
+							
+							exoPlayer.seekTo(1);
+							iv_play_pause.setImageResource(R.drawable.ic_play);
+							
+							loadTimelineThumbnails(path);
+							
+							currentRotation = 0;
+							isMirror = false;
+							selectedCropPreset = 0;
+							activeFilterId = R.id.btn_filter_none;
+							activeStickerText = "";
+							isEnhanced = false;
+							
+							updateVideoTransformations();
+							updateToggleButton(btn_action_enhance, false);
+							
+							playerView.post(new Runnable() {
+								@Override
+								public void run() {
+									applyVideoViewAspectRatio(0);
+								}
+							});
+							
+							updateCropPresetButtons(0);
+							applyFilterOverlay(R.id.btn_filter_none);
+							applyStickerPreview("");
+							
+							et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
+							et_subtitle_input.setText("");
+							et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
+							subtitleText = "";
+							subtitleXPercent = 50f;
+							subtitleYPercent = 85f;
+							slider_text_x.setValue(50f);
+							slider_text_y.setValue(85f);
+							updateSubtitlePreview();
+							
+							showPanel(panel_clip_settings);
+							setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
+							
+							undoStack.clear();
+							redoStack.clear();
+							updateUndoRedoButtonsVisibility();
+						}
+					} else if (playbackState == Player.STATE_ENDED) {
+						exoPlayer.seekTo((long) (trimStartSec * 1000));
+						exoPlayer.play();
+					}
 				}
 			});
 		}
@@ -1430,9 +1440,25 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void updateVideoTransformations() {
-		if (video_view == null) return;
-		video_view.setRotation(currentRotation);
-		video_view.setScaleX(isMirror ? -1f : 1f);
+		if (playerView == null) return;
+		playerView.setRotation(currentRotation);
+		playerView.setScaleX(isMirror ? -1f : 1f);
+		
+		updateToggleButton(btn_action_mirror, isMirror);
+	}
+
+	private void updateToggleButton(LinearLayout btnLayout, boolean isActive) {
+		if (btnLayout == null) return;
+		int activeColor = getResources().getColor(R.color.colorAccent);
+		int normalColor = getResources().getColor(R.color.lumina_text_primary);
+		for (int i = 0; i < btnLayout.getChildCount(); i++) {
+			View child = btnLayout.getChildAt(i);
+			if (child instanceof ImageView) {
+				((ImageView) child).setImageTintList(android.content.res.ColorStateList.valueOf(isActive ? activeColor : normalColor));
+			} else if (child instanceof TextView) {
+				((TextView) child).setTextColor(isActive ? activeColor : normalColor);
+			}
+		}
 	}
 
 	private void updateSubtitlePreview() {
@@ -1609,15 +1635,15 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 						}
 					}
 				} else {
-					if (video_view != null && video_view.isPlaying() && !isUserSeeking) {
-						int currentPosMs = video_view.getCurrentPosition();
+					if ((exoPlayer != null && exoPlayer.isPlaying()) && !isUserSeeking) {
+						int currentPosMs = (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
 						float currentPosSec = currentPosMs / 1000f;
 						
 						if (trimEndSec > 0 && currentPosSec >= trimEndSec) {
-							video_view.seekTo((int) (trimStartSec * 1000));
+							if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
 						} else {
 							updateTimecodes(currentPosMs);
-							int durationMs = video_view.getDuration();
+							int durationMs = (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 							if (durationMs > 0) {
 								float progressRatio = (float) currentPosMs / durationMs;
 								int trackWidth = layout_tracks_wrapper.getWidth();
@@ -1747,8 +1773,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (isMockVideo) {
 			isMockPlaying = false;
 			iv_play_pause.setImageResource(R.drawable.ic_play);
-		} else if (video_view != null && video_view.isPlaying()) {
-			video_view.pause();
+		} else if ((exoPlayer != null && exoPlayer.isPlaying())) {
+			if (exoPlayer != null) exoPlayer.pause();
 			iv_play_pause.setImageResource(R.drawable.ic_play);
 		}
 		pausePreviewAudio();
@@ -1829,11 +1855,11 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			public void onClick(DialogInterface dialog, int which) {
 				selectedTransition = which;
 				Toast.makeText(EditActivity.this, "Applied Transition: " + transitions[which], Toast.LENGTH_SHORT).show();
-				if (video_view != null) {
-					video_view.animate().alpha(0.0f).setDuration(250).withEndAction(new Runnable() {
+				if (playerView != null) {
+					playerView.animate().alpha(0.0f).setDuration(250).withEndAction(new Runnable() {
 						@Override
 						public void run() {
-							video_view.animate().alpha(1.0f).setDuration(250).start();
+							playerView.animate().alpha(1.0f).setDuration(250).start();
 						}
 					}).start();
 				}
@@ -1944,7 +1970,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		}
 
 		stopPreviewAudio();
-		if (isMockPlaying || (video_view != null && video_view.isPlaying())) {
+		if (isMockPlaying || ((exoPlayer != null && exoPlayer.isPlaying()))) {
 			playPreviewAudio();
 		}
 	}
@@ -2093,8 +2119,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					if (isMockVideo) {
 						isMockPlaying = false;
 						iv_play_pause.setImageResource(R.drawable.ic_play);
-					} else if (video_view != null && video_view.isPlaying()) {
-						video_view.pause();
+					} else if ((exoPlayer != null && exoPlayer.isPlaying())) {
+						if (exoPlayer != null) exoPlayer.pause();
 						iv_play_pause.setImageResource(R.drawable.ic_play);
 					}
 

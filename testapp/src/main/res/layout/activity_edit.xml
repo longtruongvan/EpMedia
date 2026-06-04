@@ -107,11 +107,13 @@
             android:clickable="true"
             android:focusable="true">
 
-            <VideoView
+            <androidx.media3.ui.PlayerView
                 android:id="@+id/video_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
+                app:surface_type="texture_view"
+                app:use_controller="false"
                 android:visibility="gone" />
 
             <!-- Filter tint overlay -->
