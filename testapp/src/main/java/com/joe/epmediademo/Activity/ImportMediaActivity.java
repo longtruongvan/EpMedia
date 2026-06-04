@@ -244,19 +244,13 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 			Toast.makeText(this, R.string.no_photo_toast, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_import_submit) {
 			if (selectedVideo != null) {
-				if (selectedVideo.path.startsWith("mock_")) {
-					// It is a mock file, run standard picking as fallback or show warning
-					Toast.makeText(this, R.string.mock_import_toast, Toast.LENGTH_SHORT).show();
-					openSystemPicker();
-				} else {
-					Intent intent = new Intent(this, EditActivity.class);
-					intent.putExtra("VIDEO_PATH", selectedVideo.path);
-					if (templateId != null) {
-						intent.putExtra("TEMPLATE_ID", templateId);
-					}
-					startActivity(intent);
-					finish();
+				Intent intent = new Intent(this, EditActivity.class);
+				intent.putExtra("VIDEO_PATH", selectedVideo.path);
+				if (templateId != null) {
+					intent.putExtra("TEMPLATE_ID", templateId);
 				}
+				startActivity(intent);
+				finish();
 			}
 		} else if (id == R.id.btn_export_action) {
 			if (selectedVideo != null) {
