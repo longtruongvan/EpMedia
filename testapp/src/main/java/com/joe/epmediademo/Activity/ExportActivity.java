@@ -51,7 +51,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private Button btn_trigger_export;
 
 	// Intent configuration inputs
-	private String videoUrl;
+	private java.util.ArrayList<String> videoUrls;
 	private String audioPath;
 	private float trimStartSec;
 	private float trimEndSec;
@@ -95,7 +95,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 
 		// Read configuration extras
 		Intent intent = getIntent();
-		videoUrl = intent.getStringExtra("VIDEO_PATH");
+		videoUrls = intent.getStringArrayListExtra("VIDEO_PATHS");
 		audioPath = intent.getStringExtra("AUDIO_PATH");
 		trimStartSec = intent.getFloatExtra("TRIM_START", 0f);
 		trimEndSec = intent.getFloatExtra("TRIM_END", 0f);
@@ -177,7 +177,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	}
 
 	private void loadVideoMetadataAndPreview() {
-		if (videoUrl == null || videoUrl.isEmpty()) return;
+		if (videoUrls == null || videoUrls.isEmpty()) return;
 
 		float duration = trimEndSec - trimStartSec;
 		int secs = (int) duration % 60;
@@ -187,13 +187,13 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		// Set Resolution tag text
 		tv_export_res_tag.setText(getResName(selectedResMode));
 
-		if (videoUrl.startsWith("mock_") || !new java.io.File(videoUrl).exists()) {
+		if (videoUrls.get(0).startsWith("mock_") || !new java.io.File(videoUrls.get(0)).exists()) {
 			int mockDrawableId = R.drawable.mock_cybercity_thumb;
-			if (videoUrl.contains("mountain")) {
+			if (videoUrls.get(0).contains("mountain")) {
 				mockDrawableId = R.drawable.mock_mountain_thumb;
-			} else if (videoUrl.contains("forest") || videoUrl.contains("nature")) {
+			} else if (videoUrls.get(0).contains("forest") || videoUrls.get(0).contains("nature")) {
 				mockDrawableId = R.drawable.mock_draft_nature;
-			} else if (videoUrl.contains("tiktok")) {
+			} else if (videoUrls.get(0).contains("tiktok")) {
 				mockDrawableId = R.drawable.mock_draft_tiktok;
 			}
 			iv_export_preview.setImageResource(mockDrawableId);
@@ -205,7 +205,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				public void run() {
 					MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 					try {
-						retriever.setDataSource(videoUrl);
+						retriever.setDataSource(videoUrls.get(0));
 						long timeUs = (long) (trimStartSec * 1000000L);
 						final Bitmap bitmap = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
 						if (bitmap != null) {
@@ -354,7 +354,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	}
 
 	private void startVideoExport() {
-		if (videoUrl == null || videoUrl.isEmpty()) {
+		if (videoUrls == null || videoUrls.isEmpty()) {
 			Toast.makeText(this, R.string.toast_export_no_source, Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -369,7 +369,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		progress_export.setProgress(0);
 		tv_export_percent.setText("0%");
 
-		boolean isMock = videoUrl.startsWith("mock_") || !new java.io.File(videoUrl).exists();
+		boolean isMock = videoUrls.get(0).startsWith("mock_") || !new java.io.File(videoUrls.get(0)).exists();
 		if (isMock) {
 			outputPath = MyApplication.getSavePath() + "out.mp4";
 			final android.os.Handler handler = new android.os.Handler();
@@ -404,7 +404,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		hasAudio = false;
 		android.media.MediaExtractor extractor = new android.media.MediaExtractor();
 		try {
-			extractor.setDataSource(videoUrl);
+			extractor.setDataSource(videoUrls.get(0));
 			int numTracks = extractor.getTrackCount();
 			for (int i = 0; i < numTracks; i++) {
 				android.media.MediaFormat format = extractor.getTrackFormat(i);
@@ -454,113 +454,128 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		cleanupTempFiles();
 		deleteFileSilently(outputPath);
 
-		EpVideo epVideo = new EpVideo(videoUrl);
-
-		// Apply trim clip
-		epVideo.clip(trimStartSec, trimEndSec - trimStartSec);
-
-		// Apply crop presets
-		if (selectedCropPreset != 0 && videoWidth > 0 && videoHeight > 0) {
-			int cw = videoWidth;
-			int ch = videoHeight;
-			int cx = 0;
-			int cy = 0;
-			
-			if (selectedCropPreset == 1) { // 16:9
-				ch = (int) (videoWidth * 9f / 16f);
-				if (ch > videoHeight) {
-					ch = videoHeight;
-					cw = (int) (videoHeight * 16f / 9f);
+		java.util.List<EpVideo> epVideos = new java.util.ArrayList<>();
+		if (videoUrls != null && !videoUrls.isEmpty()) {
+			for (int i = 0; i < videoUrls.size(); i++) {
+				EpVideo epVideo = new EpVideo(videoUrls.get(i));
+		
+				// Apply trim clip
+				if (i == 0 && (trimStartSec > 0 || trimEndSec > 0)) epVideo.clip(trimStartSec, trimEndSec - trimStartSec);
+		
+				// Apply crop presets
+				if (selectedCropPreset != 0 && videoWidth > 0 && videoHeight > 0) {
+					int cw = videoWidth;
+					int ch = videoHeight;
+					int cx = 0;
+					int cy = 0;
+					
+					if (selectedCropPreset == 1) { // 16:9
+						ch = (int) (videoWidth * 9f / 16f);
+						if (ch > videoHeight) {
+							ch = videoHeight;
+							cw = (int) (videoHeight * 16f / 9f);
+						}
+						cx = (videoWidth - cw) / 2;
+						cy = (videoHeight - ch) / 2;
+					} else if (selectedCropPreset == 2) { // 9:16
+						cw = (int) (videoHeight * 9f / 16f);
+						if (cw > videoWidth) {
+							cw = videoWidth;
+							ch = (int) (videoWidth * 16f / 9f);
+						}
+						cx = (videoWidth - cw) / 2;
+						cy = (videoHeight - ch) / 2;
+					} else if (selectedCropPreset == 3) { // 1:1
+						int minDim = Math.min(videoWidth, videoHeight);
+						cw = minDim;
+						ch = minDim;
+						cx = (videoWidth - minDim) / 2;
+						cy = (videoHeight - minDim) / 2;
+					}
+					epVideo.crop(cw, ch, cx, cy);
 				}
-				cx = (videoWidth - cw) / 2;
-				cy = (videoHeight - ch) / 2;
-			} else if (selectedCropPreset == 2) { // 9:16
-				cw = (int) (videoHeight * 9f / 16f);
-				if (cw > videoWidth) {
-					cw = videoWidth;
-					ch = (int) (videoWidth * 16f / 9f);
+		
+				// Apply rotate & mirror
+				if (currentRotation != 0 || isMirror) {
+					epVideo.rotation(currentRotation, isMirror);
 				}
-				cx = (videoWidth - cw) / 2;
-				cy = (videoHeight - ch) / 2;
-			} else if (selectedCropPreset == 3) { // 1:1
-				int minDim = Math.min(videoWidth, videoHeight);
-				cw = minDim;
-				ch = minDim;
-				cx = (videoWidth - minDim) / 2;
-				cy = (videoHeight - minDim) / 2;
+		
+				// Apply color filters
+				if (filterId == R.id.btn_filter_warm) {
+					epVideo.addFilter("colorbalance=rh=0.1:gh=0.05:bh=-0.1");
+				} else if (filterId == R.id.btn_filter_cool) {
+					epVideo.addFilter("colorbalance=rh=-0.1:gh=0.0:bh=0.15");
+				} else if (filterId == R.id.btn_filter_vintage) {
+					epVideo.addFilter("colorbalance=rh=0.15:gh=0.05:bh=-0.05,eq=saturation=0.8");
+				}
+		
+				// Apply visual effects
+				if (effectId == 0) { // Glitch VHS
+					epVideo.addFilter("hue=h=30:s=1.5,noise=alls=15:allf=t+u");
+				} else if (effectId == 1) { // Cinematic Light Leak
+					epVideo.addFilter("colorbalance=rh=0.1:gh=-0.05:bh=-0.05,eq=contrast=1.15:saturation=1.1");
+				} else if (effectId == 2) { // Neon Cyberpunk Glow
+					epVideo.addFilter("colorbalance=rh=0.25:gh=-0.1:bh=0.25,hue=s=1.4");
+				}
+		
+				// Apply overlays
+				if (overlayId == 0) { // Vignette Shadow
+					epVideo.addFilter("vignette=PI/4");
+				} else if (overlayId == 1) { // Retro Vignette
+					epVideo.addFilter("vignette='PI/3':eval=frame,eq=saturation=0.7");
+				} else if (overlayId == 2) { // Cinematic Letterbox (Black Bars)
+					epVideo.addFilter("drawbox=y=0:h=ih/8:color=black:t=fill,drawbox=y=ih-ih/8:h=ih/8:color=black:t=fill");
+				}
+		
+				// Apply Transitions (Fade / Zoom / Wipe)
+				float duration = trimEndSec - trimStartSec;
+				if (duration <= 0) {
+					duration = 10f; // fallback
+				}
+				if (transitionId == 0) { // Fade to Black
+					float fadeStart = Math.max(0f, duration - 1.0f);
+					epVideo.addFilter("fade=t=in:st=0:d=1,fade=t=out:st=" + fadeStart + ":d=1");
+				} else if (transitionId == 1) { // Cross Dissolve (mock with a soft color transition or fade in/out)
+					epVideo.addFilter("fade=t=in:st=0:d=1.5");
+				} else if (transitionId == 2) { // Wipe Left / Slide
+					epVideo.addFilter("scroll=horizontal=0.0005");
+				} else if (transitionId == 3) { // Zoom In
+					epVideo.addFilter("zoompan=z='min(zoom+0.001,1.3)':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1280x720");
+				}
+		
+				// Apply Enhance filter (sharpen)
+				if (isEnhanced) {
+					epVideo.addFilter("unsharp=5:5:1.0:5:5:0.0");
+				}
+		
+				// Apply sticker emoji overlay
+				if (stickerText != null && !stickerText.trim().isEmpty()) {
+					int cx = videoWidth > 0 ? (videoWidth / 2 - 24) : 100;
+					int cy = videoHeight > 0 ? (videoHeight / 2 - 24) : 100;
+					epVideo.addText(cx, cy, 48, "white", MyApplication.getSavePath() + "msyh.ttf", stickerText);
+				}
+		
+				// Apply subtitle overlay
+				if (subtitleText != null && !subtitleText.trim().isEmpty()) {
+					int targetX = (int) (videoWidth * (subtitleXPercent / 100f));
+					int targetY = (int) (videoHeight * (subtitleYPercent / 100f));
+					epVideo.addText(targetX, targetY, 36, "white", MyApplication.getSavePath() + "msyh.ttf", subtitleText);
+				}
+		
+				// Custom options can add resolution/bitrate flags based on settings (selectedResMode, selectedFpsMode)
+
+		
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						tv_export_status.setText("Áp dụng bộ lọc và hiệu ứng...");
+					}
+				});
+		
+				epVideos.add(epVideo);
 			}
-			epVideo.crop(cw, ch, cx, cy);
 		}
-
-		// Apply rotate & mirror
-		if (currentRotation != 0 || isMirror) {
-			epVideo.rotation(currentRotation, isMirror);
-		}
-
-		// Apply color filters
-		if (filterId == R.id.btn_filter_warm) {
-			epVideo.addFilter("colorbalance=rh=0.1:gh=0.05:bh=-0.1");
-		} else if (filterId == R.id.btn_filter_cool) {
-			epVideo.addFilter("colorbalance=rh=-0.1:gh=0.0:bh=0.15");
-		} else if (filterId == R.id.btn_filter_vintage) {
-			epVideo.addFilter("colorbalance=rh=0.15:gh=0.05:bh=-0.05,eq=saturation=0.8");
-		}
-
-		// Apply visual effects
-		if (effectId == 0) { // Glitch VHS
-			epVideo.addFilter("hue=h=30:s=1.5,noise=alls=15:allf=t+u");
-		} else if (effectId == 1) { // Cinematic Light Leak
-			epVideo.addFilter("colorbalance=rh=0.1:gh=-0.05:bh=-0.05,eq=contrast=1.15:saturation=1.1");
-		} else if (effectId == 2) { // Neon Cyberpunk Glow
-			epVideo.addFilter("colorbalance=rh=0.25:gh=-0.1:bh=0.25,hue=s=1.4");
-		}
-
-		// Apply overlays
-		if (overlayId == 0) { // Vignette Shadow
-			epVideo.addFilter("vignette=PI/4");
-		} else if (overlayId == 1) { // Retro Vignette
-			epVideo.addFilter("vignette='PI/3':eval=frame,eq=saturation=0.7");
-		} else if (overlayId == 2) { // Cinematic Letterbox (Black Bars)
-			epVideo.addFilter("drawbox=y=0:h=ih/8:color=black:t=fill,drawbox=y=ih-ih/8:h=ih/8:color=black:t=fill");
-		}
-
-		// Apply Transitions (Fade / Zoom / Wipe)
-		float duration = trimEndSec - trimStartSec;
-		if (duration <= 0) {
-			duration = 10f; // fallback
-		}
-		if (transitionId == 0) { // Fade to Black
-			float fadeStart = Math.max(0f, duration - 1.0f);
-			epVideo.addFilter("fade=t=in:st=0:d=1,fade=t=out:st=" + fadeStart + ":d=1");
-		} else if (transitionId == 1) { // Cross Dissolve (mock with a soft color transition or fade in/out)
-			epVideo.addFilter("fade=t=in:st=0:d=1.5");
-		} else if (transitionId == 2) { // Wipe Left / Slide
-			epVideo.addFilter("scroll=horizontal=0.0005");
-		} else if (transitionId == 3) { // Zoom In
-			epVideo.addFilter("zoompan=z='min(zoom+0.001,1.3)':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1280x720");
-		}
-
-		// Apply Enhance filter (sharpen)
-		if (isEnhanced) {
-			epVideo.addFilter("unsharp=5:5:1.0:5:5:0.0");
-		}
-
-		// Apply sticker emoji overlay
-		if (stickerText != null && !stickerText.trim().isEmpty()) {
-			int cx = videoWidth > 0 ? (videoWidth / 2 - 24) : 100;
-			int cy = videoHeight > 0 ? (videoHeight / 2 - 24) : 100;
-			epVideo.addText(cx, cy, 48, "white", MyApplication.getSavePath() + "msyh.ttf", stickerText);
-		}
-
-		// Apply subtitle overlay
-		if (subtitleText != null && !subtitleText.trim().isEmpty()) {
-			int targetX = (int) (videoWidth * (subtitleXPercent / 100f));
-			int targetY = (int) (videoHeight * (subtitleYPercent / 100f));
-			epVideo.addText(targetX, targetY, 36, "white", MyApplication.getSavePath() + "msyh.ttf", subtitleText);
-		}
-
-		// Custom options can add resolution/bitrate flags based on settings (selectedResMode, selectedFpsMode)
-		EpEditor.OutputOption opt = new EpEditor.OutputOption(pathVisuals);
+				EpEditor.OutputOption opt = new EpEditor.OutputOption(pathVisuals);
 		if (selectedResMode == 0) {
 			opt.setWidth(1280);
 			opt.setHeight(720);
@@ -579,14 +594,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		else if (selectedFpsMode == 1) opt.frameRate = 30;
 		else if (selectedFpsMode == 2) opt.frameRate = 60;
 
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				tv_export_status.setText("Áp dụng bộ lọc và hiệu ứng...");
-			}
-		});
-
-		EpEditor.exec(epVideo, opt, new OnEditorListener() {
+		OnEditorListener commonListener = new OnEditorListener() {
 			@Override
 			public void onSuccess() {
 				if (needSpeed) {
@@ -616,7 +624,13 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 					}
 				});
 			}
-		});
+		};
+
+		if (epVideos.size() == 1) {
+			EpEditor.exec(epVideos.get(0), opt, commonListener);
+		} else if (epVideos.size() > 1) {
+			EpEditor.merge(epVideos, opt, commonListener);
+		}
 	}
 
 	private void showExportSuccess() {

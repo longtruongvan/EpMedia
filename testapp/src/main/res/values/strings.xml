@@ -209,4 +209,6 @@
     <string name="ready_to_export">Ready to export</string>
     <string name="explore">Explore</string>
     <string name="toast_applying_template">Applying template %s...</string>
+    <string name="toast_video_added">Đã thêm video thành công</string>
+
 </resources>

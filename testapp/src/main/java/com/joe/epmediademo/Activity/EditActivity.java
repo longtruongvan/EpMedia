@@ -56,8 +56,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	
 	// Top Header views
 	private ImageView bt_back;
-	private ImageView bt_undo;
-	private ImageView bt_redo;
+	private ImageView btn_seek_backward;
+	private ImageView btn_seek_forward;
 	private Button bt_exec;
 	
 	// Video Player & Overlay Views
@@ -75,6 +75,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private ImageView iv_play_pause;
 	private ImageView btn_video_fullscreen;
 	private Button bt_file;
+	private android.widget.ImageView btn_add_video;
 	
 	// Timeline Views
 	private FrameLayout timeline_container;
@@ -168,7 +169,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private Button btn_sticker_heart;
 
 	// State variables
-	private String videoUrl;
+	private java.util.ArrayList<String> videoUrls = new java.util.ArrayList<>();
 	private ProgressDialog mProgressDialog;
 	private Handler playHandler = new Handler();
 	private Runnable playRunnable;
@@ -259,9 +260,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		startPlayProgressTracker();
 
 		// Load video from intent if passed from MainActivity
-		videoUrl = getIntent().getStringExtra("VIDEO_PATH");
-		if (videoUrl != null && !videoUrl.isEmpty()) {
-			setupVideoPlayer(videoUrl);
+		String initPath = getIntent().getStringExtra("VIDEO_PATH");
+		if (initPath != null && !initPath.isEmpty()) {
+			videoUrls.add(initPath);
+			setupVideoPlayer(initPath);
 			String initTool = getIntent().getStringExtra("INIT_TOOL");
 			if (initTool != null) {
 				applyInitialTool(initTool);
@@ -276,8 +278,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private void initView() {
 		// Top header bindings
 		bt_back = (ImageView) findViewById(R.id.bt_back);
-		bt_undo = (ImageView) findViewById(R.id.bt_undo);
-		bt_redo = (ImageView) findViewById(R.id.bt_redo);
+		btn_seek_backward = (ImageView) findViewById(R.id.btn_seek_backward);
+		btn_seek_forward = (ImageView) findViewById(R.id.btn_seek_forward);
 		bt_exec = (Button) findViewById(R.id.bt_exec);
 		layout_top_header = (RelativeLayout) findViewById(R.id.layout_top_header);
 		
@@ -295,6 +297,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		iv_play_pause = (ImageView) findViewById(R.id.iv_play_pause);
 		btn_video_fullscreen = (ImageView) findViewById(R.id.btn_video_fullscreen);
 		bt_file = (Button) findViewById(R.id.bt_file);
+		btn_add_video = (android.widget.ImageView) findViewById(R.id.btn_add_video);
 		
 		// Timeline bindings
 		timeline_container = (FrameLayout) findViewById(R.id.timeline_container);
@@ -387,11 +390,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 		// Set Click Listeners
 		bt_back.setOnClickListener(this);
-		bt_undo.setOnClickListener(this);
-		bt_redo.setOnClickListener(this);
+		if (btn_seek_backward != null) btn_seek_backward.setOnClickListener(this);
+		if (btn_seek_forward != null) btn_seek_forward.setOnClickListener(this);
 		bt_exec.setOnClickListener(this);
 		
 		bt_file.setOnClickListener(this);
+		if (btn_add_video != null) btn_add_video.setOnClickListener(this);
+		if (btn_add_video != null) btn_add_video.setOnClickListener(this);
 		video_container.setOnClickListener(this);
 		btn_video_speed.setOnClickListener(this);
 		iv_play_pause.setOnClickListener(this);
@@ -607,16 +612,18 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		int id = v.getId();
 		if (id == R.id.bt_back) {
 			finish();
-		} else if (id == R.id.bt_undo) {
-			undo();
-		} else if (id == R.id.bt_redo) {
-			redo();
+		} else if (id == R.id.btn_seek_backward) {
+			seekVideo(-500); // Back 0.5s
+		} else if (id == R.id.btn_seek_forward) {
+			seekVideo(500);  // Forward 0.5s
 		} else if (id == R.id.bt_exec) {
 			execVideo();
 		} else if (id == R.id.bt_file) {
 			chooseFile();
+		} else if (id == R.id.btn_add_video) {
+			chooseFile();
 		} else if (id == R.id.video_container) {
-			if (videoUrl == null || videoUrl.isEmpty()) {
+			if (videoUrls == null || videoUrls.isEmpty()) {
 				chooseFile();
 			} else {
 				togglePlayPause();
@@ -644,9 +651,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			Toast.makeText(this, isTimelineZoomed ? "Timeline Zoomed 2x" : "Timeline Normal", Toast.LENGTH_SHORT).show();
 			btn_zoom_in.setAlpha(isTimelineZoomed ? 1.0f : 0.5f);
 			if (isMockVideo) {
-				loadMockTimelineThumbnails(videoUrl);
+				loadMockTimelineThumbnails(videoUrls.get(0));
 			} else {
-				loadTimelineThumbnails(videoUrl);
+				loadTimelineThumbnails(videoUrls.get(0));
 			}
 		} else if (id == R.id.btn_layers) {
 			Toast.makeText(this, R.string.toast_manage_layers, Toast.LENGTH_SHORT).show();
@@ -684,9 +691,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				splitPoints.add(ratio);
 				Toast.makeText(this, getString(R.string.toast_split_clip) + " (" + String.format(Locale.US, "%.1f", ratio * (durationMs/1000f)) + "s)", Toast.LENGTH_SHORT).show();
 				if (isMockVideo) {
-					loadMockTimelineThumbnails(videoUrl);
+					loadMockTimelineThumbnails(videoUrls.get(0));
 				} else {
-					loadTimelineThumbnails(videoUrl);
+					loadTimelineThumbnails(videoUrls.get(0));
 				}
 			}
 		} else if (id == R.id.btn_action_speed) {
@@ -727,12 +734,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					
 					if (isMockVideo) {
 						mockCurrentPosMs = (int) (trimStartSec * 1000);
-						loadMockTimelineThumbnails(videoUrl);
+						loadMockTimelineThumbnails(videoUrls.get(0));
 					} else {
 						if (playerView != null) {
 							if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
 						}
-						loadTimelineThumbnails(videoUrl);
+						loadTimelineThumbnails(videoUrls.get(0));
 					}
 				} else {
 					resetEditorState();
@@ -838,13 +845,15 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void updateUndoRedoButtonsVisibility() {
-		if (bt_undo != null) {
-			bt_undo.setEnabled(!undoStack.isEmpty());
-			bt_undo.setAlpha(undoStack.isEmpty() ? 0.4f : 1.0f);
-		}
-		if (bt_redo != null) {
-			bt_redo.setEnabled(!redoStack.isEmpty());
-			bt_redo.setAlpha(redoStack.isEmpty() ? 0.4f : 1.0f);
+
+	}
+
+	private void seekVideo(long offsetMs) {
+		if (exoPlayer != null) {
+			long newPosition = exoPlayer.getCurrentPosition() + offsetMs;
+			if (newPosition < 0) newPosition = 0;
+			if (newPosition > exoPlayer.getDuration()) newPosition = exoPlayer.getDuration();
+			exoPlayer.seekTo(newPosition);
 		}
 	}
 
@@ -1450,10 +1459,14 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (exoPlayer != null) {
 			java.util.List<androidx.media3.common.Effect> effects = new java.util.ArrayList<>();
 			if (isEnhanced) {
-				// Sử dụng Contrast tăng cường (0.5f) như một visual preview cho tính năng Làm nét (Unsharp)
-				effects.add(new androidx.media3.effect.Contrast(0.5f));
+				effects.add(new androidx.media3.effect.Contrast(1.0f)); // Max contrast for obvious visual indicator
 			}
 			exoPlayer.setVideoEffects(effects);
+			
+			// Force the player to redraw the current frame so the effect shows immediately
+			if (!exoPlayer.isPlaying()) {
+				exoPlayer.seekTo(exoPlayer.getCurrentPosition());
+			}
 		}
 	}
 
@@ -1492,8 +1505,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void loadTimelineThumbnails(final String videoPath) {
+		loadTimelineThumbnails(videoPath, true);
+	}
+
+	private void loadTimelineThumbnails(final String videoPath, final boolean clearOld) {
 		final LinearLayout thumbnailContainer = timeline_thumbnails;
-		thumbnailContainer.removeAllViews();
+		if (clearOld) thumbnailContainer.removeAllViews();
 		
 		new Thread(new Runnable() {
 			@Override
@@ -1686,6 +1703,19 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		}
 	}
 
+	
+	private void appendVideo(String path) {
+		if (exoPlayer != null) {
+			androidx.media3.common.MediaItem mediaItem = androidx.media3.common.MediaItem.fromUri(android.net.Uri.parse(path));
+			exoPlayer.addMediaItem(mediaItem);
+			if (!exoPlayer.isPlaying()) {
+				exoPlayer.prepare();
+			}
+			loadTimelineThumbnails(path, false);
+            Toast.makeText(this, R.string.toast_video_added, Toast.LENGTH_SHORT).show();
+		}
+	}
+
 	private void chooseFile() {
 		Intent intent = new Intent();
 		intent.setType("video/*");
@@ -1698,15 +1728,20 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == CHOOSE_FILE && resultCode == RESULT_OK && data != null) {
-			videoUrl = UriUtils.getPath(EditActivity.this, data.getData());
-			setupVideoPlayer(videoUrl);
+			String newVideoUrl = UriUtils.getPath(EditActivity.this, data.getData());
+			videoUrls.add(newVideoUrl);
+			if (videoUrls.size() == 1) {
+				setupVideoPlayer(newVideoUrl);
+			} else {
+				appendVideo(newVideoUrl);
+			}
 		}
 	}
 
 	private void execVideo() {
-		if (videoUrl != null && !videoUrl.isEmpty()) {
+		if (!videoUrls.isEmpty()) {
 			Intent intent = new Intent(EditActivity.this, ExportActivity.class);
-			intent.putExtra("VIDEO_PATH", videoUrl);
+			intent.putStringArrayListExtra("VIDEO_PATHS", videoUrls);
 			intent.putExtra("TRIM_START", trimStartSec);
 			intent.putExtra("TRIM_END", trimEndSec);
 			intent.putExtra("CROP_PRESET", selectedCropPreset);

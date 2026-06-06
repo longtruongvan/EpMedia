@@ -39,34 +39,7 @@
                     android:focusable="true"
                     app:tint="@color/lumina_text_primary" />
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="24dp"
-                    android:background="#1AFFFFFF"
-                    android:layout_marginHorizontal="12dp" />
 
-                <ImageView
-                    android:id="@+id/bt_undo"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/ic_undo"
-                    android:contentDescription="Undo"
-                    android:layout_marginEnd="12dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:tint="@color/lumina_text_secondary" />
-
-                <ImageView
-                    android:id="@+id/bt_redo"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/ic_redo"
-                    android:contentDescription="Redo"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:tint="@color/lumina_text_secondary" />
             </LinearLayout>
 
             <!-- Center Title (Centered on screen) -->
@@ -81,17 +54,18 @@
                 android:layout_centerInParent="true" />
 
             <!-- Right Button -->
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/bt_exec"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:backgroundTint="@color/colorAccent"
-                android:textColor="@color/lumina_bg"
+                android:background="@drawable/bg_btn_export_premium"
+                android:textColor="@android:color/white"
                 android:text="@string/export"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:paddingHorizontal="16dp"
-                app:cornerRadius="8dp"
+                android:paddingHorizontal="24dp"
+                android:elevation="4dp"
+                android:stateListAnimator="@null"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true" />
 
@@ -228,11 +202,23 @@
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
+                <!-- Seek backward (-0.5s) -->
+                <ImageView
+                    android:id="@+id/btn_seek_backward"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_fast_rewind"
+                    android:layout_marginEnd="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:tint="@color/lumina_text_primary" />
+
                 <!-- Play/Pause circle button -->
                 <ImageView
                     android:id="@+id/iv_play_pause"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:src="@drawable/ic_play"
                     android:background="@drawable/bg_circle_play"
                     android:scaleType="centerInside"
@@ -240,6 +226,18 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:tint="@color/lumina_bg" />
+
+                <!-- Seek forward (+0.5s) -->
+                <ImageView
+                    android:id="@+id/btn_seek_forward"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_fast_forward"
+                    android:layout_marginEnd="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:tint="@color/lumina_text_primary" />
 
                 <!-- Fullscreen button -->
                 <ImageView
@@ -436,11 +434,28 @@
                             <!-- Timeline Left & Right Padding Spacers to center playhead at start/end -->
                             <!-- Dynamic LinearLayout holding the thumbnails of the clips -->
                             <LinearLayout
-                                android:id="@+id/timeline_thumbnails"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:orientation="horizontal"
-                                android:gravity="center_vertical" />
+                                android:gravity="center_vertical">
+                                
+                                <LinearLayout
+                                    android:id="@+id/timeline_thumbnails"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical" />
+                                    
+                                <ImageView
+                                    android:id="@+id/btn_add_video"
+                                    android:layout_width="48dp"
+                                    android:layout_height="48dp"
+                                    android:layout_marginStart="8dp"
+                                    android:background="#33FFFFFF"
+                                    android:src="@android:drawable/ic_input_add"
+                                    android:scaleType="center"
+                                    app:tint="@android:color/white" />
+                            </LinearLayout>
                         </FrameLayout>
 
                         <!-- Track 4: Audio Track (height 36dp) -->
