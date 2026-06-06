@@ -61,6 +61,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private String subtitleText;
 	private float subtitleXPercent;
 	private float subtitleYPercent;
+	private float subtitleScale;
 	private int videoWidth;
 	private int videoHeight;
 	private float speed;
@@ -105,6 +106,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		subtitleText = intent.getStringExtra("SUBTITLE_TEXT");
 		subtitleXPercent = intent.getFloatExtra("SUBTITLE_X", 50f);
 		subtitleYPercent = intent.getFloatExtra("SUBTITLE_Y", 85f);
+		subtitleScale = intent.getFloatExtra("SUBTITLE_SCALE", 1.0f);
 		videoWidth = intent.getIntExtra("VIDEO_WIDTH", 0);
 		videoHeight = intent.getIntExtra("VIDEO_HEIGHT", 0);
 		speed = intent.getFloatExtra("SPEED", 1.0f);
@@ -559,7 +561,10 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				if (subtitleText != null && !subtitleText.trim().isEmpty()) {
 					int targetX = (int) (videoWidth * (subtitleXPercent / 100f));
 					int targetY = (int) (videoHeight * (subtitleYPercent / 100f));
-					epVideo.addText(targetX, targetY, 36, "white", MyApplication.getSavePath() + "msyh.ttf", subtitleText);
+					int fontSize = (int) (36 * subtitleScale);
+					if (fontSize < 10) fontSize = 10;
+					if (fontSize > 200) fontSize = 200;
+					epVideo.addText(targetX, targetY, fontSize, "white", MyApplication.getSavePath() + "msyh.ttf", subtitleText);
 				}
 		
 				// Custom options can add resolution/bitrate flags based on settings (selectedResMode, selectedFpsMode)

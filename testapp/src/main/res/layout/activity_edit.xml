@@ -370,6 +370,7 @@
                             android:layout_marginBottom="4dp">
                             <!-- Clip: Teal & Orange -->
                             <LinearLayout
+                                android:id="@+id/clip_effects"
                                 android:layout_width="180dp"
                                 android:layout_height="match_parent"
                                 android:layout_marginStart="160dp"
@@ -377,7 +378,9 @@
                                 android:backgroundTint="#33FF998C"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                android:paddingHorizontal="8dp">
+                                android:paddingHorizontal="8dp"
+                                android:clickable="true"
+                                android:focusable="true">
                                 <ImageView
                                     android:layout_width="12dp"
                                     android:layout_height="12dp"
@@ -401,6 +404,7 @@
                             android:layout_marginBottom="4dp">
                             <!-- Clip: Summer Vibes -->
                             <LinearLayout
+                                android:id="@+id/clip_text"
                                 android:layout_width="140dp"
                                 android:layout_height="match_parent"
                                 android:layout_marginStart="240dp"
@@ -408,7 +412,9 @@
                                 android:backgroundTint="#33D1BCFF"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                android:paddingHorizontal="8dp">
+                                android:paddingHorizontal="8dp"
+                                android:clickable="true"
+                                android:focusable="true">
                                 <ImageView
                                     android:layout_width="12dp"
                                     android:layout_height="12dp"

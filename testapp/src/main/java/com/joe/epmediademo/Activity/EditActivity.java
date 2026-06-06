@@ -79,6 +79,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	
 	// Timeline Views
 	private FrameLayout timeline_container;
+	private LinearLayout clip_effects;
+	private LinearLayout clip_text;
 	private TextView tv_timeline_timecode;
 	private ImageView btn_zoom_in;
 	private ImageView btn_layers;
@@ -185,6 +187,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private String subtitleText = "";
 	private float subtitleXPercent = 50f;
 	private float subtitleYPercent = 85f;
+	private float subtitleScale = 1.0f;
 
 	// Visual filter & sticker state
 	private int activeFilterId = R.id.btn_filter_none;
@@ -218,12 +221,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		String subtitleText;
 		float subtitleXPercent;
 		float subtitleYPercent;
+		float subtitleScale;
 		int activeFilterId;
 		String activeStickerText;
 		boolean isEnhanced;
 
 		EditorState(float trimStartSec, float trimEndSec, int selectedCropPreset, int currentRotation, 
-					boolean isMirror, String subtitleText, float subtitleXPercent, float subtitleYPercent,
+					boolean isMirror, String subtitleText, float subtitleXPercent, float subtitleYPercent, float subtitleScale,
 					int activeFilterId, String activeStickerText, boolean isEnhanced) {
 			this.trimStartSec = trimStartSec;
 			this.trimEndSec = trimEndSec;
@@ -233,6 +237,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			this.subtitleText = subtitleText;
 			this.subtitleXPercent = subtitleXPercent;
 			this.subtitleYPercent = subtitleYPercent;
+			this.subtitleScale = subtitleScale;
 			this.activeFilterId = activeFilterId;
 			this.activeStickerText = activeStickerText;
 			this.isEnhanced = isEnhanced;
@@ -288,7 +293,48 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		playerView = findViewById(R.id.video_view);
 		video_filter_overlay = (View) findViewById(R.id.video_filter_overlay);
 		tv_sticker_preview = (TextView) findViewById(R.id.tv_sticker_preview);
-		tv_subtitle_preview = (TextView) findViewById(R.id.tv_subtitle_preview);
+				tv_subtitle_preview = (TextView) findViewById(R.id.tv_subtitle_preview);
+		tv_subtitle_preview.setOnTouchListener(new com.joe.epmediademo.Utils.MultiTouchListener(this, new com.joe.epmediademo.Utils.MultiTouchListener.OnTransformListener() {
+			@Override
+			public void onScale(float scaleFactor) {
+				subtitleScale *= scaleFactor;
+				if (subtitleScale < 0.5f) subtitleScale = 0.5f;
+				if (subtitleScale > 5.0f) subtitleScale = 5.0f;
+				updateSubtitlePreview();
+			}
+
+			@Override
+			public void onTranslate(float dx, float dy) {
+				if (video_container.getWidth() == 0) return;
+				float density = getResources().getDisplayMetrics().density;
+				float maxDx = video_container.getWidth() / 2f - 40f * density;
+				float maxDy = video_container.getHeight() - 60f * density;
+				
+				float currentXOffset = ((subtitleXPercent - 50f) / 50f) * maxDx;
+				float currentYOffset = -((100f - subtitleYPercent) / 100f) * maxDy;
+				
+				currentXOffset += dx;
+				currentYOffset += dy;
+				
+				subtitleXPercent = (currentXOffset / maxDx) * 50f + 50f;
+				subtitleYPercent = 100f - ((-currentYOffset / maxDy) * 100f);
+				
+				if (subtitleXPercent < 0) subtitleXPercent = 0;
+				if (subtitleXPercent > 100) subtitleXPercent = 100;
+				if (subtitleYPercent < 0) subtitleYPercent = 0;
+				if (subtitleYPercent > 100) subtitleYPercent = 100;
+				
+				slider_text_x.setValue(subtitleXPercent);
+				slider_text_y.setValue(subtitleYPercent);
+				
+				updateSubtitlePreview();
+			}
+
+			@Override
+			public void onTransformEnded() {
+				pushStateToUndo();
+			}
+		}));
 		tv_timecode = (TextView) findViewById(R.id.tv_timecode);
 		video_empty_overlay = (LinearLayout) findViewById(R.id.video_empty_overlay);
 		layout_video_controls = (LinearLayout) findViewById(R.id.layout_video_controls);
@@ -301,6 +347,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		
 		// Timeline bindings
 		timeline_container = (FrameLayout) findViewById(R.id.timeline_container);
+		clip_effects = (LinearLayout) findViewById(R.id.clip_effects);
+		clip_text = (LinearLayout) findViewById(R.id.clip_text);
+		if (clip_effects != null) clip_effects.setOnClickListener(this);
+		if (clip_text != null) clip_text.setOnClickListener(this);
 		tv_timeline_timecode = (TextView) findViewById(R.id.tv_timeline_timecode);
 		btn_zoom_in = (ImageView) findViewById(R.id.btn_zoom_in);
 		btn_layers = (ImageView) findViewById(R.id.btn_layers);
@@ -781,6 +831,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			showPanel(null);
 		} else if (id == R.id.btn_close_trim_editor) {
 			showPanel(panel_clip_settings);
+		} else if (id == R.id.clip_effects) {
+			showPanel(panel_filters);
+			setActiveTab(tab_filters, iv_tab_filters, tv_tab_filters);
+		} else if (id == R.id.clip_text) {
+			showPanel(panel_text_input);
+			setActiveTab(tab_text, iv_tab_text, tv_tab_text);
 		} else if (id == R.id.btn_close_filters) {
 			showPanel(null);
 		} else if (id == R.id.btn_filter_none) {
@@ -835,6 +891,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleText,
 			subtitleXPercent,
 			subtitleYPercent,
+			subtitleScale,
 			activeFilterId,
 			activeStickerText,
 			isEnhanced
@@ -871,6 +928,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleText,
 			subtitleXPercent,
 			subtitleYPercent,
+			subtitleScale,
 			activeFilterId,
 			activeStickerText,
 			isEnhanced
@@ -896,6 +954,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleText,
 			subtitleXPercent,
 			subtitleYPercent,
+			subtitleScale,
 			activeFilterId,
 			activeStickerText,
 			isEnhanced
@@ -916,6 +975,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		subtitleText = state.subtitleText;
 		subtitleXPercent = state.subtitleXPercent;
 		subtitleYPercent = state.subtitleYPercent;
+		subtitleScale = state.subtitleScale;
 		activeFilterId = state.activeFilterId;
 		activeStickerText = state.activeStickerText;
 		isEnhanced = state.isEnhanced;
@@ -1341,6 +1401,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleText = "";
 			subtitleXPercent = 50f;
 			subtitleYPercent = 85f;
+			subtitleScale = 1.0f;
 			slider_text_x.setValue(50f);
 			slider_text_y.setValue(85f);
 			updateSubtitlePreview();
@@ -1421,6 +1482,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 							subtitleText = "";
 							subtitleXPercent = 50f;
 							subtitleYPercent = 85f;
+			subtitleScale = 1.0f;
 							slider_text_x.setValue(50f);
 							slider_text_y.setValue(85f);
 							updateSubtitlePreview();
@@ -1499,6 +1561,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			
 			float yOffset = -((100f - subtitleYPercent) / 100f) * (containerHeight - 60f * density);
 			tv_subtitle_preview.setTranslationY(yOffset);
+			tv_subtitle_preview.setScaleX(subtitleScale);
+			tv_subtitle_preview.setScaleY(subtitleScale);
 		} else {
 			tv_subtitle_preview.setVisibility(View.GONE);
 		}
@@ -1750,6 +1814,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			intent.putExtra("SUBTITLE_TEXT", subtitleText);
 			intent.putExtra("SUBTITLE_X", subtitleXPercent);
 			intent.putExtra("SUBTITLE_Y", subtitleYPercent);
+			intent.putExtra("SUBTITLE_SCALE", subtitleScale);
 			intent.putExtra("VIDEO_WIDTH", videoWidth);
 			intent.putExtra("VIDEO_HEIGHT", videoHeight);
 			intent.putExtra("SPEED", currentSpeed);
