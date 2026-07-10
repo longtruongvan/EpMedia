@@ -1,1 +1,1 @@
-include ':joevideolib', ':testapp'
+include ':testapp'

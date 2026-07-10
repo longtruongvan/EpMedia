@@ -17,8 +17,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private androidx.cardview.widget.CardView btn_new_project;
 	private ImageView btn_search;
 	private TextView btn_see_all;
-	private LinearLayout btn_mock_project_1;
-	private LinearLayout btn_mock_project_2;
+	private LinearLayout btn_recent_project_1;
+	private LinearLayout btn_recent_project_2;
 	private LinearLayout btn_ai_remove_bg;
 	private LinearLayout btn_ai_captions;
 	private LinearLayout btn_draft_1;
@@ -125,9 +125,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		btn_new_project = (androidx.cardview.widget.CardView) findViewById(R.id.btn_new_project);
 		btn_search = (ImageView) findViewById(R.id.btn_search);
 		btn_see_all = (TextView) findViewById(R.id.btn_see_all);
-		btn_mock_project_1 = (LinearLayout) findViewById(R.id.btn_mock_project_1);
+		btn_recent_project_1 = (LinearLayout) findViewById(R.id.btn_recent_project_1);
 		tv_header_export = (TextView) findViewById(R.id.tv_header_export);
-		btn_mock_project_2 = (LinearLayout) findViewById(R.id.btn_mock_project_2);
+		btn_recent_project_2 = (LinearLayout) findViewById(R.id.btn_recent_project_2);
 		btn_ai_remove_bg = (LinearLayout) findViewById(R.id.btn_ai_remove_bg);
 		btn_ai_captions = (LinearLayout) findViewById(R.id.btn_ai_captions);
 		btn_draft_1 = (LinearLayout) findViewById(R.id.btn_draft_1);
@@ -191,8 +191,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		btn_new_project.setOnClickListener(this);
 		btn_search.setOnClickListener(this);
 		btn_see_all.setOnClickListener(this);
-		btn_mock_project_1.setOnClickListener(this);
-		btn_mock_project_2.setOnClickListener(this);
+		btn_recent_project_1.setOnClickListener(this);
+		btn_recent_project_2.setOnClickListener(this);
 		btn_ai_remove_bg.setOnClickListener(this);
 		btn_ai_captions.setOnClickListener(this);
 		btn_draft_1.setOnClickListener(this);
@@ -327,9 +327,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			activeTabId = R.id.nav_projects;
 			setActiveTab(nav_projects, iv_nav_projects, tv_nav_projects);
 			switchContentLayouts(layout_projects_content);
-		} else if (id == R.id.btn_mock_project_1 || id == R.id.btn_proj_1_tab) {
+		} else if (id == R.id.btn_recent_project_1 || id == R.id.btn_proj_1_tab) {
 			openImportForRealMedia();
-		} else if (id == R.id.btn_mock_project_2 || id == R.id.btn_proj_2_tab) {
+		} else if (id == R.id.btn_recent_project_2 || id == R.id.btn_proj_2_tab) {
 			openImportForRealMedia();
 		} else if (id == R.id.btn_ai_remove_bg || id == R.id.btn_ai_remove_bg_tab) {
 			Toast.makeText(this, R.string.toast_ai_remove_bg, Toast.LENGTH_SHORT).show();

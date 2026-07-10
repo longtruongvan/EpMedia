@@ -2,7 +2,6 @@ package com.joe.epmediademo.Activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,23 +9,18 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.joe.epmediademo.Application.MyApplication;
 import com.joe.epmediademo.R;
 import com.joe.epmediademo.Utils.UriUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import VideoHandle.EpEditor;
-import VideoHandle.EpVideo;
-import VideoHandle.OnEditorListener;
-
 public class MergeActivity extends AppCompatActivity implements View.OnClickListener {
 
 	private static final int CHOOSE_FILE = 11;
 	private TextView tv_add;
 	private Button bt_add, bt_merge;
-	private List<EpVideo> videoList;
+	private List<String> videoList;
 	private ProgressDialog mProgressDialog;
 
 	@Override
@@ -82,7 +76,7 @@ public class MergeActivity extends AppCompatActivity implements View.OnClickList
 				if (resultCode == RESULT_OK) {
 					String videoUrl = UriUtils.getPath(MergeActivity.this, data.getData());
 					tv_add.setText(tv_add.getText() + videoUrl + "\n");
-					videoList.add(new EpVideo(videoUrl));
+					videoList.add(videoUrl);
 					break;
 				}
 		}
@@ -93,32 +87,7 @@ public class MergeActivity extends AppCompatActivity implements View.OnClickList
 	 */
 	private void mergeVideo() {
 		if (videoList.size() > 1) {
-			mProgressDialog.setProgress(0);
-			mProgressDialog.show();
-			final String outPath = MyApplication.getSavePath() + "outmerge.mp4";
-			EpEditor.merge(videoList, new EpEditor.OutputOption(outPath), new OnEditorListener() {
-				@Override
-				public void onSuccess() {
-					Toast.makeText(MergeActivity.this, "编辑完成:"+outPath, Toast.LENGTH_SHORT).show();
-					mProgressDialog.dismiss();
-
-					Intent v = new Intent(Intent.ACTION_VIEW);
-					v.setDataAndType(Uri.parse(outPath), "video/mp4");
-					startActivity(v);
-				}
-
-				@Override
-				public void onFailure() {
-					Toast.makeText(MergeActivity.this, "编辑失败", Toast.LENGTH_SHORT).show();
-					mProgressDialog.dismiss();
-				}
-
-				@Override
-				public void onProgress(float v) {
-					mProgressDialog.setProgress((int) (v * 100));
-				}
-
-			});
+			Toast.makeText(this, R.string.toast_merge_advanced_unsupported, Toast.LENGTH_LONG).show();
 		} else {
 			Toast.makeText(this, "至少添加两个视频", Toast.LENGTH_SHORT).show();
 		}

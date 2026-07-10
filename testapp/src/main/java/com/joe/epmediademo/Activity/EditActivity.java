@@ -48,10 +48,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import VideoHandle.EpEditor;
-import VideoHandle.EpVideo;
-import VideoHandle.OnEditorListener;
-
 @androidx.annotation.OptIn(markerClass = UnstableApi.class)
 public class EditActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -1368,80 +1364,14 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 		splitPoints.clear();
 
-		String realPath = path;
 		isMockVideo = false;
-		if (path.startsWith("mock_")) {
-			isMockVideo = true;
-		} else if (!new java.io.File(path).exists()) {
-			isMockVideo = true;
+		if (!new java.io.File(path).exists()) {
+			Toast.makeText(this, R.string.toast_export_no_source, Toast.LENGTH_LONG).show();
+			finish();
+			return;
 		}
 
-		if (isMockVideo) {
-			playerView.setBackgroundColor(Color.parseColor("#121216"));
-			final int durationMs = path.contains("cybercity") ? 75000 : (path.contains("forest") ? 24000 : 42000);
-			mockDurationMs = durationMs;
-			mockCurrentPosMs = 0;
-			isMockPlaying = false;
-			
-			float durationSec = durationMs / 1000f;
-			trimStartSec = 0f;
-			trimEndSec = durationSec;
-			videoWidth = 1280;
-			videoHeight = 720;
-			
-			range_slider.setValueFrom(0f);
-			range_slider.setValueTo(durationSec);
-			range_slider.setValues(Arrays.asList(0f, durationSec));
-			
-			updateTrimLabels();
-			
-			int screenWidth = getResources().getDisplayMetrics().widthPixels;
-			int halfWidth = screenWidth / 2;
-			timeline_scroll.setPadding(halfWidth, 0, halfWidth, 0);
-			timeline_scroll.setClipToPadding(false);
-			
-			loadMockTimelineThumbnails(path);
-			
-			currentRotation = 0;
-			isMirror = false;
-			selectedCropPreset = 0;
-			activeFilterId = R.id.btn_filter_none;
-			activeStickerText = "";
-			isEnhanced = false;
-			
-			updateVideoTransformations();
-			updateToggleButton(btn_action_enhance, false);
-			
-			playerView.post(new Runnable() {
-				@Override
-				public void run() {
-					applyVideoViewAspectRatio(0);
-				}
-			});
-			
-			updateCropPresetButtons(0);
-			applyFilterOverlay(R.id.btn_filter_none);
-			applyStickerPreview("");
-			
-			et_subtitle_input.removeTextChangedListener(subtitleTextWatcher);
-			et_subtitle_input.setText("");
-			et_subtitle_input.addTextChangedListener(subtitleTextWatcher);
-			subtitleText = "";
-			subtitleXPercent = 50f;
-			subtitleYPercent = 85f;
-			subtitleScale = 1.0f;
-			subtitleRotation = 0f;
-			slider_text_x.setValue(50f);
-			slider_text_y.setValue(85f);
-			updateSubtitlePreview();
-			
-			showPanel(panel_clip_settings);
-			setActiveTab(tab_edit, iv_tab_edit, tv_tab_edit);
-			
-			undoStack.clear();
-			redoStack.clear();
-			updateUndoRedoButtonsVisibility();
-		} else {
+		{
 			playerView.setBackgroundColor(Color.TRANSPARENT);
 			if (exoPlayer != null) {
 				exoPlayer.release();
@@ -1451,7 +1381,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					.build();
 			playerView.setPlayer(exoPlayer);
 			
-			MediaItem mediaItem = MediaItem.fromUri(realPath);
+			MediaItem mediaItem = MediaItem.fromUri(path);
 			exoPlayer.setMediaItem(mediaItem);
 			exoPlayer.prepare();
 			exoPlayer.addListener(new Player.Listener() {

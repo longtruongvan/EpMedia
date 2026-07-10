@@ -238,7 +238,7 @@
 
                     <!-- Project Card 1 -->
                     <LinearLayout
-                        android:id="@+id/btn_mock_project_1"
+                        android:id="@+id/btn_recent_project_1"
                         android:layout_width="160dp"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -254,7 +254,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:src="@drawable/mock_mountain_thumb" />
+                                android:src="@drawable/sample_mountain_thumb" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -291,7 +291,7 @@
 
                     <!-- Project Card 2 -->
                     <LinearLayout
-                        android:id="@+id/btn_mock_project_2"
+                        android:id="@+id/btn_recent_project_2"
                         android:layout_width="160dp"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -306,7 +306,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:src="@drawable/mock_cybercity_thumb" />
+                                android:src="@drawable/sample_cybercity_thumb" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -503,7 +503,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:src="@drawable/mock_retro_wave" />
+                                android:src="@drawable/sample_retro_wave" />
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
@@ -547,7 +547,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:src="@drawable/mock_architecture" />
+                                android:src="@drawable/sample_architecture" />
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
@@ -590,7 +590,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:src="@drawable/mock_star_trail" />
+                                android:src="@drawable/sample_star_trail" />
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
@@ -648,7 +648,7 @@
                     android:layout_width="52dp"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/mock_draft_tiktok" />
+                    android:src="@drawable/sample_draft_tiktok" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -697,7 +697,7 @@
                     android:layout_width="52dp"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/mock_draft_nature" />
+                    android:src="@drawable/sample_draft_nature" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -836,7 +836,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/mock_retro_wave" />
+                        android:src="@drawable/sample_retro_wave" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -878,7 +878,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/mock_architecture" />
+                        android:src="@drawable/sample_architecture" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -920,7 +920,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/mock_star_trail" />
+                        android:src="@drawable/sample_star_trail" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -1200,7 +1200,7 @@
                     android:layout_width="80dp"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/mock_mountain_thumb" />
+                    android:src="@drawable/sample_mountain_thumb" />
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -1241,7 +1241,7 @@
                     android:layout_width="80dp"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/mock_cybercity_thumb" />
+                    android:src="@drawable/sample_cybercity_thumb" />
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

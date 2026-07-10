@@ -10,6 +10,8 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
+import java.io.File;
+
 /**
  * Created by Administrator on 2016/11/30.
  */
@@ -41,16 +43,25 @@ public class UriUtils {
 					return Environment.getExternalStorageDirectory() + "/" + split[1];
 				}
 
-				// TODO handle non-primary volumes
+				String nonPrimaryPath = getPathFromExternalFilesDirs(context, type, split.length > 1 ? split[1] : "");
+				if (nonPrimaryPath != null) {
+					return nonPrimaryPath;
+				}
 			}
 			// DownloadsProvider
 			else if (isDownloadsDocument(uri)) {
 
 				final String id = DocumentsContract.getDocumentId(uri);
-				final Uri contentUri = ContentUris.withAppendedId(
-						Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-				return getDataColumn(context, contentUri, null, null);
+				if (id != null && id.startsWith("raw:")) {
+					return id.substring(4);
+				}
+				try {
+					final Uri contentUri = ContentUris.withAppendedId(
+							Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+					return getDataColumn(context, contentUri, null, null);
+				} catch (NumberFormatException ignored) {
+					return getDataColumn(context, uri, null, null);
+				}
 			}
 			// MediaProvider
 			else if (isMediaDocument(uri)) {
@@ -82,6 +93,35 @@ public class UriUtils {
 		// File
 		else if ("file".equalsIgnoreCase(uri.getScheme())) {
 			return uri.getPath();
+		}
+
+		return null;
+	}
+
+	private static String getPathFromExternalFilesDirs(Context context, String volumeId, String relativePath) {
+		File[] externalDirs = context.getExternalFilesDirs(null);
+		if (externalDirs == null) {
+			return null;
+		}
+
+		for (File externalDir : externalDirs) {
+			if (externalDir == null) {
+				continue;
+			}
+
+			String absolutePath = externalDir.getAbsolutePath();
+			int androidDataIndex = absolutePath.indexOf("/Android/data/");
+			if (androidDataIndex < 0) {
+				continue;
+			}
+
+			String storageRoot = absolutePath.substring(0, androidDataIndex);
+			if (storageRoot.toLowerCase().contains(volumeId.toLowerCase())) {
+				File resolved = new File(storageRoot, relativePath);
+				if (resolved.exists()) {
+					return resolved.getAbsolutePath();
+				}
+			}
 		}
 
 		return null;
@@ -146,4 +186,3 @@ public class UriUtils {
 	}
 
 }
-
