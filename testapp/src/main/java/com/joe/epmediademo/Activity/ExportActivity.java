@@ -179,7 +179,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private void loadVideoMetadataAndPreview() {
 		if (videoUrls == null || videoUrls.isEmpty()) return;
 
-		float duration = trimEndSec - trimStartSec;
+		float duration = getDisplayDurationSec();
 		int secs = (int) duration % 60;
 		int mins = (int) (duration / 60) % 60;
 		tv_export_duration_tag.setText(String.format(Locale.US, "%02d:%02d", mins, secs));
@@ -223,7 +223,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	}
 
 	private void updateEstimatedSize() {
-		float duration = trimEndSec - trimStartSec;
+		float duration = getDisplayDurationSec();
 		if (duration <= 0) duration = 10f; // fallback
 
 		// Resolution weight: 720p = 1.0, 1080p = 2.0, 2K = 3.5, 4K = 7.0
@@ -240,6 +240,46 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		// Base MB per second multiplier (approx 0.8 MB/sec at 1080p 30fps)
 		double estSizeMB = duration * 0.4 * resWeight * fpsWeight;
 		tv_estimated_size.setText(getString(R.string.estimated_size_format, estSizeMB));
+	}
+
+	private float getDisplayDurationSec() {
+		if (videoUrls == null || videoUrls.isEmpty()) {
+			return 0f;
+		}
+		if (videoUrls.size() == 1 && trimEndSec > trimStartSec) {
+			return trimEndSec - trimStartSec;
+		}
+
+		long durationMs = 0L;
+		for (String path : videoUrls) {
+			MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+			try {
+				retriever.setDataSource(path);
+				String value = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+				if (value != null) {
+					durationMs += Long.parseLong(value);
+				}
+			} catch (Exception ignored) {
+			} finally {
+				try {
+					retriever.release();
+				} catch (Exception ignored) {
+				}
+			}
+		}
+		return durationMs / 1000f;
+	}
+
+	private boolean hasMissingSource() {
+		if (videoUrls == null || videoUrls.isEmpty()) {
+			return true;
+		}
+		for (String path : videoUrls) {
+			if (path == null || !new File(path).exists()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private String getResName(int mode) {
@@ -362,7 +402,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		progress_export.setProgress(0);
 		tv_export_percent.setText("0%");
 
-		boolean isMissingSource = !new java.io.File(videoUrls.get(0)).exists();
+		boolean isMissingSource = hasMissingSource();
 		if (isMissingSource) {
 			showExportFailure();
 			Toast.makeText(this, R.string.toast_export_no_source, Toast.LENGTH_LONG).show();
@@ -381,12 +421,13 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			return;
 		}
 
-		runPlatformExport(videoUrls.get(0), outputPath);
+		runPlatformExport(outputPath);
 	}
 
 	private boolean canUsePlatformExporter() {
 		return videoUrls != null
-				&& videoUrls.size() == 1
+				&& !videoUrls.isEmpty()
+				&& (videoUrls.size() == 1 || (trimStartSec == 0f && trimEndSec == 0f))
 				&& selectedCropPreset == 0
 				&& currentRotation == 0
 				&& !isMirror
@@ -402,8 +443,8 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				&& !isEnhanced;
 	}
 
-	private void runPlatformExport(String inputPath, String platformOutputPath) {
-		PlatformVideoExporter.exportAsync(inputPath, platformOutputPath, trimStartSec, trimEndSec,
+	private void runPlatformExport(String platformOutputPath) {
+		PlatformVideoExporter.exportAsync(videoUrls, platformOutputPath, trimStartSec, trimEndSec,
 				new PlatformVideoExporter.Listener() {
 					@Override
 					public void onProgress(final float progress) {

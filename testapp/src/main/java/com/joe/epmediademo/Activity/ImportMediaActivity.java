@@ -52,7 +52,6 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 
 	private List<VideoItem> videoList = new ArrayList<>();
 	private VideoAdapter adapter;
-	private VideoItem selectedVideo = null;
 	private LruCache<String, Bitmap> thumbnailCache;
 	private String templateId = null;
 	private String initTool = null;
@@ -239,9 +238,10 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 			updateImportButtonState();
 			Toast.makeText(this, R.string.no_photo_toast, Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.btn_import_submit) {
-			if (selectedVideo != null) {
+			ArrayList<String> selectedPaths = getSelectedVideoPaths();
+			if (selectedPaths.size() == 1) {
 				Intent intent = new Intent(this, EditActivity.class);
-				intent.putExtra("VIDEO_PATH", selectedVideo.path);
+				intent.putExtra("VIDEO_PATH", selectedPaths.get(0));
 				if (templateId != null) {
 					intent.putExtra("TEMPLATE_ID", templateId);
 				}
@@ -250,15 +250,13 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				}
 				startActivity(intent);
 				finish();
+			} else if (selectedPaths.size() > 1) {
+				openExportForSelectedVideos(selectedPaths);
 			}
 		} else if (id == R.id.btn_export_action) {
-			if (selectedVideo != null) {
-				Intent intent = new Intent(this, ExportActivity.class);
-				java.util.ArrayList<String> paths = new java.util.ArrayList<>();
-				paths.add(selectedVideo.path);
-				intent.putStringArrayListExtra("VIDEO_PATHS", paths);
-				startActivity(intent);
-				finish();
+			ArrayList<String> selectedPaths = getSelectedVideoPaths();
+			if (!selectedPaths.isEmpty()) {
+				openExportForSelectedVideos(selectedPaths);
 			} else {
 				Toast.makeText(this, R.string.toast_select_video_first, Toast.LENGTH_SHORT).show();
 			}
@@ -283,6 +281,23 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				}
 			}
 		}
+
+	private ArrayList<String> getSelectedVideoPaths() {
+		ArrayList<String> paths = new ArrayList<>();
+		for (VideoItem item : videoList) {
+			if (item.isSelected && item.path != null && !item.path.isEmpty()) {
+				paths.add(item.path);
+			}
+		}
+		return paths;
+	}
+
+	private void openExportForSelectedVideos(ArrayList<String> selectedPaths) {
+		Intent intent = new Intent(this, ExportActivity.class);
+		intent.putStringArrayListExtra("VIDEO_PATHS", selectedPaths);
+		startActivity(intent);
+		finish();
+	}
 
 	// RecyclerView Adapter
 	private class VideoAdapter extends RecyclerView.Adapter<VideoViewHolder> {
@@ -348,14 +363,7 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					// Toggle single selection
-					for (VideoItem i : videoList) {
-						if (i != item) {
-							i.isSelected = false;
-						}
-					}
 					item.isSelected = !item.isSelected;
-					selectedVideo = item.isSelected ? item : null;
 					
 					notifyDataSetChanged();
 					updateImportButtonState();
@@ -384,9 +392,10 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 	}
 
 	private void updateImportButtonState() {
-		if (selectedVideo != null) {
+		int selectedCount = getSelectedVideoPaths().size();
+		if (selectedCount > 0) {
 			layout_import_action.setVisibility(View.VISIBLE);
-			btn_import_submit.setText(getString(R.string.import_count_format, 1));
+			btn_import_submit.setText(getString(R.string.import_count_format, selectedCount));
 		} else {
 			layout_import_action.setVisibility(View.GONE);
 		}
