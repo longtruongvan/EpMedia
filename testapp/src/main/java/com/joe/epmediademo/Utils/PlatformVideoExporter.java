@@ -34,6 +34,11 @@ public final class PlatformVideoExporter {
 
 	public static void exportAsync(final List<String> inputPaths, final String outputPath, final float trimStartSec,
 								   final float trimEndSec, final Listener listener) {
+		exportAsync(inputPaths, outputPath, trimStartSec, trimEndSec, 1.0f, listener);
+	}
+
+	public static void exportAsync(final List<String> inputPaths, final String outputPath, final float trimStartSec,
+								   final float trimEndSec, final float speed, final Listener listener) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -41,10 +46,13 @@ public final class PlatformVideoExporter {
 					if (inputPaths == null || inputPaths.isEmpty()) {
 						throw new IllegalArgumentException("No input videos selected");
 					}
+					if (speed <= 0f) {
+						throw new IllegalArgumentException("Invalid speed: " + speed);
+					}
 					if (inputPaths.size() == 1) {
-						export(inputPaths.get(0), outputPath, trimStartSec, trimEndSec, listener);
+						export(inputPaths.get(0), outputPath, trimStartSec, trimEndSec, speed, listener);
 					} else {
-						exportSequence(inputPaths, outputPath, listener);
+						exportSequence(inputPaths, outputPath, speed, listener);
 					}
 					listener.onSuccess();
 				} catch (Exception e) {
@@ -55,11 +63,15 @@ public final class PlatformVideoExporter {
 	}
 
 	private static void exportSequence(List<String> inputPaths, String outputPath, Listener listener) throws Exception {
+		exportSequence(inputPaths, outputPath, 1.0f, listener);
+	}
+
+	private static void exportSequence(List<String> inputPaths, String outputPath, float speed, Listener listener) throws Exception {
 		prepareOutputFile(outputPath);
 
 		long totalDurationUs = 0L;
 		for (String inputPath : inputPaths) {
-			totalDurationUs += Math.max(1L, readDurationUs(inputPath));
+			totalDurationUs += Math.max(1L, (long) (readDurationUs(inputPath) / speed));
 		}
 		totalDurationUs = Math.max(1L, totalDurationUs);
 
@@ -80,7 +92,7 @@ public final class PlatformVideoExporter {
 
 			long clipOffsetUs = 0L;
 			for (String inputPath : inputPaths) {
-				long writtenDurationUs = appendClip(inputPath, muxer, setup, buffer, bufferInfo, clipOffsetUs, totalDurationUs, listener);
+				long writtenDurationUs = appendClip(inputPath, muxer, setup, buffer, bufferInfo, clipOffsetUs, totalDurationUs, speed, listener);
 				clipOffsetUs += Math.max(1L, writtenDurationUs);
 			}
 			listener.onProgress(1f);
@@ -124,6 +136,12 @@ public final class PlatformVideoExporter {
 	private static long appendClip(String inputPath, MediaMuxer muxer, TrackSetup setup, ByteBuffer buffer,
 								   MediaCodec.BufferInfo bufferInfo, long clipOffsetUs, long totalDurationUs,
 								   Listener listener) throws Exception {
+		return appendClip(inputPath, muxer, setup, buffer, bufferInfo, clipOffsetUs, totalDurationUs, 1.0f, listener);
+	}
+
+	private static long appendClip(String inputPath, MediaMuxer muxer, TrackSetup setup, ByteBuffer buffer,
+								   MediaCodec.BufferInfo bufferInfo, long clipOffsetUs, long totalDurationUs,
+								   float speed, Listener listener) throws Exception {
 		MediaExtractor extractor = new MediaExtractor();
 		try {
 			extractor.setDataSource(inputPath);
@@ -166,7 +184,7 @@ public final class PlatformVideoExporter {
 				if (firstSampleUs < 0L) {
 					firstSampleUs = sampleTimeUs;
 				}
-				long normalizedSampleUs = Math.max(0L, sampleTimeUs - firstSampleUs);
+				long normalizedSampleUs = (long) (Math.max(0L, sampleTimeUs - firstSampleUs) / speed);
 				lastSampleUs = Math.max(lastSampleUs, normalizedSampleUs);
 				bufferInfo.set(0, sampleSize, clipOffsetUs + normalizedSampleUs, toCodecBufferFlags(extractor.getSampleFlags()));
 				muxer.writeSampleData(setup.muxerTrackByType.get(trackType), buffer, bufferInfo);
@@ -174,7 +192,7 @@ public final class PlatformVideoExporter {
 				extractor.advance();
 			}
 
-			long metadataDurationUs = readDurationUs(inputPath);
+			long metadataDurationUs = (long) (readDurationUs(inputPath) / speed);
 			return Math.max(lastSampleUs + 1_000L, metadataDurationUs);
 		} finally {
 			extractor.release();
@@ -222,6 +240,11 @@ public final class PlatformVideoExporter {
 	}
 
 	private static void export(String inputPath, String outputPath, float trimStartSec, float trimEndSec,
+							   Listener listener) throws Exception {
+		export(inputPath, outputPath, trimStartSec, trimEndSec, 1.0f, listener);
+	}
+
+	private static void export(String inputPath, String outputPath, float trimStartSec, float trimEndSec, float speed,
 							   Listener listener) throws Exception {
 		prepareOutputFile(outputPath);
 
@@ -284,7 +307,8 @@ public final class PlatformVideoExporter {
 				if (sampleSize < 0) {
 					break;
 				}
-				bufferInfo.set(0, sampleSize, sampleTimeUs - startUs, toCodecBufferFlags(extractor.getSampleFlags()));
+				long adjustedSampleTimeUs = (long) ((sampleTimeUs - startUs) / speed);
+				bufferInfo.set(0, sampleSize, adjustedSampleTimeUs, toCodecBufferFlags(extractor.getSampleFlags()));
 				muxer.writeSampleData(muxerTrackIndex, buffer, bufferInfo);
 				listener.onProgress(Math.min(1f, (float) (sampleTimeUs - startUs) / progressDurationUs));
 				extractor.advance();

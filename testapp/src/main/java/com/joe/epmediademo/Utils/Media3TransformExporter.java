@@ -1,7 +1,11 @@
 package com.joe.epmediademo.Utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -16,9 +20,12 @@ import androidx.media3.common.C;
 import androidx.media3.common.Effect;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MimeTypes;
+import androidx.media3.common.VideoFrameProcessingException;
 import androidx.media3.common.audio.AudioProcessor;
 import androidx.media3.common.audio.BaseAudioProcessor;
+import androidx.media3.common.util.Size;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.effect.BitmapOverlay;
 import androidx.media3.effect.Brightness;
 import androidx.media3.effect.Contrast;
 import androidx.media3.effect.OverlayEffect;
@@ -81,6 +88,7 @@ public final class Media3TransformExporter {
 		public int overlayId = 3;
 		public float videoVolume = 1f;
 		public String audioPath;
+		public int transitionId = -1;
 	}
 
 	private Media3TransformExporter() {
@@ -273,6 +281,7 @@ public final class Media3TransformExporter {
 		addCreativeEffect(effects, config.effectId);
 		addTimelineOverlay(effects, config.overlayId);
 		addOverlayEffects(effects, config);
+		addTransitionEffect(effects, config);
 		return effects;
 	}
 
@@ -299,6 +308,58 @@ public final class Media3TransformExporter {
 					.build());
 			effects.add(new Contrast(0.12f));
 			effects.add(new Brightness(-0.02f));
+		}
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static void addTransitionEffect(List<Effect> effects, Config config) {
+		if (config.transitionId < 0) {
+			return;
+		}
+		List<Long> boundariesUs = readTransitionBoundariesUs(config.inputPaths);
+		if (boundariesUs.isEmpty()) {
+			return;
+		}
+		effects.add(new OverlayEffect(ImmutableList.<TextureOverlay>of(
+				new BlackTransitionOverlay(boundariesUs, config.transitionId))));
+	}
+
+	private static List<Long> readTransitionBoundariesUs(List<String> inputPaths) {
+		List<Long> boundariesUs = new ArrayList<>();
+		if (inputPaths == null || inputPaths.isEmpty()) {
+			return boundariesUs;
+		}
+		long cumulativeUs = 0L;
+		if (inputPaths.size() == 1) {
+			long durationUs = readDurationUs(inputPaths.get(0));
+			if (durationUs > 0L) {
+				boundariesUs.add(0L);
+				boundariesUs.add(durationUs);
+			}
+			return boundariesUs;
+		}
+		for (int i = 0; i < inputPaths.size() - 1; i++) {
+			cumulativeUs += Math.max(0L, readDurationUs(inputPaths.get(i)));
+			if (cumulativeUs > 0L) {
+				boundariesUs.add(cumulativeUs);
+			}
+		}
+		return boundariesUs;
+	}
+
+	private static long readDurationUs(String path) {
+		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+		try {
+			retriever.setDataSource(path);
+			String value = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+			return value == null ? 0L : Long.parseLong(value) * 1000L;
+		} catch (Exception ignored) {
+			return 0L;
+		} finally {
+			try {
+				retriever.release();
+			} catch (Exception ignored) {
+			}
 		}
 	}
 
@@ -504,6 +565,70 @@ public final class Media3TransformExporter {
 			}
 			outputBuffer.flip();
 			inputBuffer.position(inputLimit);
+		}
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static final class BlackTransitionOverlay extends BitmapOverlay {
+		private static final long TRANSITION_HALF_WIDTH_US = 500_000L;
+		private final List<Long> boundariesUs;
+		private final int transitionId;
+		private final Bitmap bitmap;
+
+		BlackTransitionOverlay(List<Long> boundariesUs, int transitionId) {
+			this.boundariesUs = new ArrayList<>(boundariesUs);
+			this.transitionId = transitionId;
+			bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(bitmap);
+			Paint paint = new Paint();
+			paint.setColor(Color.BLACK);
+			canvas.drawRect(0, 0, bitmap.getWidth(), bitmap.getHeight(), paint);
+		}
+
+		@Override
+		public Bitmap getBitmap(long presentationTimeUs) throws VideoFrameProcessingException {
+			return bitmap;
+		}
+
+		@Override
+		public Size getTextureSize(long presentationTimeUs) {
+			return new Size(bitmap.getWidth(), bitmap.getHeight());
+		}
+
+		@Override
+		public OverlaySettings getOverlaySettings(long presentationTimeUs) {
+			float alpha = getAlpha(presentationTimeUs);
+			return new OverlaySettings.Builder()
+					.setAlphaScale(alpha)
+					.setScale(4f, 4f)
+					.setBackgroundFrameAnchor(0f, 0f)
+					.setOverlayFrameAnchor(0f, 0f)
+					.build();
+		}
+
+		private float getAlpha(long presentationTimeUs) {
+			float maxAlpha = 0f;
+			for (Long boundaryUs : boundariesUs) {
+				long distanceUs = Math.abs(presentationTimeUs - boundaryUs);
+				if (distanceUs <= TRANSITION_HALF_WIDTH_US) {
+					float normalized = 1f - (float) distanceUs / TRANSITION_HALF_WIDTH_US;
+					maxAlpha = Math.max(maxAlpha, normalized * getPeakAlpha());
+				}
+			}
+			return maxAlpha;
+		}
+
+		private float getPeakAlpha() {
+			if (transitionId == 1) {
+				return 0.45f;
+			}
+			if (transitionId == 2) {
+				return 0.70f;
+			}
+			if (transitionId == 3) {
+				return 0.55f;
+			}
+			return 0.85f;
 		}
 	}
 }

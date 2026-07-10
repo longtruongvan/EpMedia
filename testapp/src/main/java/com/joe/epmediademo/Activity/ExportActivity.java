@@ -422,7 +422,9 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			return;
 		}
 
-		if (requiresTransformExporter()) {
+		if (speed != 1.0f) {
+			runSpeedThenTransformExport(outputPath);
+		} else if (requiresTransformExporter()) {
 			runTransformExport(outputPath);
 		} else {
 			runPlatformExport(outputPath);
@@ -432,9 +434,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private boolean hasUnsupportedAdvancedEdits() {
 		return videoUrls == null
 				|| videoUrls.isEmpty()
-				|| (videoUrls.size() > 1 && trimEndSec > trimStartSec)
-				|| speed != 1.0f
-				|| transitionId != -1;
+				|| (videoUrls.size() > 1 && trimEndSec > trimStartSec);
 	}
 
 	private boolean requiresTransformExporter() {
@@ -509,6 +509,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		config.overlayId = overlayId;
 		config.videoVolume = videoVolume;
 		config.audioPath = audioPath;
+		config.transitionId = transitionId;
 
 		Media3TransformExporter.exportAsync(getApplicationContext(), config, new Media3TransformExporter.Listener() {
 			@Override
@@ -535,6 +536,49 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				showExportFailure();
 			}
 		});
+	}
+
+	private void runSpeedThenTransformExport(final String transformOutputPath) {
+		final String speedOutputPath = MyApplication.getSavePath() + "temp_speed.mp4";
+		deleteFileSilently(speedOutputPath);
+		PlatformVideoExporter.exportAsync(videoUrls, speedOutputPath, trimStartSec, trimEndSec, speed,
+				new PlatformVideoExporter.Listener() {
+					@Override
+					public void onProgress(final float progress) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								int percent = Math.max(0, Math.min(45, (int) (progress * 45f)));
+								progress_export.setProgress(percent);
+								tv_export_percent.setText(percent + "%");
+							}
+						});
+					}
+
+					@Override
+					public void onSuccess() {
+						java.util.ArrayList<String> originalUrls = videoUrls;
+						float originalTrimStart = trimStartSec;
+						float originalTrimEnd = trimEndSec;
+						float originalSpeed = speed;
+						videoUrls = new java.util.ArrayList<>();
+						videoUrls.add(speedOutputPath);
+						trimStartSec = 0f;
+						trimEndSec = 0f;
+						speed = 1.0f;
+						runTransformExport(transformOutputPath);
+						videoUrls = originalUrls;
+						trimStartSec = originalTrimStart;
+						trimEndSec = originalTrimEnd;
+						speed = originalSpeed;
+					}
+
+					@Override
+					public void onFailure(Exception exception) {
+						Log.e(TAG, "Speed export failed", exception);
+						showExportFailure();
+					}
+				});
 	}
 
 	private int getSelectedOutputHeight() {
