@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.joe.epmediademo.Application.MyApplication;
 import com.joe.epmediademo.R;
+import com.joe.epmediademo.Utils.PlatformVideoExporter;
 
 import java.io.File;
 import java.util.Locale;
@@ -427,6 +428,11 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		cleanupTempFiles();
 		deleteFileSilently(outputPath);
 
+		if (canUsePlatformExporter()) {
+			runPlatformExport(videoUrls.get(0), outputPath);
+			return;
+		}
+
 		java.util.List<EpVideo> epVideos = new java.util.ArrayList<>();
 		if (videoUrls != null && !videoUrls.isEmpty()) {
 			for (int i = 0; i < videoUrls.size(); i++) {
@@ -626,6 +632,52 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			Log.e(TAG, "Video export engine failed to start", t);
 			showExportFailure();
 		}
+	}
+
+	private boolean canUsePlatformExporter() {
+		return videoUrls != null
+				&& videoUrls.size() == 1
+				&& selectedCropPreset == 0
+				&& currentRotation == 0
+				&& !isMirror
+				&& (subtitleText == null || subtitleText.trim().isEmpty())
+				&& (stickerText == null || stickerText.trim().isEmpty())
+				&& speed == 1.0f
+				&& videoVolume == 1.0f
+				&& (audioPath == null || audioPath.trim().isEmpty())
+				&& (filterId == 0 || filterId == R.id.btn_filter_none)
+				&& effectId == 3
+				&& overlayId == 3
+				&& transitionId == -1
+				&& !isEnhanced;
+	}
+
+	private void runPlatformExport(String inputPath, String platformOutputPath) {
+		PlatformVideoExporter.exportAsync(inputPath, platformOutputPath, trimStartSec, trimEndSec,
+				new PlatformVideoExporter.Listener() {
+					@Override
+					public void onProgress(final float progress) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								int percent = Math.max(0, Math.min(99, (int) (progress * 100f)));
+								progress_export.setProgress(percent);
+								tv_export_percent.setText(percent + "%");
+							}
+						});
+					}
+
+					@Override
+					public void onSuccess() {
+						showExportSuccess();
+					}
+
+					@Override
+					public void onFailure(Exception exception) {
+						Log.e(TAG, "Platform export failed", exception);
+						showExportFailure();
+					}
+				});
 	}
 
 	private void showExportSuccess() {
