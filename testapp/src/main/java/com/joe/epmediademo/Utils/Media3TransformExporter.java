@@ -12,10 +12,12 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 
 import androidx.annotation.OptIn;
+import androidx.media3.common.C;
 import androidx.media3.common.Effect;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MimeTypes;
 import androidx.media3.common.audio.AudioProcessor;
+import androidx.media3.common.audio.BaseAudioProcessor;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.effect.Brightness;
 import androidx.media3.effect.Contrast;
@@ -39,6 +41,8 @@ import com.google.common.collect.ImmutableList;
 import com.joe.epmediademo.R;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,6 +76,7 @@ public final class Media3TransformExporter {
 		public int filterId;
 		public int effectId = 3;
 		public int overlayId = 3;
+		public float videoVolume = 1f;
 	}
 
 	private Media3TransformExporter() {
@@ -148,7 +153,7 @@ public final class Media3TransformExporter {
 	@OptIn(markerClass = UnstableApi.class)
 	private static Composition buildComposition(Config config) {
 		List<Effect> videoEffects = buildVideoEffects(config);
-		Effects effects = new Effects(Collections.<AudioProcessor>emptyList(), videoEffects);
+		Effects effects = new Effects(buildAudioProcessors(config), videoEffects);
 		List<EditedMediaItem> editedItems = new ArrayList<>();
 
 		for (int i = 0; i < config.inputPaths.size(); i++) {
@@ -172,6 +177,15 @@ public final class Media3TransformExporter {
 				.setTransmuxAudio(false)
 				.setTransmuxVideo(false)
 				.build();
+	}
+
+	private static List<AudioProcessor> buildAudioProcessors(Config config) {
+		if (Math.abs(config.videoVolume - 1f) < 0.001f) {
+			return Collections.emptyList();
+		}
+		List<AudioProcessor> processors = new ArrayList<>();
+		processors.add(new VolumeAudioProcessor(clamp(config.videoVolume, 0f, 2f)));
+		return processors;
 	}
 
 	@OptIn(markerClass = UnstableApi.class)
@@ -388,6 +402,48 @@ public final class Media3TransformExporter {
 				file.delete();
 			}
 		} catch (Exception ignored) {
+		}
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static final class VolumeAudioProcessor extends BaseAudioProcessor {
+		private final float volume;
+
+		VolumeAudioProcessor(float volume) {
+			this.volume = volume;
+		}
+
+		@Override
+		protected AudioFormat onConfigure(AudioFormat inputAudioFormat) throws AudioProcessor.UnhandledAudioFormatException {
+			if (inputAudioFormat.encoding != C.ENCODING_PCM_16BIT) {
+				throw new AudioProcessor.UnhandledAudioFormatException(inputAudioFormat);
+			}
+			return Math.abs(volume - 1f) < 0.001f ? AudioFormat.NOT_SET : inputAudioFormat;
+		}
+
+		@Override
+		public void queueInput(ByteBuffer inputBuffer) {
+			int inputPosition = inputBuffer.position();
+			int inputLimit = inputBuffer.limit();
+			ByteBuffer outputBuffer = replaceOutputBuffer(inputLimit - inputPosition).order(ByteOrder.LITTLE_ENDIAN);
+			ByteBuffer input = inputBuffer.duplicate().order(ByteOrder.LITTLE_ENDIAN);
+			input.position(inputPosition);
+			input.limit(inputLimit);
+			while (input.remaining() >= 2) {
+				short sample = input.getShort();
+				int scaled = Math.round(sample * volume);
+				if (scaled > Short.MAX_VALUE) {
+					scaled = Short.MAX_VALUE;
+				} else if (scaled < Short.MIN_VALUE) {
+					scaled = Short.MIN_VALUE;
+				}
+				outputBuffer.putShort((short) scaled);
+			}
+			while (input.hasRemaining()) {
+				outputBuffer.put(input.get());
+			}
+			outputBuffer.flip();
+			inputBuffer.position(inputLimit);
 		}
 	}
 }
