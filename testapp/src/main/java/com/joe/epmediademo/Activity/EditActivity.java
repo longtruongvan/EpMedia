@@ -203,10 +203,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private int selectedOverlay = 3; // 0 = Vignette, 1 = Retro Vignette, 2 = Letterbox, 3 = None
 	private float videoVolume = 1.0f;
 
-	private boolean isMockVideo = false;
-	private boolean isMockPlaying = false;
-	private int mockCurrentPosMs = 0;
-	private int mockDurationMs = 60000;
+	private boolean isFallbackPreview = false;
+	private boolean isFallbackPreviewPlaying = false;
+	private int previewCurrentPosMs = 0;
+	private int previewDurationMs = 60000;
 	private boolean isTimelineZoomed = false;
 	private boolean isFullscreen = false;
 	private java.util.List<Float> splitPoints = new java.util.ArrayList<>();
@@ -564,14 +564,14 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					updateTrimLabels();
 					
 					if (fromUser) {
-						if (isMockVideo) {
-							float currentPosSec = mockCurrentPosMs / 1000f;
+						if (isFallbackPreview) {
+							float currentPosSec = previewCurrentPosMs / 1000f;
 							if (Math.abs(currentPosSec - trimStartSec) > 0.2f && Math.abs(currentPosSec - trimEndSec) > 0.2f) {
-								mockCurrentPosMs = (int) (trimStartSec * 1000);
+								previewCurrentPosMs = (int) (trimStartSec * 1000);
 							} else if (Math.abs(currentPosSec - trimStartSec) < 0.2f) {
-								mockCurrentPosMs = (int) (trimStartSec * 1000);
+								previewCurrentPosMs = (int) (trimStartSec * 1000);
 							} else {
-								mockCurrentPosMs = (int) (trimEndSec * 1000);
+								previewCurrentPosMs = (int) (trimEndSec * 1000);
 							}
 						} else if (playerView != null) {
 							int currentPosMs = (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
@@ -599,9 +599,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			@Override
 			public void onStopTrackingTouch(RangeSlider slider) {
 				isUserSeeking = false;
-				if (isMockVideo) {
-					mockCurrentPosMs = (int) (trimStartSec * 1000);
-					isMockPlaying = true;
+				if (isFallbackPreview) {
+					previewCurrentPosMs = (int) (trimStartSec * 1000);
+					isFallbackPreviewPlaying = true;
 					iv_play_pause.setImageResource(R.drawable.ic_pause);
 				} else if (playerView != null) {
 					if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
@@ -617,9 +617,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE) {
 					isUserSeeking = true;
-					if (isMockVideo) {
-						if (isMockPlaying) {
-							isMockPlaying = false;
+					if (isFallbackPreview) {
+						if (isFallbackPreviewPlaying) {
+							isFallbackPreviewPlaying = false;
 							iv_play_pause.setImageResource(R.drawable.ic_play);
 						}
 					} else if ((exoPlayer != null && exoPlayer.isPlaying())) {
@@ -644,14 +644,14 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 				if (isUserSeeking) {
 					int scrollX = timeline_scroll.getScrollX();
 					int trackWidth = layout_tracks_wrapper.getWidth();
-					int durationMs = isMockVideo ? mockDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
+					int durationMs = isFallbackPreview ? previewDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 					if (trackWidth > 0 && durationMs > 0) {
 						float ratio = (float) scrollX / trackWidth;
 						if (ratio < 0) ratio = 0;
 						if (ratio > 1) ratio = 1;
 						int seekMs = (int) (ratio * durationMs);
-						if (isMockVideo) {
-							mockCurrentPosMs = seekMs;
+						if (isFallbackPreview) {
+							previewCurrentPosMs = seekMs;
 						} else if (playerView != null) {
 							if (exoPlayer != null) exoPlayer.seekTo(seekMs);
 						}
@@ -716,8 +716,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			isTimelineZoomed = !isTimelineZoomed;
 			Toast.makeText(this, isTimelineZoomed ? "Timeline Zoomed 2x" : "Timeline Normal", Toast.LENGTH_SHORT).show();
 			btn_zoom_in.setAlpha(isTimelineZoomed ? 1.0f : 0.5f);
-			if (isMockVideo) {
-				loadMockTimelineThumbnails(videoUrls.get(0));
+			if (isFallbackPreview) {
+				loadFallbackTimelineThumbnails(videoUrls.get(0));
 			} else {
 				loadTimelineThumbnails(videoUrls.get(0));
 			}
@@ -750,14 +750,14 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_close_clip_settings) {
 			showPanel(null);
 		} else if (id == R.id.btn_action_split) {
-			int currentPosMs = isMockVideo ? mockCurrentPosMs : (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
-			int durationMs = isMockVideo ? mockDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
+			int currentPosMs = isFallbackPreview ? previewCurrentPosMs : (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
+			int durationMs = isFallbackPreview ? previewDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 			if (durationMs > 0) {
 				float ratio = (float) currentPosMs / durationMs;
 				splitPoints.add(ratio);
 				Toast.makeText(this, getString(R.string.toast_split_clip) + " (" + String.format(Locale.US, "%.1f", ratio * (durationMs/1000f)) + "s)", Toast.LENGTH_SHORT).show();
-				if (isMockVideo) {
-					loadMockTimelineThumbnails(videoUrls.get(0));
+				if (isFallbackPreview) {
+					loadFallbackTimelineThumbnails(videoUrls.get(0));
 				} else {
 					loadTimelineThumbnails(videoUrls.get(0));
 				}
@@ -771,8 +771,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_action_delete) {
 			if (!splitPoints.isEmpty()) {
 				pushStateToUndo();
-				int currentPosMs = isMockVideo ? mockCurrentPosMs : (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
-				int durationMs = isMockVideo ? mockDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
+				int currentPosMs = isFallbackPreview ? previewCurrentPosMs : (exoPlayer != null ? (int)exoPlayer.getCurrentPosition() : 0);
+				int durationMs = isFallbackPreview ? previewDurationMs : (exoPlayer != null ? (int)exoPlayer.getDuration() : 0);
 				float currentRatio = durationMs > 0 ? (float) currentPosMs / durationMs : 0f;
 				
 				float closestSplit = -1f;
@@ -798,9 +798,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					}
 					splitPoints.remove(closestSplit);
 					
-					if (isMockVideo) {
-						mockCurrentPosMs = (int) (trimStartSec * 1000);
-						loadMockTimelineThumbnails(videoUrls.get(0));
+					if (isFallbackPreview) {
+						previewCurrentPosMs = (int) (trimStartSec * 1000);
+						loadFallbackTimelineThumbnails(videoUrls.get(0));
 					} else {
 						if (playerView != null) {
 							if (exoPlayer != null) exoPlayer.seekTo((int) (trimStartSec * 1000));
@@ -1022,10 +1022,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		applyStickerPreview(activeStickerText);
 
 		// Apply trim slider values
-		if (isMockVideo) {
+		if (isFallbackPreview) {
 			range_slider.setValues(Arrays.asList(trimStartSec, trimEndSec));
 			updateTrimLabels();
-			mockCurrentPosMs = (int) (trimStartSec * 1000);
+			previewCurrentPosMs = (int) (trimStartSec * 1000);
 		} else if (playerView != null) {
 			range_slider.setValues(Arrays.asList(trimStartSec, trimEndSec));
 			updateTrimLabels();
@@ -1308,13 +1308,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void togglePlayPause() {
 		if (playerView == null) return;
-		if (isMockVideo) {
-			if (isMockPlaying) {
-				isMockPlaying = false;
+		if (isFallbackPreview) {
+			if (isFallbackPreviewPlaying) {
+				isFallbackPreviewPlaying = false;
 				iv_play_pause.setImageResource(R.drawable.ic_play);
 				pausePreviewAudio();
 			} else {
-				isMockPlaying = true;
+				isFallbackPreviewPlaying = true;
 				iv_play_pause.setImageResource(R.drawable.ic_pause);
 				playPreviewAudio();
 			}
@@ -1364,7 +1364,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 		splitPoints.clear();
 
-		isMockVideo = false;
+		isFallbackPreview = false;
 		if (!new java.io.File(path).exists()) {
 			Toast.makeText(this, R.string.toast_export_no_source, Toast.LENGTH_LONG).show();
 			finish();
@@ -1604,7 +1604,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		}).start();
 	}
 
-	private void loadMockTimelineThumbnails(final String path) {
+	private void loadFallbackTimelineThumbnails(final String path) {
 		final LinearLayout thumbnailContainer = timeline_thumbnails;
 		thumbnailContainer.removeAllViews();
 		
@@ -1670,16 +1670,16 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		playRunnable = new Runnable() {
 			@Override
 			public void run() {
-				if (isMockVideo) {
-					if (isMockPlaying && !isUserSeeking) {
-						mockCurrentPosMs += (int) (33 * currentSpeed);
-						float currentPosSec = mockCurrentPosMs / 1000f;
+				if (isFallbackPreview) {
+					if (isFallbackPreviewPlaying && !isUserSeeking) {
+						previewCurrentPosMs += (int) (33 * currentSpeed);
+						float currentPosSec = previewCurrentPosMs / 1000f;
 						if (trimEndSec > 0 && currentPosSec >= trimEndSec) {
-							mockCurrentPosMs = (int) (trimStartSec * 1000);
+							previewCurrentPosMs = (int) (trimStartSec * 1000);
 						} else {
-							updateTimecodes(mockCurrentPosMs);
-							if (mockDurationMs > 0) {
-								float progressRatio = (float) mockCurrentPosMs / mockDurationMs;
+							updateTimecodes(previewCurrentPosMs);
+							if (previewDurationMs > 0) {
+								float progressRatio = (float) previewCurrentPosMs / previewDurationMs;
 								int trackWidth = layout_tracks_wrapper.getWidth();
 								if (trackWidth > 0) {
 									int targetScrollX = (int) (progressRatio * trackWidth);
@@ -1843,8 +1843,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (isMockVideo) {
-			isMockPlaying = false;
+		if (isFallbackPreview) {
+			isFallbackPreviewPlaying = false;
 			iv_play_pause.setImageResource(R.drawable.ic_play);
 		} else if ((exoPlayer != null && exoPlayer.isPlaying())) {
 			if (exoPlayer != null) exoPlayer.pause();
@@ -2039,7 +2039,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		}
 
 		stopPreviewAudio();
-		if (isMockPlaying || ((exoPlayer != null && exoPlayer.isPlaying()))) {
+		if (isFallbackPreviewPlaying || ((exoPlayer != null && exoPlayer.isPlaying()))) {
 			playPreviewAudio();
 		}
 	}
@@ -2185,8 +2185,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 					if (pos == -1) return;
 					
 					stopPreviewAudio();
-					if (isMockVideo) {
-						isMockPlaying = false;
+					if (isFallbackPreview) {
+						isFallbackPreviewPlaying = false;
 						iv_play_pause.setImageResource(R.drawable.ic_play);
 					} else if ((exoPlayer != null && exoPlayer.isPlaying())) {
 						if (exoPlayer != null) exoPlayer.pause();

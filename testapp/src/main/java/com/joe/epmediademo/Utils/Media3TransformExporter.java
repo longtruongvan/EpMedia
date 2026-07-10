@@ -41,6 +41,9 @@ import com.google.common.collect.ImmutableList;
 import com.joe.epmediademo.R;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -77,6 +80,7 @@ public final class Media3TransformExporter {
 		public int effectId = 3;
 		public int overlayId = 3;
 		public float videoVolume = 1f;
+		public String audioPath;
 	}
 
 	private Media3TransformExporter() {
@@ -96,7 +100,7 @@ public final class Media3TransformExporter {
 					validateConfig(config);
 					prepareOutputFile(config.outputPath);
 
-					final Composition composition = buildComposition(config);
+					final Composition composition = buildComposition(context.getApplicationContext(), config);
 					final Transformer transformer = new Transformer.Builder(context.getApplicationContext())
 							.setLooper(thread.getLooper())
 							.setVideoMimeType(MimeTypes.VIDEO_H264)
@@ -151,7 +155,7 @@ public final class Media3TransformExporter {
 	}
 
 	@OptIn(markerClass = UnstableApi.class)
-	private static Composition buildComposition(Config config) {
+	private static Composition buildComposition(Context context, Config config) throws IOException {
 		List<Effect> videoEffects = buildVideoEffects(config);
 		Effects effects = new Effects(buildAudioProcessors(config), videoEffects);
 		List<EditedMediaItem> editedItems = new ArrayList<>();
@@ -172,11 +176,67 @@ public final class Media3TransformExporter {
 					.build());
 		}
 
-		EditedMediaItemSequence sequence = new EditedMediaItemSequence(editedItems);
-		return new Composition.Builder(sequence)
+		List<EditedMediaItemSequence> sequences = new ArrayList<>();
+		sequences.add(new EditedMediaItemSequence(editedItems));
+		addAudioSequenceIfNeeded(context, config, sequences);
+		return new Composition.Builder(sequences)
+				.experimentalSetForceAudioTrack(true)
 				.setTransmuxAudio(false)
 				.setTransmuxVideo(false)
 				.build();
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static void addAudioSequenceIfNeeded(Context context, Config config,
+												 List<EditedMediaItemSequence> sequences) throws IOException {
+		if (!hasText(config.audioPath)) {
+			return;
+		}
+		File audioFile = resolveAudioFile(context, config.audioPath);
+		if (audioFile == null || !audioFile.exists()) {
+			throw new IllegalArgumentException("Audio track does not exist: " + config.audioPath);
+		}
+
+		EditedMediaItem audioItem = new EditedMediaItem.Builder(new MediaItem.Builder()
+				.setUri(Uri.fromFile(audioFile))
+				.build())
+				.setRemoveVideo(true)
+				.build();
+		sequences.add(new EditedMediaItemSequence(Collections.singletonList(audioItem), true));
+	}
+
+	private static File resolveAudioFile(Context context, String audioPath) throws IOException {
+		if (audioPath.startsWith("audio/")) {
+			File outDir = new File(context.getCacheDir(), "epmedia_audio");
+			if (!outDir.exists() && !outDir.mkdirs()) {
+				throw new IOException("Could not create audio cache directory");
+			}
+			File outFile = new File(outDir, new File(audioPath).getName());
+			if (!outFile.exists() || outFile.length() == 0L) {
+				copyAsset(context, audioPath, outFile);
+			}
+			return outFile;
+		}
+		return new File(audioPath);
+	}
+
+	private static void copyAsset(Context context, String assetPath, File outFile) throws IOException {
+		InputStream in = context.getAssets().open(assetPath);
+		try {
+			FileOutputStream out = new FileOutputStream(outFile);
+			try {
+				byte[] buffer = new byte[1024 * 64];
+				int read;
+				while ((read = in.read(buffer)) != -1) {
+					out.write(buffer, 0, read);
+				}
+				out.flush();
+			} finally {
+				out.close();
+			}
+		} finally {
+			in.close();
+		}
 	}
 
 	private static List<AudioProcessor> buildAudioProcessors(Config config) {
