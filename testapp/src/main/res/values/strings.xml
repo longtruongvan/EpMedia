@@ -201,6 +201,7 @@
     <string name="export_completed_label">Export completed!</string>
     <string name="export_failed_label">Export failed!</string>
     <string name="export_advanced_unsupported_label">Advanced export unavailable</string>
+    <string name="export_gallery_location">Gallery / Movies / EpMedia</string>
     <string name="open_exported_video">Open Exported Video</string>
     <string name="retry_exporting">Retry Exporting</string>
     <string name="estimated_size_format">Estimated file size: %.1f MB</string>

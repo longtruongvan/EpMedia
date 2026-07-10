@@ -1,10 +1,14 @@
 package com.joe.epmediademo.Activity;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +25,9 @@ import com.joe.epmediademo.R;
 import com.joe.epmediademo.Utils.PlatformVideoExporter;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Locale;
 
 public class ExportActivity extends AppCompatActivity implements View.OnClickListener {
@@ -78,6 +85,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private int selectedFpsMode = 1; // 0 = 24, 1 = 30, 2 = 60
 	private boolean isExporting = false;
 	private String outputPath;
+	private Uri publishedOutputUri;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -366,6 +374,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		// Clean up any lingering files
 		cleanupTempFiles();
 		deleteFileSilently(outputPath);
+		publishedOutputUri = null;
 
 		if (!canUsePlatformExporter()) {
 			showUnsupportedAdvancedExport();
@@ -410,6 +419,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 
 					@Override
 					public void onSuccess() {
+						publishedOutputUri = publishExportToGallery(platformOutputPath);
 						showExportSuccess();
 					}
 
@@ -436,7 +446,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
 				btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
 
-				Toast.makeText(ExportActivity.this, getString(R.string.toast_export_success, outputPath), Toast.LENGTH_LONG).show();
+				Toast.makeText(ExportActivity.this, getString(R.string.toast_export_success, getExportDisplayLocation()), Toast.LENGTH_LONG).show();
 
 				// Play video directly on completion
 				openGeneratedVideo();
@@ -504,7 +514,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private void openGeneratedVideo() {
 		if (outputPath != null && new File(outputPath).exists()) {
 			Intent v = new Intent(Intent.ACTION_VIEW);
-			v.setDataAndType(getOutputContentUri(), "video/mp4");
+			v.setDataAndType(getShareableOutputUri(), "video/mp4");
 			v.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 			startActivity(v);
 		}
@@ -532,7 +542,7 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 	private Intent buildShareIntent(String packageName) {
 		Intent share = new Intent(Intent.ACTION_SEND);
 		share.setType("video/mp4");
-		share.putExtra(Intent.EXTRA_STREAM, getOutputContentUri());
+		share.putExtra(Intent.EXTRA_STREAM, getShareableOutputUri());
 		share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 		if (packageName != null) {
 			share.setPackage(packageName);
@@ -540,7 +550,86 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		return share;
 	}
 
+	private Uri getShareableOutputUri() {
+		return publishedOutputUri != null ? publishedOutputUri : getOutputContentUri();
+	}
+
 	private Uri getOutputContentUri() {
 		return FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", new File(outputPath));
+	}
+
+	private String getExportDisplayLocation() {
+		return publishedOutputUri != null ? getString(R.string.export_gallery_location) : outputPath;
+	}
+
+	private Uri publishExportToGallery(String sourcePath) {
+		if (sourcePath == null) {
+			return null;
+		}
+
+		File source = new File(sourcePath);
+		if (!source.exists()) {
+			return null;
+		}
+
+		String displayName = "EpMedia_" + System.currentTimeMillis() + ".mp4";
+		ContentValues values = new ContentValues();
+		values.put(MediaStore.Video.Media.DISPLAY_NAME, displayName);
+		values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+		values.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000L);
+		values.put(MediaStore.Video.Media.DATE_MODIFIED, System.currentTimeMillis() / 1000L);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			values.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/EpMedia");
+			values.put(MediaStore.Video.Media.IS_PENDING, 1);
+		}
+
+		Uri collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+		Uri itemUri = null;
+		try {
+			itemUri = getContentResolver().insert(collection, values);
+			if (itemUri == null) {
+				return null;
+			}
+
+			OutputStream out = getContentResolver().openOutputStream(itemUri);
+			if (out == null) {
+				throw new IOException("Could not open gallery output stream");
+			}
+			copyFileToStream(source, out);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				ContentValues pendingValues = new ContentValues();
+				pendingValues.put(MediaStore.Video.Media.IS_PENDING, 0);
+				getContentResolver().update(itemUri, pendingValues, null, null);
+			}
+			return itemUri;
+		} catch (Exception e) {
+			Log.w(TAG, "Could not publish export to gallery", e);
+			if (itemUri != null) {
+				try {
+					getContentResolver().delete(itemUri, null, null);
+				} catch (Exception ignored) {
+				}
+			}
+			return null;
+		}
+	}
+
+	private void copyFileToStream(File source, OutputStream out) throws IOException {
+		FileInputStream in = new FileInputStream(source);
+		try {
+			byte[] buffer = new byte[1024 * 64];
+			int read;
+			while ((read = in.read(buffer)) != -1) {
+				out.write(buffer, 0, read);
+			}
+			out.flush();
+		} finally {
+			try {
+				in.close();
+			} finally {
+				out.close();
+			}
+		}
 	}
 }

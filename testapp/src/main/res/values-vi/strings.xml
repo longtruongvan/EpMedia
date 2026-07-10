@@ -201,6 +201,7 @@
     <string name="export_completed_label">Đã xuất xong!</string>
     <string name="export_failed_label">Xuất thất bại!</string>
     <string name="export_advanced_unsupported_label">Chưa hỗ trợ xuất nâng cao</string>
+    <string name="export_gallery_location">Thư viện / Movies / EpMedia</string>
     <string name="open_exported_video">Mở video đã xuất</string>
     <string name="retry_exporting">Thử xuất lại</string>
     <string name="estimated_size_format">Kích thước ước tính: %.1f MB</string>
