@@ -22,6 +22,7 @@ import androidx.core.content.FileProvider;
 
 import com.joe.epmediademo.Application.MyApplication;
 import com.joe.epmediademo.R;
+import com.joe.epmediademo.Utils.Media3TransformExporter;
 import com.joe.epmediademo.Utils.PlatformVideoExporter;
 
 import java.io.File;
@@ -416,31 +417,45 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		deleteFileSilently(outputPath);
 		publishedOutputUri = null;
 
-		if (!canUsePlatformExporter()) {
+		if (hasUnsupportedAdvancedEdits()) {
 			showUnsupportedAdvancedExport();
 			return;
 		}
 
-		runPlatformExport(outputPath);
+		if (requiresTransformExporter()) {
+			runTransformExport(outputPath);
+		} else {
+			runPlatformExport(outputPath);
+		}
 	}
 
-	private boolean canUsePlatformExporter() {
-		return videoUrls != null
-				&& !videoUrls.isEmpty()
-				&& (videoUrls.size() == 1 || (trimStartSec == 0f && trimEndSec == 0f))
+	private boolean hasUnsupportedAdvancedEdits() {
+		return videoUrls == null
+				|| videoUrls.isEmpty()
+				|| (videoUrls.size() > 1 && trimEndSec > trimStartSec)
+				|| (subtitleText != null && !subtitleText.trim().isEmpty())
+				|| (stickerText != null && !stickerText.trim().isEmpty())
+				|| speed != 1.0f
+				|| videoVolume != 1.0f
+				|| (audioPath != null && !audioPath.trim().isEmpty())
+				|| (filterId != 0 && filterId != R.id.btn_filter_none)
+				|| effectId != 3
+				|| overlayId != 3
+				|| transitionId != -1;
+	}
+
+	private boolean requiresTransformExporter() {
+		if (videoUrls != null
+				&& videoUrls.size() > 1
+				&& selectedResMode == 1
+				&& selectedFpsMode == 1
 				&& selectedCropPreset == 0
 				&& currentRotation == 0
 				&& !isMirror
-				&& (subtitleText == null || subtitleText.trim().isEmpty())
-				&& (stickerText == null || stickerText.trim().isEmpty())
-				&& speed == 1.0f
-				&& videoVolume == 1.0f
-				&& (audioPath == null || audioPath.trim().isEmpty())
-				&& (filterId == 0 || filterId == R.id.btn_filter_none)
-				&& effectId == 3
-				&& overlayId == 3
-				&& transitionId == -1
-				&& !isEnhanced;
+				&& !isEnhanced) {
+			return false;
+		}
+		return true;
 	}
 
 	private void runPlatformExport(String platformOutputPath) {
@@ -470,6 +485,72 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 						showExportFailure();
 					}
 				});
+	}
+
+	private void runTransformExport(String transformOutputPath) {
+		Media3TransformExporter.Config config = new Media3TransformExporter.Config();
+		config.inputPaths = videoUrls;
+		config.outputPath = transformOutputPath;
+		config.trimStartSec = trimStartSec;
+		config.trimEndSec = trimEndSec;
+		config.outputHeight = getSelectedOutputHeight();
+		config.outputFps = getSelectedOutputFps();
+		config.cropPreset = selectedCropPreset;
+		config.rotationDegrees = currentRotation;
+		config.mirror = isMirror;
+		config.enhance = isEnhanced;
+
+		Media3TransformExporter.exportAsync(getApplicationContext(), config, new Media3TransformExporter.Listener() {
+			@Override
+			public void onProgress(final float progress) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						int percent = Math.max(0, Math.min(99, (int) (progress * 100f)));
+						progress_export.setProgress(percent);
+						tv_export_percent.setText(percent + "%");
+					}
+				});
+			}
+
+			@Override
+			public void onSuccess() {
+				publishedOutputUri = publishExportToGallery(transformOutputPath);
+				showExportSuccess();
+			}
+
+			@Override
+			public void onFailure(Exception exception) {
+				Log.e(TAG, "Transform export failed", exception);
+				showExportFailure();
+			}
+		});
+	}
+
+	private int getSelectedOutputHeight() {
+		switch (selectedResMode) {
+			case 0:
+				return 720;
+			case 2:
+				return 1440;
+			case 3:
+				return 2160;
+			case 1:
+			default:
+				return 1080;
+		}
+	}
+
+	private int getSelectedOutputFps() {
+		switch (selectedFpsMode) {
+			case 0:
+				return 24;
+			case 2:
+				return 60;
+			case 1:
+			default:
+				return 30;
+		}
 	}
 
 	private void showExportSuccess() {
