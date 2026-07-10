@@ -55,6 +55,7 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 	private VideoItem selectedVideo = null;
 	private LruCache<String, Bitmap> thumbnailCache;
 	private String templateId = null;
+	private String initTool = null;
 
 	// Representation of a video asset
 	public static class VideoItem {
@@ -76,6 +77,7 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 		setContentView(R.layout.activity_import_media);
 
 		templateId = getIntent().getStringExtra("TEMPLATE_ID");
+		initTool = getIntent().getStringExtra("INIT_TOOL");
 
 		// 4MB cache for video thumbnails
 		final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
@@ -143,7 +145,7 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				queryLocalVideos();
 			} else {
 				Toast.makeText(this, R.string.no_permission_toast, Toast.LENGTH_LONG).show();
-				showMockupAssets();
+				openSystemPicker();
 			}
 		}
 	}
@@ -184,20 +186,11 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 		}
 
 		if (videoList.isEmpty()) {
-			// Show mockup assets if device contains no local videos
-			showMockupAssets();
+			Toast.makeText(this, R.string.no_video_toast, Toast.LENGTH_SHORT).show();
+			openSystemPicker();
 		} else {
 			adapter.notifyDataSetChanged();
 		}
-	}
-
-	private void showMockupAssets() {
-		Toast.makeText(this, R.string.no_video_toast, Toast.LENGTH_SHORT).show();
-		// Adding simulated mockup assets
-		videoList.add(new VideoItem("mock_mountain.mp4", "Mountain Adventure", 42000));
-		videoList.add(new VideoItem("mock_cybercity.mp4", "Cybercity Night", 75000));
-		videoList.add(new VideoItem("mock_forest.mp4", "Nature Montage", 24000));
-		adapter.notifyDataSetChanged();
 	}
 
 	private void openSystemPicker() {
@@ -218,6 +211,9 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				intent.putExtra("VIDEO_PATH", path);
 				if (templateId != null) {
 					intent.putExtra("TEMPLATE_ID", templateId);
+				}
+				if (initTool != null) {
+					intent.putExtra("INIT_TOOL", initTool);
 				}
 				startActivity(intent);
 				finish();
@@ -249,13 +245,18 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				if (templateId != null) {
 					intent.putExtra("TEMPLATE_ID", templateId);
 				}
+				if (initTool != null) {
+					intent.putExtra("INIT_TOOL", initTool);
+				}
 				startActivity(intent);
 				finish();
 			}
 		} else if (id == R.id.btn_export_action) {
 			if (selectedVideo != null) {
 				Intent intent = new Intent(this, ExportActivity.class);
-				intent.putExtra("VIDEO_PATH", selectedVideo.path);
+				java.util.ArrayList<String> paths = new java.util.ArrayList<>();
+				paths.add(selectedVideo.path);
+				intent.putStringArrayListExtra("VIDEO_PATHS", paths);
 				startActivity(intent);
 				finish();
 			} else {
@@ -273,15 +274,15 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 	private void setSegmentActive(Button activeButton) {
 		Button[] buttons = {btn_seg_recent, btn_seg_videos, btn_seg_photos};
 		for (Button b : buttons) {
-			if (b == activeButton) {
-				b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-				b.setTextColor(getResources().getColor(R.color.lumina_bg));
-			} else {
-				b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.R.color.transparent));
-				b.setTextColor(getResources().getColor(R.color.lumina_text_secondary));
+				if (b == activeButton) {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+					b.setTextColor(getResources().getColor(R.color.lumina_bg));
+				} else {
+					b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
+					b.setTextColor(getResources().getColor(R.color.lumina_text_secondary));
+				}
 			}
 		}
-	}
 
 	// RecyclerView Adapter
 	private class VideoAdapter extends RecyclerView.Adapter<VideoViewHolder> {
@@ -294,8 +295,8 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 		}
 
 		@Override
-		public void onBindViewHolder(@NonNull final VideoViewHolder holder, final int position) {
-			final VideoItem item = videoList.get(position);
+			public void onBindViewHolder(@NonNull final VideoViewHolder holder, int position) {
+				final VideoItem item = videoList.get(position);
 
 			// Setup duration label
 			int secs = (int) (item.durationMs / 1000) % 60;
@@ -313,17 +314,9 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 				holder.itemView.setBackground(null);
 			}
 
-			// Render thumbnail image dynamically from cache or disk
-			holder.iv_thumbnail.setImageResource(android.R.drawable.ic_menu_gallery);
-			if (item.path.startsWith("mock_")) {
-				if (item.path.contains("mountain")) {
-					holder.iv_thumbnail.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-				} else if (item.path.contains("cybercity")) {
-					holder.iv_thumbnail.setBackgroundColor(getResources().getColor(R.color.lumina_violet));
-				} else {
-					holder.iv_thumbnail.setBackgroundColor(getResources().getColor(R.color.lumina_orange));
-				}
-			} else {
+				// Render thumbnail image dynamically from cache or disk
+				holder.iv_thumbnail.setImageResource(android.R.drawable.ic_menu_gallery);
+				holder.iv_thumbnail.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				Bitmap cached = thumbnailCache.get(item.path);
 				if (cached != null) {
 					holder.iv_thumbnail.setImageBitmap(cached);
@@ -338,7 +331,10 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 								runOnUiThread(new Runnable() {
 									@Override
 									public void run() {
-										if (holder.getAdapterPosition() == position) {
+										int adapterPosition = holder.getAdapterPosition();
+										if (adapterPosition != RecyclerView.NO_POSITION
+												&& adapterPosition < videoList.size()
+												&& videoList.get(adapterPosition).path.equals(item.path)) {
 											holder.iv_thumbnail.setImageBitmap(bitmap);
 										}
 									}
@@ -347,7 +343,6 @@ public class ImportMediaActivity extends AppCompatActivity implements View.OnCli
 						}
 					}).start();
 				}
-			}
 
 			// Item selection handler
 			holder.itemView.setOnClickListener(new View.OnClickListener() {

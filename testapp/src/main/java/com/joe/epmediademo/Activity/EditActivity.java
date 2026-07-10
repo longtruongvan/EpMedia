@@ -27,8 +27,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
+import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.effect.MatrixTransformation;
 import androidx.media3.effect.GlEffect;
 import androidx.media3.effect.GlShaderProgram;
@@ -50,6 +52,7 @@ import VideoHandle.EpEditor;
 import VideoHandle.EpVideo;
 import VideoHandle.OnEditorListener;
 
+@androidx.annotation.OptIn(markerClass = UnstableApi.class)
 public class EditActivity extends AppCompatActivity implements View.OnClickListener {
 
 	private static final int CHOOSE_FILE = 10;
@@ -84,6 +87,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private TextView tv_timeline_timecode;
 	private ImageView btn_zoom_in;
 	private ImageView btn_layers;
+	private TextView tv_track_effects_label;
 	private HorizontalScrollView timeline_scroll;
 	private LinearLayout layout_tracks_wrapper;
 	private LinearLayout timeline_thumbnails;
@@ -188,6 +192,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 	private float subtitleXPercent = 50f;
 	private float subtitleYPercent = 85f;
 	private float subtitleScale = 1.0f;
+	private float subtitleRotation = 0f;
 
 	// Visual filter & sticker state
 	private int activeFilterId = R.id.btn_filter_none;
@@ -222,12 +227,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		float subtitleXPercent;
 		float subtitleYPercent;
 		float subtitleScale;
+		float subtitleRotation;
 		int activeFilterId;
 		String activeStickerText;
 		boolean isEnhanced;
 
 		EditorState(float trimStartSec, float trimEndSec, int selectedCropPreset, int currentRotation, 
-					boolean isMirror, String subtitleText, float subtitleXPercent, float subtitleYPercent, float subtitleScale,
+					boolean isMirror, String subtitleText, float subtitleXPercent, float subtitleYPercent, float subtitleScale, float subtitleRotation,
 					int activeFilterId, String activeStickerText, boolean isEnhanced) {
 			this.trimStartSec = trimStartSec;
 			this.trimEndSec = trimEndSec;
@@ -238,6 +244,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			this.subtitleXPercent = subtitleXPercent;
 			this.subtitleYPercent = subtitleYPercent;
 			this.subtitleScale = subtitleScale;
+			this.subtitleRotation = subtitleRotation;
 			this.activeFilterId = activeFilterId;
 			this.activeStickerText = activeStickerText;
 			this.isEnhanced = isEnhanced;
@@ -293,10 +300,11 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		playerView = findViewById(R.id.video_view);
 		video_filter_overlay = (View) findViewById(R.id.video_filter_overlay);
 		tv_sticker_preview = (TextView) findViewById(R.id.tv_sticker_preview);
-				tv_subtitle_preview = (TextView) findViewById(R.id.tv_subtitle_preview);
-		tv_subtitle_preview.setOnTouchListener(new com.joe.epmediademo.Utils.MultiTouchListener(this, new com.joe.epmediademo.Utils.MultiTouchListener.OnTransformListener() {
+		tv_subtitle_preview = (TextView) findViewById(R.id.tv_subtitle_preview);
+		video_filter_overlay.setOnTouchListener(new com.joe.epmediademo.Utils.MultiTouchListener(this, new com.joe.epmediademo.Utils.MultiTouchListener.OnTransformListener() {
 			@Override
 			public void onScale(float scaleFactor) {
+				if (tv_subtitle_preview.getVisibility() != View.VISIBLE) return;
 				subtitleScale *= scaleFactor;
 				if (subtitleScale < 0.5f) subtitleScale = 0.5f;
 				if (subtitleScale > 5.0f) subtitleScale = 5.0f;
@@ -304,7 +312,15 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			}
 
 			@Override
+			public void onRotate(float deltaAngle) {
+				if (tv_subtitle_preview.getVisibility() != View.VISIBLE) return;
+				subtitleRotation += deltaAngle;
+				updateSubtitlePreview();
+			}
+
+			@Override
 			public void onTranslate(float dx, float dy) {
+				if (tv_subtitle_preview.getVisibility() != View.VISIBLE) return;
 				if (video_container.getWidth() == 0) return;
 				float density = getResources().getDisplayMetrics().density;
 				float maxDx = video_container.getWidth() / 2f - 40f * density;
@@ -332,9 +348,12 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 			@Override
 			public void onTransformEnded() {
+				if (tv_subtitle_preview.getVisibility() != View.VISIBLE) return;
 				pushStateToUndo();
 			}
 		}));
+		video_filter_overlay.setClickable(true);
+		video_filter_overlay.setFocusable(true);
 		tv_timecode = (TextView) findViewById(R.id.tv_timecode);
 		video_empty_overlay = (LinearLayout) findViewById(R.id.video_empty_overlay);
 		layout_video_controls = (LinearLayout) findViewById(R.id.layout_video_controls);
@@ -352,6 +371,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		if (clip_effects != null) clip_effects.setOnClickListener(this);
 		if (clip_text != null) clip_text.setOnClickListener(this);
 		tv_timeline_timecode = (TextView) findViewById(R.id.tv_timeline_timecode);
+		tv_track_effects_label = (TextView) findViewById(R.id.tv_track_effects_label);
 		btn_zoom_in = (ImageView) findViewById(R.id.btn_zoom_in);
 		btn_layers = (ImageView) findViewById(R.id.btn_layers);
 		timeline_scroll = (HorizontalScrollView) findViewById(R.id.timeline_scroll);
@@ -892,6 +912,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleXPercent,
 			subtitleYPercent,
 			subtitleScale,
+			subtitleRotation,
 			activeFilterId,
 			activeStickerText,
 			isEnhanced
@@ -929,6 +950,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleXPercent,
 			subtitleYPercent,
 			subtitleScale,
+			subtitleRotation,
 			activeFilterId,
 			activeStickerText,
 			isEnhanced
@@ -955,6 +977,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleXPercent,
 			subtitleYPercent,
 			subtitleScale,
+			subtitleRotation,
 			activeFilterId,
 			activeStickerText,
 			isEnhanced
@@ -976,6 +999,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		subtitleXPercent = state.subtitleXPercent;
 		subtitleYPercent = state.subtitleYPercent;
 		subtitleScale = state.subtitleScale;
+		subtitleRotation = state.subtitleRotation;
 		activeFilterId = state.activeFilterId;
 		activeStickerText = state.activeStickerText;
 		isEnhanced = state.isEnhanced;
@@ -1137,6 +1161,13 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (filterId == R.id.btn_filter_vintage) {
 			video_filter_overlay.setVisibility(View.VISIBLE);
 			video_filter_overlay.setBackgroundColor(Color.parseColor("#44795548"));
+		}
+
+		if (tv_track_effects_label != null) {
+			if (filterId == R.id.btn_filter_none) tv_track_effects_label.setText("No Filter");
+			else if (filterId == R.id.btn_filter_warm) tv_track_effects_label.setText("Warm");
+			else if (filterId == R.id.btn_filter_cool) tv_track_effects_label.setText("Cool");
+			else if (filterId == R.id.btn_filter_vintage) tv_track_effects_label.setText("Vintage");
 		}
 
 		// Update button styles
@@ -1339,13 +1370,10 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 
 		String realPath = path;
 		isMockVideo = false;
-		if (path.startsWith("mock_") || !new java.io.File(path).exists()) {
-			String foundPath = findAnyRealVideo();
-			if (foundPath != null) {
-				realPath = foundPath;
-			} else {
-				isMockVideo = true;
-			}
+		if (path.startsWith("mock_")) {
+			isMockVideo = true;
+		} else if (!new java.io.File(path).exists()) {
+			isMockVideo = true;
 		}
 
 		if (isMockVideo) {
@@ -1402,6 +1430,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			subtitleXPercent = 50f;
 			subtitleYPercent = 85f;
 			subtitleScale = 1.0f;
+			subtitleRotation = 0f;
 			slider_text_x.setValue(50f);
 			slider_text_y.setValue(85f);
 			updateSubtitlePreview();
@@ -1417,7 +1446,9 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			if (exoPlayer != null) {
 				exoPlayer.release();
 			}
-			exoPlayer = new ExoPlayer.Builder(this).build();
+			exoPlayer = new ExoPlayer.Builder(this)
+					.setVideoChangeFrameRateStrategy(C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF)
+					.build();
 			playerView.setPlayer(exoPlayer);
 			
 			MediaItem mediaItem = MediaItem.fromUri(realPath);
@@ -1482,7 +1513,8 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 							subtitleText = "";
 							subtitleXPercent = 50f;
 							subtitleYPercent = 85f;
-			subtitleScale = 1.0f;
+							subtitleScale = 1.0f;
+							subtitleRotation = 0f;
 							slider_text_x.setValue(50f);
 							slider_text_y.setValue(85f);
 							updateSubtitlePreview();
@@ -1563,6 +1595,7 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			tv_subtitle_preview.setTranslationY(yOffset);
 			tv_subtitle_preview.setScaleX(subtitleScale);
 			tv_subtitle_preview.setScaleY(subtitleScale);
+			tv_subtitle_preview.setRotation(subtitleRotation);
 		} else {
 			tv_subtitle_preview.setVisibility(View.GONE);
 		}
@@ -1905,28 +1938,24 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			@Override
 			public void run() {
 				if ("remove_bg".equals(tool)) {
-					isEnhanced = true;
-					Toast.makeText(EditActivity.this, "AI Tách nền: Đang tách nền tự động...", Toast.LENGTH_LONG).show();
-					if (btn_action_enhance != null) {
-						btn_action_enhance.performClick();
-					}
+					showAiUnavailable("AI background removal");
 				} else if ("auto_captions".equals(tool)) {
-					subtitleText = "Welcome to Cybercity Night vlog!";
-					if (tv_subtitle_preview != null) {
-						tv_subtitle_preview.setText(subtitleText);
-						tv_subtitle_preview.setVisibility(View.VISIBLE);
-					}
-					Toast.makeText(EditActivity.this, "AI Phụ đề: Đã tự động tạo phụ đề!", Toast.LENGTH_LONG).show();
+					showPanel(panel_text_input);
+					setActiveTab(tab_text, iv_tab_text, tv_tab_text);
+					showAiUnavailable("AI auto captions");
 				} else if ("cutout".equals(tool)) {
-					isMirror = true;
-					updateVideoTransformations();
-					Toast.makeText(EditActivity.this, "AI Cắt thông minh: Đã tách chủ thể!", Toast.LENGTH_LONG).show();
+					showAiUnavailable("AI smart cutout");
 				} else if ("voice_changer".equals(tool)) {
-					Toast.makeText(EditActivity.this, "AI Thay đổi giọng nói: Vui lòng chọn giọng!", Toast.LENGTH_LONG).show();
 					showPanel(panel_audio);
+					setActiveTab(tab_audio, iv_tab_audio, tv_tab_audio);
+					showAiUnavailable("AI voice changer");
 				}
 			}
 		}, 1000);
+	}
+
+	private void showAiUnavailable(String featureName) {
+		Toast.makeText(this, featureName + " requires a configured AI engine before production use.", Toast.LENGTH_LONG).show();
 	}
 
 	private void showEffectsDialog() {

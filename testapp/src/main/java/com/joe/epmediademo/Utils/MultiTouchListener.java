@@ -13,12 +13,16 @@ public class MultiTouchListener implements View.OnTouchListener {
     private float mLastTouchY;
     private int mActivePointerId = INVALID_POINTER_ID;
 
+    private float mLastAngle;
+    private boolean mIsRotating;
+
     private ScaleGestureDetector mScaleGestureDetector;
     private OnTransformListener mListener;
 
     public interface OnTransformListener {
         void onScale(float scaleFactor);
         void onTranslate(float dx, float dy);
+        void onRotate(float deltaAngle);
         void onTransformEnded();
     }
 
@@ -33,6 +37,15 @@ public class MultiTouchListener implements View.OnTouchListener {
                 return true;
             }
         });
+    }
+
+    private float getAngle(MotionEvent event) {
+        if (event.getPointerCount() >= 2) {
+            float dx = event.getX(1) - event.getX(0);
+            float dy = event.getY(1) - event.getY(0);
+            return (float) Math.toDegrees(Math.atan2(dy, dx));
+        }
+        return 0f;
     }
 
     @Override
@@ -50,26 +63,45 @@ public class MultiTouchListener implements View.OnTouchListener {
                 mLastTouchX = x;
                 mLastTouchY = y;
                 mActivePointerId = event.getPointerId(0);
+                mIsRotating = false;
                 break;
             }
-
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                if (event.getPointerCount() == 2) {
+                    mLastAngle = getAngle(event);
+                    mIsRotating = true;
+                }
+                break;
+            }
             case MotionEvent.ACTION_MOVE: {
                 final int pointerIndex = event.findPointerIndex(mActivePointerId);
                 if (pointerIndex == INVALID_POINTER_ID) {
                     break;
                 }
 
-                // Since we translate the view, we must use raw X and Y to calculate deltas
                 final float x = event.getRawX();
                 final float y = event.getRawY();
 
-                if (!mScaleGestureDetector.isInProgress()) {
+                if (!mScaleGestureDetector.isInProgress() && !mIsRotating) {
                     final float dx = x - mLastTouchX;
                     final float dy = y - mLastTouchY;
 
                     if (mListener != null) {
                         mListener.onTranslate(dx, dy);
                     }
+                }
+
+                if (event.getPointerCount() >= 2 && mIsRotating) {
+                    float currentAngle = getAngle(event);
+                    float deltaAngle = currentAngle - mLastAngle;
+                    
+                    if (deltaAngle > 180f) deltaAngle -= 360f;
+                    else if (deltaAngle < -180f) deltaAngle += 360f;
+
+                    if (mListener != null) {
+                        mListener.onRotate(deltaAngle);
+                    }
+                    mLastAngle = currentAngle;
                 }
                 
                 mLastTouchX = x;
@@ -80,6 +112,7 @@ public class MultiTouchListener implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
                 mActivePointerId = INVALID_POINTER_ID;
+                mIsRotating = false;
                 if (mListener != null) {
                     mListener.onTransformEnded();
                 }
@@ -91,13 +124,13 @@ public class MultiTouchListener implements View.OnTouchListener {
 
                 if (pointerId == mActivePointerId) {
                     final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-                    // Note: finding the actual rawX for a specific pointer requires
-                    // some math or we just skip updating rawX here and let the next MOVE handle it.
-                    // A simple hack is to just invalidate the last touch and reset on next MOVE.
                     mActivePointerId = event.getPointerId(newPointerIndex);
-                    // It's safer to just let the jump happen or reset lastTouch variables
-                    mLastTouchX = event.getRawX(); // This might be slightly off if multiple fingers are far apart, but acceptable
+                    mLastTouchX = event.getRawX();
                     mLastTouchY = event.getRawY();
+                }
+                
+                if (event.getPointerCount() - 1 < 2) {
+                    mIsRotating = false;
                 }
                 break;
             }

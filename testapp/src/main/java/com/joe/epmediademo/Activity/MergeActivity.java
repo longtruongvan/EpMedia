@@ -76,6 +76,7 @@ public class MergeActivity extends AppCompatActivity implements View.OnClickList
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 			case CHOOSE_FILE:
 				if (resultCode == RESULT_OK) {

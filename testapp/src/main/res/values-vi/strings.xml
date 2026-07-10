@@ -109,9 +109,8 @@
     <string name="seg_photos">Ảnh</string>
     <string name="import_count_format">Nhập (%d)</string>
     <string name="no_permission_toast">Không có quyền truy cập bộ nhớ. Sử dụng bộ chọn file hệ thống làm dự phòng.</string>
-    <string name="no_video_toast">Không tìm thấy video nào trên máy. Hiển thị video mẫu.</string>
+    <string name="no_video_toast">Không tìm thấy video nào trên máy. Đang mở bộ chọn hệ thống.</string>
     <string name="no_photo_toast">Không tìm thấy ảnh nào</string>
-    <string name="mock_import_toast">Mô phỏng: Đang mở bộ chọn file thực tế để tải...</string>
 
     <!-- Editor Screen -->
     <string name="speed_format">Tốc độ: %.1fx</string>
@@ -131,7 +130,7 @@
     <string name="toast_mirror_off">Chế độ bình thường</string>
     <string name="toast_enhance_on">Đã bật bộ lọc làm nét (Enhance)</string>
     <string name="toast_enhance_off">Đã tắt bộ lọc làm nét</string>
-    <string name="toast_more_options">Nhiều tùy chọn hơn sắp ra mắt</string>
+    <string name="toast_more_options">Không có tùy chọn clip bổ sung cho lựa chọn này</string>
     <string name="toast_crop_original">Tỉ lệ: Gốc</string>
     <string name="toast_crop_16_9">Tỉ lệ: 16:9</string>
     <string name="toast_crop_9_16">Tỉ lệ: 9:16</string>
@@ -209,4 +208,5 @@
     <string name="ready_to_export">Sẵn sàng xuất</string>
     <string name="explore">Khám phá</string>
     <string name="toast_applying_template">Đang áp dụng mẫu %s...</string>
+    <string name="toast_video_added">Đã thêm video thành công</string>
 </resources>

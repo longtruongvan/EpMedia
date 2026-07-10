@@ -313,8 +313,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 						String query = input.getText().toString().trim();
 						if (!query.isEmpty()) {
 							Toast.makeText(MainActivity.this, getString(R.string.toast_loading_project, query), Toast.LENGTH_SHORT).show();
-							Intent intent = new Intent(MainActivity.this, EditActivity.class);
-							intent.putExtra("VIDEO_PATH", "mock_cybercity.mp4");
+							Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
 							intent.putExtra("SEARCH_QUERY", query);
 							startActivity(intent);
 						}
@@ -329,49 +328,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			setActiveTab(nav_projects, iv_nav_projects, tv_nav_projects);
 			switchContentLayouts(layout_projects_content);
 		} else if (id == R.id.btn_mock_project_1 || id == R.id.btn_proj_1_tab) {
-			Toast.makeText(this, getString(R.string.toast_loading_project, getString(R.string.project_mountain)), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_mountain.mp4");
-			startActivity(intent);
+			openImportForRealMedia();
 		} else if (id == R.id.btn_mock_project_2 || id == R.id.btn_proj_2_tab) {
-			Toast.makeText(this, getString(R.string.toast_loading_project, getString(R.string.project_cybercity)), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_cybercity.mp4");
-			startActivity(intent);
+			openImportForRealMedia();
 		} else if (id == R.id.btn_ai_remove_bg || id == R.id.btn_ai_remove_bg_tab) {
 			Toast.makeText(this, R.string.toast_ai_remove_bg, Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_mountain.mp4");
+			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
 			intent.putExtra("INIT_TOOL", "remove_bg");
 			startActivity(intent);
 		} else if (id == R.id.btn_ai_captions || id == R.id.btn_ai_captions_tab) {
 			Toast.makeText(this, R.string.toast_ai_captions, Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_cybercity.mp4");
+			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
 			intent.putExtra("INIT_TOOL", "auto_captions");
 			startActivity(intent);
 		} else if (id == R.id.btn_ai_cutout_tab) {
 			Toast.makeText(this, getString(R.string.ai_smart_cutout), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_forest.mp4");
+			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
 			intent.putExtra("INIT_TOOL", "cutout");
 			startActivity(intent);
 		} else if (id == R.id.btn_ai_voice_tab) {
 			Toast.makeText(this, getString(R.string.ai_voice_changer), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_mountain.mp4");
+			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
 			intent.putExtra("INIT_TOOL", "voice_changer");
 			startActivity(intent);
 		} else if (id == R.id.btn_draft_1) {
-			Toast.makeText(this, getString(R.string.toast_loading_draft, getString(R.string.draft_tiktok)), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_cybercity.mp4");
-			startActivity(intent);
+			openImportForRealMedia();
 		} else if (id == R.id.btn_draft_2) {
-			Toast.makeText(this, getString(R.string.toast_loading_draft, getString(R.string.draft_nature)), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, EditActivity.class);
-			intent.putExtra("VIDEO_PATH", "mock_forest.mp4");
-			startActivity(intent);
+			openImportForRealMedia();
 		} else if (id == R.id.btn_switch_language) {
 			toggleLanguage();
 		} else if (id == R.id.btn_help_support) {
@@ -440,5 +423,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		if (activeText != null) {
 			activeText.setTextColor(activeColor);
 		}
+	}
+
+	private void openImportForRealMedia() {
+		Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
+		startActivity(intent);
 	}
 }

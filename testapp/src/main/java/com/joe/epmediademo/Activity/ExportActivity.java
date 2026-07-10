@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -25,6 +26,7 @@ import VideoHandle.EpVideo;
 import VideoHandle.OnEditorListener;
 
 public class ExportActivity extends AppCompatActivity implements View.OnClickListener {
+	private static final String TAG = "ExportActivity";
 
 	private ImageView btn_back;
 	private ImageView iv_export_preview;
@@ -190,16 +192,9 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		tv_export_res_tag.setText(getResName(selectedResMode));
 
 		if (videoUrls.get(0).startsWith("mock_") || !new java.io.File(videoUrls.get(0)).exists()) {
-			int mockDrawableId = R.drawable.mock_cybercity_thumb;
-			if (videoUrls.get(0).contains("mountain")) {
-				mockDrawableId = R.drawable.mock_mountain_thumb;
-			} else if (videoUrls.get(0).contains("forest") || videoUrls.get(0).contains("nature")) {
-				mockDrawableId = R.drawable.mock_draft_nature;
-			} else if (videoUrls.get(0).contains("tiktok")) {
-				mockDrawableId = R.drawable.mock_draft_tiktok;
-			}
-			iv_export_preview.setImageResource(mockDrawableId);
-			iv_export_preview.setAlpha(0.6f);
+			iv_export_preview.setImageResource(android.R.drawable.ic_dialog_alert);
+			iv_export_preview.setAlpha(0.45f);
+			Toast.makeText(this, R.string.toast_export_no_source, Toast.LENGTH_SHORT).show();
 		} else {
 			// Asynchronously load thumbnail frame from video path
 			new Thread(new Runnable() {
@@ -373,32 +368,8 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 
 		boolean isMock = videoUrls.get(0).startsWith("mock_") || !new java.io.File(videoUrls.get(0)).exists();
 		if (isMock) {
-			outputPath = MyApplication.getSavePath() + "out.mp4";
-			final android.os.Handler handler = new android.os.Handler();
-			handler.post(new Runnable() {
-				int progress = 0;
-				@Override
-				public void run() {
-					if (progress <= 100) {
-						progress_export.setProgress(progress);
-						tv_export_percent.setText(progress + "%");
-						progress += 10;
-						handler.postDelayed(this, 300);
-					} else {
-						isExporting = false;
-						progress_export.setProgress(100);
-						tv_export_percent.setText("100%");
-						tv_export_status.setText(R.string.export_completed_label);
-
-						btn_trigger_export.setEnabled(true);
-						btn_trigger_export.setText(R.string.open_exported_video);
-						btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-						btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
-
-						Toast.makeText(ExportActivity.this, getString(R.string.toast_export_success, outputPath), Toast.LENGTH_LONG).show();
-					}
-				}
-			});
+			showExportFailure();
+			Toast.makeText(this, R.string.toast_export_no_source, Toast.LENGTH_LONG).show();
 			return;
 		}
 
@@ -632,9 +603,28 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		};
 
 		if (epVideos.size() == 1) {
-			EpEditor.exec(epVideos.get(0), opt, commonListener);
+			runEditorSafely(new Runnable() {
+				@Override
+				public void run() {
+					EpEditor.exec(epVideos.get(0), opt, commonListener);
+				}
+			});
 		} else if (epVideos.size() > 1) {
-			EpEditor.merge(epVideos, opt, commonListener);
+			runEditorSafely(new Runnable() {
+				@Override
+				public void run() {
+					EpEditor.merge(epVideos, opt, commonListener);
+				}
+			});
+		}
+	}
+
+	private void runEditorSafely(Runnable editorCall) {
+		try {
+			editorCall.run();
+		} catch (Throwable t) {
+			Log.e(TAG, "Video export engine failed to start", t);
+			showExportFailure();
 		}
 	}
 
@@ -711,32 +701,37 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 
 		EpEditor.PTS ptsType = hasAudioState ? EpEditor.PTS.ALL : EpEditor.PTS.VIDEO;
 
-		EpEditor.changePTS(inputPath, outputPathStage, speed, ptsType, new OnEditorListener() {
+		runEditorSafely(new Runnable() {
 			@Override
-			public void onSuccess() {
-				deleteFileSilently(inputPath);
-				if (needVolumeState) {
-					runVolumeStage(outputPathStage, needMusicState ? (MyApplication.getSavePath() + "temp_volume.mp4") : outputPath, needMusicState);
-				} else if (needMusicState) {
-					runMusicStage(outputPathStage);
-				} else {
-					showExportSuccess();
-				}
-			}
-
-			@Override
-			public void onFailure() {
-				showExportFailure();
-			}
-
-			@Override
-			public void onProgress(final float v) {
-				runOnUiThread(new Runnable() {
+			public void run() {
+				EpEditor.changePTS(inputPath, outputPathStage, speed, ptsType, new OnEditorListener() {
 					@Override
-					public void run() {
-						int progress = (int) (p2Start + v * (p2End - p2Start));
-						progress_export.setProgress(progress);
-						tv_export_percent.setText(progress + "%");
+					public void onSuccess() {
+						deleteFileSilently(inputPath);
+						if (needVolumeState) {
+							runVolumeStage(outputPathStage, needMusicState ? (MyApplication.getSavePath() + "temp_volume.mp4") : outputPath, needMusicState);
+						} else if (needMusicState) {
+							runMusicStage(outputPathStage);
+						} else {
+							showExportSuccess();
+						}
+					}
+
+					@Override
+					public void onFailure() {
+						showExportFailure();
+					}
+
+					@Override
+					public void onProgress(final float v) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								int progress = (int) (p2Start + v * (p2End - p2Start));
+								progress_export.setProgress(progress);
+								tv_export_percent.setText(progress + "%");
+							}
+						});
 					}
 				});
 			}
@@ -767,32 +762,38 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 			durationUs = 10 * 1000000; // fallback 10s
 		}
 
-		String cmd = "-y -i " + inputPath + " -filter:a volume=" + videoVolume + " -c:v copy " + outputPathStage;
+		final long commandDurationUs = durationUs;
+		final String cmd = "-y -i " + inputPath + " -filter:a volume=" + videoVolume + " -c:v copy " + outputPathStage;
 
-		EpEditor.execCmd(cmd, durationUs, new OnEditorListener() {
+		runEditorSafely(new Runnable() {
 			@Override
-			public void onSuccess() {
-				deleteFileSilently(inputPath);
-				if (needMusicState) {
-					runMusicStage(outputPathStage);
-				} else {
-					showExportSuccess();
-				}
-			}
-
-			@Override
-			public void onFailure() {
-				showExportFailure();
-			}
-
-			@Override
-			public void onProgress(final float v) {
-				runOnUiThread(new Runnable() {
+			public void run() {
+				EpEditor.execCmd(cmd, commandDurationUs, new OnEditorListener() {
 					@Override
-					public void run() {
-						int progress = (int) (p3Start + v * (p3End - p3Start));
-						progress_export.setProgress(progress);
-						tv_export_percent.setText(progress + "%");
+					public void onSuccess() {
+						deleteFileSilently(inputPath);
+						if (needMusicState) {
+							runMusicStage(outputPathStage);
+						} else {
+							showExportSuccess();
+						}
+					}
+
+					@Override
+					public void onFailure() {
+						showExportFailure();
+					}
+
+					@Override
+					public void onProgress(final float v) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								int progress = (int) (p3Start + v * (p3End - p3Start));
+								progress_export.setProgress(progress);
+								tv_export_percent.setText(progress + "%");
+							}
+						});
 					}
 				});
 			}
@@ -815,28 +816,33 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 
 		float mixVideoVolume = needVolume ? 1.0f : videoVolume;
 
-		EpEditor.music(inputPath, tempAudioFile, outputPath, mixVideoVolume, 0.8f, new OnEditorListener() {
+		runEditorSafely(new Runnable() {
 			@Override
-			public void onSuccess() {
-				deleteFileSilently(tempAudioFile);
-				deleteFileSilently(inputPath);
-				showExportSuccess();
-			}
-
-			@Override
-			public void onFailure() {
-				deleteFileSilently(tempAudioFile);
-				showExportFailure();
-			}
-
-			@Override
-			public void onProgress(final float v) {
-				runOnUiThread(new Runnable() {
+			public void run() {
+				EpEditor.music(inputPath, tempAudioFile, outputPath, mixVideoVolume, 0.8f, new OnEditorListener() {
 					@Override
-					public void run() {
-						int progress = (int) (p4Start + v * (p4End - p4Start));
-						progress_export.setProgress(progress);
-						tv_export_percent.setText(progress + "%");
+					public void onSuccess() {
+						deleteFileSilently(tempAudioFile);
+						deleteFileSilently(inputPath);
+						showExportSuccess();
+					}
+
+					@Override
+					public void onFailure() {
+						deleteFileSilently(tempAudioFile);
+						showExportFailure();
+					}
+
+					@Override
+					public void onProgress(final float v) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								int progress = (int) (p4Start + v * (p4End - p4Start));
+								progress_export.setProgress(progress);
+								tv_export_percent.setText(progress + "%");
+							}
+						});
 					}
 				});
 			}
