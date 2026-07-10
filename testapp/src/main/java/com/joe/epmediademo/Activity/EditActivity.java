@@ -1868,24 +1868,24 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
 			@Override
 			public void run() {
 				if ("remove_bg".equals(tool)) {
-					showAiUnavailable("AI background removal");
+					showAiEngineRequired();
 				} else if ("auto_captions".equals(tool)) {
 					showPanel(panel_text_input);
 					setActiveTab(tab_text, iv_tab_text, tv_tab_text);
-					showAiUnavailable("AI auto captions");
+					showAiEngineRequired();
 				} else if ("cutout".equals(tool)) {
-					showAiUnavailable("AI smart cutout");
+					showAiEngineRequired();
 				} else if ("voice_changer".equals(tool)) {
 					showPanel(panel_audio);
 					setActiveTab(tab_audio, iv_tab_audio, tv_tab_audio);
-					showAiUnavailable("AI voice changer");
+					showAiEngineRequired();
 				}
 			}
 		}, 1000);
 	}
 
-	private void showAiUnavailable(String featureName) {
-		Toast.makeText(this, featureName + " requires a configured AI engine before production use.", Toast.LENGTH_LONG).show();
+	private void showAiEngineRequired() {
+		Toast.makeText(this, R.string.toast_ai_engine_required, Toast.LENGTH_LONG).show();
 	}
 
 	private void showEffectsDialog() {

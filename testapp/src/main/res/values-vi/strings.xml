@@ -94,8 +94,7 @@
     <string name="toast_search">Tìm kiếm dự án hoặc hiệu ứng</string>
     <string name="toast_see_all">Hiển thị toàn bộ dự án</string>
     <string name="toast_loading_project">Đang tải %s...</string>
-    <string name="toast_ai_remove_bg">Bật công cụ AI tách nền</string>
-    <string name="toast_ai_captions">Bật công cụ AI tạo phụ đề tự động</string>
+    <string name="toast_ai_engine_required">Tính năng AI này cần engine AI production được cấu hình.</string>
     <string name="toast_loading_draft">Đang tải bản nháp %s...</string>
     <string name="toast_templates_loading">Màn hình Mẫu (Templates) đang tải</string>
     <string name="toast_ai_loading">Màn hình Công cụ AI đang tải</string>
@@ -190,17 +189,14 @@
     <string name="toast_export_no_source">Không có file nguồn để xuất</string>
     <string name="toast_export_success">Xuất video thành công: %s</string>
     <string name="toast_export_failed">Xuất video thất bại</string>
-    <string name="toast_export_advanced_unsupported">Các chỉnh sửa đã chọn cần engine xuất nâng cao trước khi xuất bản production.</string>
     <string name="toast_export_share_first">Vui lòng xuất video thành công trước khi chia sẻ!</string>
     <string name="toast_export_share_no_app">Không tìm thấy ứng dụng chia sẻ này trên máy</string>
-    <string name="toast_merge_advanced_unsupported">Ghép nhiều video cần engine xuất nâng cao trước khi xuất bản production.</string>
     
     <string name="share_title">Chia sẻ Video</string>
     <string name="exporting_label">Đang xuất...</string>
     <string name="exporting_video_label">Đang xuất video...</string>
     <string name="export_completed_label">Đã xuất xong!</string>
     <string name="export_failed_label">Xuất thất bại!</string>
-    <string name="export_advanced_unsupported_label">Chưa hỗ trợ xuất nâng cao</string>
     <string name="export_gallery_location">Thư viện / Movies / EpMedia</string>
     <string name="open_exported_video">Mở video đã xuất</string>
     <string name="retry_exporting">Thử xuất lại</string>

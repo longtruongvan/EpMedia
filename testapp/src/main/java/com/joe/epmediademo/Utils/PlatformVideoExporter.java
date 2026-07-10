@@ -52,7 +52,7 @@ public final class PlatformVideoExporter {
 					if (inputPaths.size() == 1) {
 						export(inputPaths.get(0), outputPath, trimStartSec, trimEndSec, speed, listener);
 					} else {
-						exportSequence(inputPaths, outputPath, speed, listener);
+						exportSequence(inputPaths, outputPath, trimStartSec, trimEndSec, speed, listener);
 					}
 					listener.onSuccess();
 				} catch (Exception e) {
@@ -67,11 +67,18 @@ public final class PlatformVideoExporter {
 	}
 
 	private static void exportSequence(List<String> inputPaths, String outputPath, float speed, Listener listener) throws Exception {
+		exportSequence(inputPaths, outputPath, 0f, 0f, speed, listener);
+	}
+
+	private static void exportSequence(List<String> inputPaths, String outputPath, float trimStartSec, float trimEndSec,
+									   float speed, Listener listener) throws Exception {
 		prepareOutputFile(outputPath);
 
 		long totalDurationUs = 0L;
-		for (String inputPath : inputPaths) {
-			totalDurationUs += Math.max(1L, (long) (readDurationUs(inputPath) / speed));
+		for (int i = 0; i < inputPaths.size(); i++) {
+			totalDurationUs += Math.max(1L, (long) (getClipDurationUs(inputPaths.get(i),
+					i == 0 ? trimStartSec : 0f,
+					i == 0 ? trimEndSec : 0f) / speed));
 		}
 		totalDurationUs = Math.max(1L, totalDurationUs);
 
@@ -91,8 +98,14 @@ public final class PlatformVideoExporter {
 			muxerStarted = true;
 
 			long clipOffsetUs = 0L;
-			for (String inputPath : inputPaths) {
-				long writtenDurationUs = appendClip(inputPath, muxer, setup, buffer, bufferInfo, clipOffsetUs, totalDurationUs, speed, listener);
+			for (int i = 0; i < inputPaths.size(); i++) {
+				String inputPath = inputPaths.get(i);
+				long writtenDurationUs = appendClip(inputPath, muxer, setup, buffer, bufferInfo, clipOffsetUs,
+						totalDurationUs,
+						i == 0 ? trimStartSec : 0f,
+						i == 0 ? trimEndSec : 0f,
+						speed,
+						listener);
 				clipOffsetUs += Math.max(1L, writtenDurationUs);
 			}
 			listener.onProgress(1f);
@@ -142,8 +155,19 @@ public final class PlatformVideoExporter {
 	private static long appendClip(String inputPath, MediaMuxer muxer, TrackSetup setup, ByteBuffer buffer,
 								   MediaCodec.BufferInfo bufferInfo, long clipOffsetUs, long totalDurationUs,
 								   float speed, Listener listener) throws Exception {
+		return appendClip(inputPath, muxer, setup, buffer, bufferInfo, clipOffsetUs, totalDurationUs,
+				0f, 0f, speed, listener);
+	}
+
+	private static long appendClip(String inputPath, MediaMuxer muxer, TrackSetup setup, ByteBuffer buffer,
+								   MediaCodec.BufferInfo bufferInfo, long clipOffsetUs, long totalDurationUs,
+								   float trimStartSec, float trimEndSec, float speed, Listener listener) throws Exception {
 		MediaExtractor extractor = new MediaExtractor();
 		try {
+			long inputDurationUs = readDurationUs(inputPath);
+			long startUs = Math.max(0L, (long) (trimStartSec * 1_000_000L));
+			long requestedEndUs = trimEndSec > trimStartSec ? (long) (trimEndSec * 1_000_000L) : inputDurationUs;
+			long endUs = inputDurationUs > 0 ? Math.min(requestedEndUs, inputDurationUs) : requestedEndUs;
 			extractor.setDataSource(inputPath);
 			Map<Integer, String> selectedTracks = new HashMap<>();
 			for (int i = 0; i < extractor.getTrackCount(); i++) {
@@ -161,8 +185,10 @@ public final class PlatformVideoExporter {
 			if (!selectedTracks.containsValue("video")) {
 				throw new IllegalStateException("No compatible video track found in " + inputPath);
 			}
+			if (startUs > 0L) {
+				extractor.seekTo(startUs, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+			}
 
-			long firstSampleUs = -1L;
 			long lastSampleUs = 0L;
 			while (true) {
 				int trackIndex = extractor.getSampleTrackIndex();
@@ -181,10 +207,14 @@ public final class PlatformVideoExporter {
 					break;
 				}
 				long sampleTimeUs = extractor.getSampleTime();
-				if (firstSampleUs < 0L) {
-					firstSampleUs = sampleTimeUs;
+				if (endUs > 0L && sampleTimeUs > endUs) {
+					break;
 				}
-				long normalizedSampleUs = (long) (Math.max(0L, sampleTimeUs - firstSampleUs) / speed);
+				if (sampleTimeUs < startUs) {
+					extractor.advance();
+					continue;
+				}
+				long normalizedSampleUs = (long) (Math.max(0L, sampleTimeUs - startUs) / speed);
 				lastSampleUs = Math.max(lastSampleUs, normalizedSampleUs);
 				bufferInfo.set(0, sampleSize, clipOffsetUs + normalizedSampleUs, toCodecBufferFlags(extractor.getSampleFlags()));
 				muxer.writeSampleData(setup.muxerTrackByType.get(trackType), buffer, bufferInfo);
@@ -192,7 +222,7 @@ public final class PlatformVideoExporter {
 				extractor.advance();
 			}
 
-			long metadataDurationUs = (long) (readDurationUs(inputPath) / speed);
+			long metadataDurationUs = (long) (getClipDurationUs(inputPath, trimStartSec, trimEndSec) / speed);
 			return Math.max(lastSampleUs + 1_000L, metadataDurationUs);
 		} finally {
 			extractor.release();
@@ -356,6 +386,14 @@ public final class PlatformVideoExporter {
 			} catch (Exception ignored) {
 			}
 		}
+	}
+
+	private static long getClipDurationUs(String inputPath, float trimStartSec, float trimEndSec) {
+		long inputDurationUs = readDurationUs(inputPath);
+		long startUs = Math.max(0L, (long) (trimStartSec * 1_000_000L));
+		long requestedEndUs = trimEndSec > trimStartSec ? (long) (trimEndSec * 1_000_000L) : inputDurationUs;
+		long endUs = inputDurationUs > 0 ? Math.min(requestedEndUs, inputDurationUs) : requestedEndUs;
+		return Math.max(1L, endUs - startUs);
 	}
 
 	private static int toCodecBufferFlags(int extractorFlags) {

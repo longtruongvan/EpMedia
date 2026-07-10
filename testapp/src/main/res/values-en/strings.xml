@@ -94,8 +94,7 @@
     <string name="toast_search">Search projects or effects</string>
     <string name="toast_see_all">Showing all projects</string>
     <string name="toast_loading_project">Loading %s...</string>
-    <string name="toast_ai_remove_bg">Enabling AI background remover</string>
-    <string name="toast_ai_captions">Enabling AI auto-captions</string>
+    <string name="toast_ai_engine_required">This AI feature needs a configured production AI engine.</string>
     <string name="toast_loading_draft">Loading draft %s...</string>
     <string name="toast_templates_loading">Templates screen is loading</string>
     <string name="toast_ai_loading">AI tools screen is loading</string>
@@ -190,17 +189,14 @@
     <string name="toast_export_no_source">No source file to export</string>
     <string name="toast_export_success">Export completed: %s</string>
     <string name="toast_export_failed">Export failed</string>
-    <string name="toast_export_advanced_unsupported">Selected edits require the advanced export engine before production export.</string>
     <string name="toast_export_share_first">Please export the video successfully before sharing!</string>
     <string name="toast_export_share_no_app">Could not find this sharing app on device</string>
-    <string name="toast_merge_advanced_unsupported">Multi-video merge requires the advanced export engine before production export.</string>
     
     <string name="share_title">Share Video</string>
     <string name="exporting_label">Exporting...</string>
     <string name="exporting_video_label">Exporting video...</string>
     <string name="export_completed_label">Export completed!</string>
     <string name="export_failed_label">Export failed!</string>
-    <string name="export_advanced_unsupported_label">Advanced export unavailable</string>
     <string name="export_gallery_location">Gallery / Movies / EpMedia</string>
     <string name="open_exported_video">Open Exported Video</string>
     <string name="retry_exporting">Retry Exporting</string>

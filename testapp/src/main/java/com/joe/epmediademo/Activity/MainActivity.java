@@ -332,25 +332,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (id == R.id.btn_recent_project_2 || id == R.id.btn_proj_2_tab) {
 			openImportForRealMedia();
 		} else if (id == R.id.btn_ai_remove_bg || id == R.id.btn_ai_remove_bg_tab) {
-			Toast.makeText(this, R.string.toast_ai_remove_bg, Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
-			intent.putExtra("INIT_TOOL", "remove_bg");
-			startActivity(intent);
+			showAiEngineRequired();
 		} else if (id == R.id.btn_ai_captions || id == R.id.btn_ai_captions_tab) {
-			Toast.makeText(this, R.string.toast_ai_captions, Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
-			intent.putExtra("INIT_TOOL", "auto_captions");
-			startActivity(intent);
+			showAiEngineRequired();
 		} else if (id == R.id.btn_ai_cutout_tab) {
-			Toast.makeText(this, getString(R.string.ai_smart_cutout), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
-			intent.putExtra("INIT_TOOL", "cutout");
-			startActivity(intent);
+			showAiEngineRequired();
 		} else if (id == R.id.btn_ai_voice_tab) {
-			Toast.makeText(this, getString(R.string.ai_voice_changer), Toast.LENGTH_SHORT).show();
-			Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
-			intent.putExtra("INIT_TOOL", "voice_changer");
-			startActivity(intent);
+			showAiEngineRequired();
 		} else if (id == R.id.btn_draft_1) {
 			openImportForRealMedia();
 		} else if (id == R.id.btn_draft_2) {
@@ -428,5 +416,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private void openImportForRealMedia() {
 		Intent intent = new Intent(MainActivity.this, ImportMediaActivity.class);
 		startActivity(intent);
+	}
+
+	private void showAiEngineRequired() {
+		Toast.makeText(this, R.string.toast_ai_engine_required, Toast.LENGTH_LONG).show();
 	}
 }

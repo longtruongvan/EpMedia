@@ -171,7 +171,7 @@ public final class Media3TransformExporter {
 		for (int i = 0; i < config.inputPaths.size(); i++) {
 			MediaItem.Builder mediaBuilder = new MediaItem.Builder()
 					.setUri(Uri.fromFile(new File(config.inputPaths.get(i))));
-			if (config.inputPaths.size() == 1 && config.trimEndSec > config.trimStartSec) {
+			if (i == 0 && config.trimEndSec > config.trimStartSec) {
 				mediaBuilder.setClippingConfiguration(new MediaItem.ClippingConfiguration.Builder()
 						.setStartPositionMs(Math.max(0L, (long) (config.trimStartSec * 1000L)))
 						.setEndPositionMs(Math.max(1L, (long) (config.trimEndSec * 1000L)))

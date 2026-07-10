@@ -417,11 +417,6 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		deleteFileSilently(outputPath);
 		publishedOutputUri = null;
 
-		if (hasUnsupportedAdvancedEdits()) {
-			showUnsupportedAdvancedExport();
-			return;
-		}
-
 		if (speed != 1.0f) {
 			runSpeedThenTransformExport(outputPath);
 		} else if (requiresTransformExporter()) {
@@ -429,12 +424,6 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		} else {
 			runPlatformExport(outputPath);
 		}
-	}
-
-	private boolean hasUnsupportedAdvancedEdits() {
-		return videoUrls == null
-				|| videoUrls.isEmpty()
-				|| (videoUrls.size() > 1 && trimEndSec > trimStartSec);
 	}
 
 	private boolean requiresTransformExporter() {
@@ -643,25 +632,6 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
 
 				Toast.makeText(ExportActivity.this, R.string.toast_export_failed, Toast.LENGTH_SHORT).show();
-			}
-		});
-	}
-
-	private void showUnsupportedAdvancedExport() {
-		cleanupTempFiles();
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				isExporting = false;
-				progress_export.setProgress(0);
-				tv_export_percent.setText("0%");
-				tv_export_status.setText(R.string.export_advanced_unsupported_label);
-				btn_trigger_export.setEnabled(true);
-				btn_trigger_export.setText(R.string.retry_exporting);
-				btn_trigger_export.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-				btn_trigger_export.setTextColor(getResources().getColor(R.color.lumina_bg));
-
-				Toast.makeText(ExportActivity.this, R.string.toast_export_advanced_unsupported, Toast.LENGTH_LONG).show();
 			}
 		});
 	}
