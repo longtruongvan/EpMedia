@@ -70,6 +70,8 @@ public final class Media3TransformExporter {
 		public float subtitleScale = 1f;
 		public String stickerText;
 		public int filterId;
+		public int effectId = 3;
+		public int overlayId = 3;
 	}
 
 	private Media3TransformExporter() {
@@ -194,6 +196,8 @@ public final class Media3TransformExporter {
 			effects.add(new Contrast(0.18f));
 		}
 		addFilterEffects(effects, config.filterId);
+		addCreativeEffect(effects, config.effectId);
+		addTimelineOverlay(effects, config.overlayId);
 		addOverlayEffects(effects, config);
 		return effects;
 	}
@@ -221,6 +225,50 @@ public final class Media3TransformExporter {
 					.build());
 			effects.add(new Contrast(0.12f));
 			effects.add(new Brightness(-0.02f));
+		}
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static void addCreativeEffect(List<Effect> effects, int effectId) {
+		if (effectId == 0) {
+			effects.add(new RgbAdjustment.Builder()
+					.setRedScale(1.12f)
+					.setGreenScale(0.92f)
+					.setBlueScale(1.08f)
+					.build());
+			effects.add(new Contrast(0.20f));
+		} else if (effectId == 1) {
+			effects.add(new RgbAdjustment.Builder()
+					.setRedScale(1.10f)
+					.setGreenScale(1.03f)
+					.setBlueScale(0.92f)
+					.build());
+			effects.add(new Brightness(0.04f));
+		} else if (effectId == 2) {
+			effects.add(new RgbAdjustment.Builder()
+					.setRedScale(0.95f)
+					.setGreenScale(1.08f)
+					.setBlueScale(1.18f)
+					.build());
+			effects.add(new Contrast(0.18f));
+		}
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static void addTimelineOverlay(List<Effect> effects, int overlayId) {
+		if (overlayId == 0) {
+			effects.add(new Brightness(-0.04f));
+			effects.add(new Contrast(0.10f));
+		} else if (overlayId == 1) {
+			effects.add(new RgbAdjustment.Builder()
+					.setRedScale(1.08f)
+					.setGreenScale(0.98f)
+					.setBlueScale(0.90f)
+					.build());
+			effects.add(new Brightness(-0.03f));
+		} else if (overlayId == 2) {
+			effects.add(new Contrast(0.16f));
+			effects.add(new Brightness(-0.06f));
 		}
 	}
 

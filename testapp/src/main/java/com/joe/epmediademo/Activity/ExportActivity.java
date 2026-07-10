@@ -436,8 +436,6 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				|| speed != 1.0f
 				|| videoVolume != 1.0f
 				|| (audioPath != null && !audioPath.trim().isEmpty())
-				|| effectId != 3
-				|| overlayId != 3
 				|| transitionId != -1;
 	}
 
@@ -452,7 +450,9 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				&& !isEnhanced
 				&& (subtitleText == null || subtitleText.trim().isEmpty())
 				&& (stickerText == null || stickerText.trim().isEmpty())
-				&& (filterId == 0 || filterId == R.id.btn_filter_none)) {
+				&& (filterId == 0 || filterId == R.id.btn_filter_none)
+				&& effectId == 3
+				&& overlayId == 3) {
 			return false;
 		}
 		return true;
@@ -505,6 +505,8 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		config.subtitleScale = subtitleScale;
 		config.stickerText = stickerText;
 		config.filterId = filterId;
+		config.effectId = effectId;
+		config.overlayId = overlayId;
 
 		Media3TransformExporter.exportAsync(getApplicationContext(), config, new Media3TransformExporter.Listener() {
 			@Override

@@ -87,7 +87,9 @@ public class MergeActivity extends AppCompatActivity implements View.OnClickList
 	 */
 	private void mergeVideo() {
 		if (videoList.size() > 1) {
-			Toast.makeText(this, R.string.toast_merge_advanced_unsupported, Toast.LENGTH_LONG).show();
+			Intent intent = new Intent(this, ExportActivity.class);
+			intent.putStringArrayListExtra("VIDEO_PATHS", new ArrayList<>(videoList));
+			startActivity(intent);
 		} else {
 			Toast.makeText(this, "至少添加两个视频", Toast.LENGTH_SHORT).show();
 		}
