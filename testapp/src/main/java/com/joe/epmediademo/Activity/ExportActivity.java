@@ -433,12 +433,9 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		return videoUrls == null
 				|| videoUrls.isEmpty()
 				|| (videoUrls.size() > 1 && trimEndSec > trimStartSec)
-				|| (subtitleText != null && !subtitleText.trim().isEmpty())
-				|| (stickerText != null && !stickerText.trim().isEmpty())
 				|| speed != 1.0f
 				|| videoVolume != 1.0f
 				|| (audioPath != null && !audioPath.trim().isEmpty())
-				|| (filterId != 0 && filterId != R.id.btn_filter_none)
 				|| effectId != 3
 				|| overlayId != 3
 				|| transitionId != -1;
@@ -452,7 +449,10 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 				&& selectedCropPreset == 0
 				&& currentRotation == 0
 				&& !isMirror
-				&& !isEnhanced) {
+				&& !isEnhanced
+				&& (subtitleText == null || subtitleText.trim().isEmpty())
+				&& (stickerText == null || stickerText.trim().isEmpty())
+				&& (filterId == 0 || filterId == R.id.btn_filter_none)) {
 			return false;
 		}
 		return true;
@@ -499,6 +499,12 @@ public class ExportActivity extends AppCompatActivity implements View.OnClickLis
 		config.rotationDegrees = currentRotation;
 		config.mirror = isMirror;
 		config.enhance = isEnhanced;
+		config.subtitleText = subtitleText;
+		config.subtitleXPercent = subtitleXPercent;
+		config.subtitleYPercent = subtitleYPercent;
+		config.subtitleScale = subtitleScale;
+		config.stickerText = stickerText;
+		config.filterId = filterId;
 
 		Media3TransformExporter.exportAsync(getApplicationContext(), config, new Media3TransformExporter.Listener() {
 			@Override

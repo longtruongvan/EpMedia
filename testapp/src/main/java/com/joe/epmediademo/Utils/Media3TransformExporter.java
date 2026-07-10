@@ -1,9 +1,15 @@
 package com.joe.epmediademo.Utils;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 
 import androidx.annotation.OptIn;
 import androidx.media3.common.Effect;
@@ -11,9 +17,15 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.MimeTypes;
 import androidx.media3.common.audio.AudioProcessor;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.effect.Brightness;
 import androidx.media3.effect.Contrast;
+import androidx.media3.effect.OverlayEffect;
+import androidx.media3.effect.OverlaySettings;
 import androidx.media3.effect.Presentation;
+import androidx.media3.effect.RgbAdjustment;
 import androidx.media3.effect.ScaleAndRotateTransformation;
+import androidx.media3.effect.TextOverlay;
+import androidx.media3.effect.TextureOverlay;
 import androidx.media3.transformer.Composition;
 import androidx.media3.transformer.EditedMediaItem;
 import androidx.media3.transformer.EditedMediaItemSequence;
@@ -22,6 +34,9 @@ import androidx.media3.transformer.ExportException;
 import androidx.media3.transformer.ExportResult;
 import androidx.media3.transformer.ProgressHolder;
 import androidx.media3.transformer.Transformer;
+
+import com.google.common.collect.ImmutableList;
+import com.joe.epmediademo.R;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,6 +64,12 @@ public final class Media3TransformExporter {
 		public int rotationDegrees;
 		public boolean mirror;
 		public boolean enhance;
+		public String subtitleText;
+		public float subtitleXPercent = 50f;
+		public float subtitleYPercent = 85f;
+		public float subtitleScale = 1f;
+		public String stickerText;
+		public int filterId;
 	}
 
 	private Media3TransformExporter() {
@@ -172,7 +193,86 @@ public final class Media3TransformExporter {
 		if (config.enhance) {
 			effects.add(new Contrast(0.18f));
 		}
+		addFilterEffects(effects, config.filterId);
+		addOverlayEffects(effects, config);
 		return effects;
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static void addFilterEffects(List<Effect> effects, int filterId) {
+		if (filterId == R.id.btn_filter_warm) {
+			effects.add(new RgbAdjustment.Builder()
+					.setRedScale(1.08f)
+					.setGreenScale(1.02f)
+					.setBlueScale(0.92f)
+					.build());
+			effects.add(new Brightness(0.03f));
+		} else if (filterId == R.id.btn_filter_cool) {
+			effects.add(new RgbAdjustment.Builder()
+					.setRedScale(0.93f)
+					.setGreenScale(1.02f)
+					.setBlueScale(1.10f)
+					.build());
+		} else if (filterId == R.id.btn_filter_vintage) {
+			effects.add(new RgbAdjustment.Builder()
+					.setRedScale(1.07f)
+					.setGreenScale(0.98f)
+					.setBlueScale(0.86f)
+					.build());
+			effects.add(new Contrast(0.12f));
+			effects.add(new Brightness(-0.02f));
+		}
+	}
+
+	@OptIn(markerClass = UnstableApi.class)
+	private static void addOverlayEffects(List<Effect> effects, Config config) {
+		ImmutableList.Builder<TextureOverlay> overlays = ImmutableList.builder();
+		if (hasText(config.subtitleText)) {
+			overlays.add(TextOverlay.createStaticTextOverlay(
+					buildStyledText(config.subtitleText, Math.round(48f * clamp(config.subtitleScale, 0.5f, 5f))),
+					new OverlaySettings.Builder()
+							.setBackgroundFrameAnchor(toAnchor(config.subtitleXPercent), toYAnchor(config.subtitleYPercent))
+							.setOverlayFrameAnchor(0f, 0f)
+							.build()));
+		}
+		if (hasText(config.stickerText)) {
+			overlays.add(TextOverlay.createStaticTextOverlay(
+					buildStyledText(config.stickerText, 96),
+					new OverlaySettings.Builder()
+							.setBackgroundFrameAnchor(0.72f, -0.62f)
+							.setOverlayFrameAnchor(0f, 0f)
+							.build()));
+		}
+
+		ImmutableList<TextureOverlay> overlayList = overlays.build();
+		if (!overlayList.isEmpty()) {
+			effects.add(new OverlayEffect(overlayList));
+		}
+	}
+
+	private static SpannableString buildStyledText(String value, int textSizePx) {
+		String text = value == null ? "" : value.trim();
+		SpannableString spannable = new SpannableString(text);
+		spannable.setSpan(new AbsoluteSizeSpan(Math.max(24, textSizePx)), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+		spannable.setSpan(new ForegroundColorSpan(Color.WHITE), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+		spannable.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return spannable;
+	}
+
+	private static boolean hasText(String value) {
+		return value != null && !value.trim().isEmpty();
+	}
+
+	private static float toAnchor(float percent) {
+		return clamp(percent, 0f, 100f) / 50f - 1f;
+	}
+
+	private static float toYAnchor(float percent) {
+		return 1f - clamp(percent, 0f, 100f) / 50f;
+	}
+
+	private static float clamp(float value, float min, float max) {
+		return Math.max(min, Math.min(max, value));
 	}
 
 	private static float getCropAspectRatio(int cropPreset) {
